@@ -11,21 +11,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = fishtracker
 TEMPLATE = app
 
-INCLUDEPATH += "C:/Program Files (x86)/Point Grey Research/FlyCapture2/include" #\
-    #"C:/Program Files (x86)/Point Grey Research/FlyCapture2/include/C" \
-    #"C:/Program Files (x86)/Point Grey Research/FlyCapture2/include/FC1"
+INCLUDEPATH += "C:/Program Files (x86)/Point Grey Research/FlyCapture2/include"
 LIBS += -L"C:/Program Files (x86)/Point Grey Research/FlyCapture2/lib" \
-    -lFlyCapture2# \
-    #-lFlyCapture2_v90 \
-    #-lFlyCapture2_v100 \
-    #-L"C:/Program Files (x86)/Point Grey Research/FlyCapture2/lib/FC1" \
-    #-lPGRFlyCapture
+    -lFlyCapture2
 
-INCLUDEPATH += C:/NV/libs/opencv-2.4/install/w32/vc10/shared/debug/include
-LIBS += -LC:/NV/libs/opencv-2.4/install/w32/vc10/shared/debug/lib \
-    -lopencv_core245d \
-    -lopencv_highgui245d \
-    -lopencv_imgproc245d
+INCLUDEPATH += C:/OpenCV/opencv/build/include
+LIBS += -LC:/OpenCV/opencv/build/x86/vc10/lib \
+    -lopencv_core2410 \
+    -lopencv_highgui2410 \
+    -lopencv_imgproc2410
 
 SOURCES += main.cpp\
         mainwindow.cpp
