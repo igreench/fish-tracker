@@ -19,7 +19,9 @@ INCLUDEPATH += C:/OpenCV/opencv/build/include
 LIBS += -LC:/OpenCV/opencv/build/x86/vc10/lib \
     -lopencv_core2410 \
     -lopencv_highgui2410 \
-    -lopencv_imgproc2410
+    -lopencv_imgproc2410 \
+    -lopencv_calib3d2410 \
+    -lopencv_features2d2410
 
 SOURCES += main.cpp\
         mainwindow.cpp
