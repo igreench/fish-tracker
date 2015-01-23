@@ -10,6 +10,8 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv/cv.h>
 
+#include "opencv2/contrib/contrib.hpp"
+
 #include <QDebug>
 
 using namespace FlyCapture2;
@@ -393,12 +395,34 @@ int main() {
             //cv::getDefaultNewCameraMatrix(
             cv::remap(image2_1, rimage2, rmap[0], rmap[1], CV_INTER_LINEAR);
 
+
+
+            //
+            cv::StereoSGBM sgbm;
+            sgbm.SADWindowSize = 5;
+            sgbm.numberOfDisparities = 192;
+            sgbm.preFilterCap = 4;
+            sgbm.minDisparity = -64;
+            sgbm.uniquenessRatio = 1;
+            sgbm.speckleWindowSize = 150;
+            sgbm.speckleRange = 2;
+            sgbm.disp12MaxDiff = 10;
+            sgbm.fullDP = false;
+            sgbm.P1 = 600;
+            sgbm.P2 = 2400;
+
+            cv::Mat disp, disp8;
+            sgbm(rimage1, rimage2, disp);
+            cv::normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
+
+            cv::resize(disp8, disp8, image2_2.size(), 0, 0, CV_INTER_LINEAR);
+            cv::imshow("disp", disp8);
+
             //show
             cv::resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
             cv::imshow("rimage1", rimage1);
             cv::resize(rimage2, rimage2, image2_2.size(), 0, 0, CV_INTER_LINEAR);
             cv::imshow("rimage2", rimage2);
-
         }
 
         // camera1: resize
