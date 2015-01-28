@@ -18,10 +18,14 @@ using namespace FlyCapture2;
 
 //std::vector<cv::Point3f> objectPoints;
 std::vector<std::vector<cv::Point3f> > objectPoints;
+
+
 //std::vector<cv::Point2f> imageCorners1;
 //std::vector<cv::Point2f> imageCorners2;
 //std::vector<std::vector<cv::Point2f> > imagePoints1;
 //std::vector<std::vector<cv::Point2f> > imagePoints2;
+std::vector<std::vector<cv::Point2f> > imagePoints1;
+std::vector<std::vector<cv::Point2f> > imagePoints2;
 
 const int BOARD_WIDTH = 8;
 const int BOARD_HEIGHT = 9;
@@ -70,7 +74,7 @@ QString matToString(cv::Mat mat)
 bool addImage(const cv::Mat im, std::vector<cv::Point2f> *imageCorners, cv::Mat &result)
 {
     std::vector<std::vector<cv::Point2f> > detected_corners;//!< Список обнаруженных углов
-    cv::Size pattern_size = cv::Size(BOARD_WIDTH, BOARD_HEIGHT);;//!< Размер шахматной доски
+    cv::Size pattern_size = cv::Size(BOARD_WIDTH, BOARD_HEIGHT);//!< Размер шахматной доски
     cv::Size imsize; //!< Размер изображение вычисляется в addImage
 
     //std::vector<cv::Point2f> imageCorners;
@@ -165,6 +169,8 @@ int main() {
     bool isStereoCalibrated = false;
     bool isStereoRectified = false;
     cv::Mat scres;// stereo callibrate result with points
+    cv::Mat R, T, Q; //
+    cv::Mat rmap[2];
 
     // Connect the camera
     error = busMgr.GetCameraFromIndex(0, &guid);
@@ -287,36 +293,23 @@ int main() {
 
         //stereoCalibrate
 
-        cv::Mat R, T, E, F;
+        cv::Mat E, F;
 
         if (!isStereoCalibrated) {
             std::vector<cv::Point2f> corners1, corners2;
-            isStereoCalibrated = addImage(image1_1, &corners1, scres) && addImage(image2_1, &corners2, scres);
-            std::vector<std::vector<cv::Point2f> > imagePoints1;
-            std::vector<std::vector<cv::Point2f> > imagePoints2;
-            imagePoints1.push_back(corners1);
+            isStereoCalibrated = addImage(image1_1, &corners1, scres) && addImage(image2_1, &corners2, scres);            
+            imagePoints1.clear();
+            imagePoints2.clear();
+            objectPoints.clear();
+            imagePoints1.push_back(corners1);            
             imagePoints2.push_back(corners2);
             if (isStereoCalibrated) {
-                /*for (int j=0; j<corners2.size(); j++) {
-                    qDebug() << j << corners2[j].x << corners2[j].y;
-                }*/
-                //
-                /*std::vector<cv::Point3f> obj;
-                for (int j=0; j<board_n; j++) {
-                    obj.push_back(Point3f(j/board_w, j%board_w, 0.0f));
-                }*/
                 int n = BOARD_WIDTH * BOARD_HEIGHT;
                 std::vector<cv::Point3f> obj;
                 for (int j = 0; j < n; j++) {
-                    //obj.push_back(cv::Point3f(j / BOARD_WIDTH, j % BOARD_WIDTH, 0.0f));
                     obj.push_back(cv::Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
                 }
                 objectPoints.push_back(obj);
-
-                /*for (int j=0; j<obj.size(); j++) {
-                    qDebug() << j << obj[j].x << obj[j].y;
-                }*/
-                //
 
                 qDebug() << "imagePoints1 size:" << imagePoints1.size();
                 qDebug() << "imagePoints2 size:" << imagePoints2.size();
@@ -324,8 +317,6 @@ int main() {
                 qDebug() << "corners2 size:" << corners2.size();
                 qDebug() << "objectPoints size:" << objectPoints.size();
                 qDebug() << "obj size:" << obj.size();
-
-                //
 
                 cv::stereoCalibrate(objectPoints, imagePoints1, imagePoints2,
                                     cameraMatrix1,
@@ -344,7 +335,7 @@ int main() {
             //cv::imshow("scres", scres);//
         }
 
-        cv::Mat R1, R2, P1, P2, Q;
+        cv::Mat R1, R2, P1, P2; //Q
         // stereoRectify
         if (isStereoCalibrated && !isStereoRectified) {
 
@@ -383,19 +374,19 @@ int main() {
         }
 
         if (isStereoCalibrated && isStereoRectified) {
+/*
+            cv::initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_16SC2, rmap[0], rmap[1]);
+            cv::initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_16SC2, rmap[0], rmap[1]);
+
+
 
             cv::Mat rimage1, rimage2;
-            cv::Mat rmap[2];
             //cv::Mat R1, P1, rimage1;
-            cv::initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_16SC2, rmap[0], rmap[1]);
             cv::remap(image1_1, rimage1, rmap[0], rmap[1], CV_INTER_LINEAR);
 
             //cv::Mat R2, P2, rimage2;
-            cv::initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_16SC2, rmap[0], rmap[1]);
             //cv::getDefaultNewCameraMatrix(
             cv::remap(image2_1, rimage2, rmap[0], rmap[1], CV_INTER_LINEAR);
-
-
 
             //
             cv::StereoSGBM sgbm;
@@ -418,24 +409,160 @@ int main() {
             cv::resize(disp8, disp8, image2_2.size(), 0, 0, CV_INTER_LINEAR);
             cv::imshow("disp", disp8);
 
-            //show
             cv::resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
             cv::imshow("rimage1", rimage1);
             cv::resize(rimage2, rimage2, image2_2.size(), 0, 0, CV_INTER_LINEAR);
-            cv::imshow("rimage2", rimage2);
+            cv::imshow("rimage2", rimage2);*/
+        } else {
+            cv::resize(image1_1, image1_1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+            cv::imshow("image1", image1_1);
+            cv::resize(image2_1, image2_1, image2_2.size(), 0, 0, CV_INTER_LINEAR);
+            cv::imshow("image2", image2_1);
         }
 
-        // camera1: resize
-        cv::resize(image1_1, image1_1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+        if (key == 'k') {
+            if (isStereoCalibrated && isStereoRectified) {
 
-        // camera1: show
-        cv::imshow("image1", image1_1);
-        
-        // camera2: resize
-        cv::resize(image2_1, image2_1, image2_2.size(), 0, 0, CV_INTER_LINEAR);
+                qDebug() << "Let's check disparity map";
+                std::vector<cv::Point2f> corners1;
+                if (addImage(image1_1, &corners1, scres)) {
 
-        // camera2: show
-        cv::imshow("image2", image2_1);
+                    qDebug() << "Pattern found";
+
+                    cv::initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_16SC2, rmap[0], rmap[1]);
+                    cv::initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_16SC2, rmap[0], rmap[1]);
+
+                    qDebug() << "Done initUndistortRectifyMap";
+
+                    cv::Mat rimage1, rimage2;
+                    cv::remap(image1_1, rimage1, rmap[0], rmap[1], CV_INTER_LINEAR);
+                    cv::remap(image2_1, rimage2, rmap[0], rmap[1], CV_INTER_LINEAR);
+
+                    qDebug() << "Done remap";
+
+                    cv::Mat r;
+                    cv::Rodrigues(R, r);
+
+                    qDebug() << "Done Rodrigues";
+
+                    //std::vector<std::vector<cv::Point2f> > imagePoints1;
+                    //std::vector<cv::Point2f> projectedPoints1;
+
+                    //cv::projectPoints(objectPoints, r, T, cameraMatrix1, distCoeffs1, projectedPoints1);
+
+                    /*for(unsigned int i = 0; i < projectedPoints1.size(); ++i) {
+                        //std::cout << "Image point: " << imagePoints1[i] << " Projected to " << projectedPoints1[i] << std::endl;
+                    }*/
+
+                    //
+
+                    cv::StereoSGBM sgbm;
+                    sgbm.SADWindowSize = 5;
+                    sgbm.numberOfDisparities = 192;
+                    sgbm.preFilterCap = 4;
+                    sgbm.minDisparity = -64;
+                    sgbm.uniquenessRatio = 1;
+                    sgbm.speckleWindowSize = 150;
+                    sgbm.speckleRange = 2;
+                    sgbm.disp12MaxDiff = 10;
+                    sgbm.fullDP = false;
+                    sgbm.P1 = 600;
+                    sgbm.P2 = 2400;
+
+                    qDebug() << "Done StereoSGBM";
+
+                    cv::Mat disp, disp8;
+                    sgbm(rimage1, rimage2, disp);
+                    cv::normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
+
+                    qDebug() << "Done normalize";
+
+                    //cv::resize(disp8, disp8, image2_2.size(), 0, 0, CV_INTER_LINEAR);
+                    //cv::imshow("disp", disp8);//
+
+                    //
+                    cv::Mat image3d;
+
+                    cv::reprojectImageTo3D(disp8, image3d, Q);
+
+                    qDebug() << "Done reprojectImageTo3D";
+
+                    cv::resize(scres, scres, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+                    cv::imshow("scres", scres);
+
+                    //objectPoints.clear();
+                    std::vector<std::vector<cv::Point3d> > objectPointsP;
+                    std::vector<cv::Point3d> objpoints;
+                    for(unsigned int i = 0; i < corners1.size(); ++i) {
+                        //objectPoints.push_back( image3d(corners1[i].x, corners1[i].y) );
+                        /*objpoints.push_back(cv::Point3f(
+                                                image3d.at<cv::Point3f>(image3d(corners1[i].x, corners1[i].y)[0]),
+                                                image3d.at<cv::Point3f>(image3d(corners1[i].x, corners1[i].y)[1]),
+                                                image3d.at<cv::Point3f>(image3d(corners1[i].x, corners1[i].y)[2])));*/
+                        if ((image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[0] > -1000) &&
+                            (image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[0] < 1000) &&
+                            (image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[1] > -1000) &&
+                            (image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[1] < 1000) &&
+                            (image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[2] > -1000) &&
+                            (image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[2] < 1000)) {
+                            objpoints.push_back(cv::Point3f(
+                                                    image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[0],
+                                                    image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[1],
+                                                    image3d.at<cv::Vec3f>(corners1[i].x, corners1[i].y)[2]));
+                            //qDebug() << "Corner " << i << " : x=" << corners1[i].x << " y=" << corners1[i].y;
+                            //qDebug() << "objpoints " << i << " : x=" << objpoints[i].x << " y=" << objpoints[i].y << " z=" << objpoints[i].z;
+                        } else {
+                            //objpoints.push_back(cv::Point3f(0.0f, 0.0f, 0.0f));
+                            //objpoints.push_back(cv::Point3d(0, 0, 0));
+                            //objpoints.push_back(objpoints[i-1]);
+                            //qDebug() << "out of range";
+                            //qDebug() << "Corner " << i << " : x=" << corners1[i].x << " y=" << corners1[i].y;
+                            //qDebug() << "objpoints " << i << " : x=" << objpoints[i].x << " y=" << objpoints[i].y << " z=" << objpoints[i].z;
+                        }
+                    }
+                    objectPointsP.push_back(objpoints);
+
+                    qDebug() << "Done adding object points";
+
+
+                    //imagePoints1.clear();
+                    //std::vector<std::vector<cv::Point2f> > imagePointsP;
+                    std::vector<cv::Point2d> imagePoints;
+                    qDebug() << "Start projectPoints";
+
+                    qDebug() << "r: " << matToString(r);
+                    qDebug() << "T: " << matToString(T);
+                    qDebug() << "cameraMatrix1: " << matToString(cameraMatrix1);
+                    qDebug() << "distCoeffs1: " << matToString(distCoeffs1);
+                    for(unsigned int i = 0; i < objpoints.size(); ++i) {
+                        qDebug() << objpoints[i].x << objpoints[i].y << objpoints[i].z;
+                    }
+                    qDebug() << "Start projectPoints";
+                    cv::projectPoints(objpoints, r, T, cameraMatrix1, distCoeffs1, imagePoints);
+                    //cv::projectPoints(objpoints, r, T, cameraMatrix1, distCoeffs1, imagePointsP);
+
+                    qDebug() << "Done projectPoints";
+
+                    cv::Size pattern_size = cv::Size(BOARD_WIDTH, BOARD_HEIGHT);
+
+                    //cv::drawChessboardCorners(scres, pattern_size, imagePoints1, true);
+                    //qDebug() << "Done drawChessboardCorners";
+
+                    //imagePoints.push_back(cv::Point2d(50, 50));
+
+                    for(unsigned int i = 0; i < imagePoints.size(); ++i) {
+                        cv::circle(rimage1, cv::Point2d(imagePoints[i].x, imagePoints[i].y), 30, cv::Scalar( 255, 0, 0 ));
+                        qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+                    }
+
+                    //cv::resize(scres, scres, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+                    //cv::imshow("scres1", scres);
+
+                    cv::resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+                    cv::imshow("scres1", rimage1);
+                }
+            }
+        }
 
         // wait key
         key = cv::waitKey(30);
