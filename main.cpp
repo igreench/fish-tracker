@@ -268,8 +268,10 @@ int main() {
         //cv::resize(image1_1, image1_1, image1_2.size(), 0, 0, CV_INTER_LINEAR);//
 
         // camera1: undistortion
-        cv::Mat cameraMatrix1 = (cv::Mat_<double>(3,3) << 1947.44,0,1011.07,0,1707.99,414.401,0,0,1);
-        cv::Mat distCoeffs1 = (cv::Mat_<double>(1,5) << -0.160223,-0.123745,0.00997641,-0.00934415,0);
+        //cv::Mat cameraMatrix1 = (cv::Mat_<double>(3,3) << 1947.44,0,1011.07,0,1707.99,414.401,0,0,1);
+        cv::Mat cameraMatrix1 = (cv::Mat_<double>(3,3) << 1927.04,0,917.475,0,1706.88,579.804,0,0,1);
+        //cv::Mat distCoeffs1 = (cv::Mat_<double>(1,5) << -0.160223,-0.123745,0.00997641,-0.00934415,0);
+        cv::Mat distCoeffs1 = (cv::Mat_<double>(1,5) << -0.215192,0.171866,0.0118907,0.00368162,0);
         cv::Size imageSize1 = image1_1.size();
 
         // camera2: get the image
@@ -291,8 +293,10 @@ int main() {
         //cv::resize(image2_1, image2_1, image2_2.size(), 0, 0, CV_INTER_LINEAR);//
 
         // camera2: undistortion
-        cv::Mat cameraMatrix2 = (cv::Mat_<double>(3,3) << 1849.16,0,900.797,0,1642.24,507.873,0,0,1);
-        cv::Mat distCoeffs2 = (cv::Mat_<double>(1,5) << -0.26513,0.15058,0.00745374,-0.00767843,0);
+        //cv::Mat cameraMatrix2 = (cv::Mat_<double>(3,3) << 1849.16,0,900.797,0,1642.24,507.873,0,0,1);
+        cv::Mat cameraMatrix2 = (cv::Mat_<double>(3,3) << 1766.16,0,817.485,0,1564.63,562.498,0,0,1);
+        //cv::Mat distCoeffs2 = (cv::Mat_<double>(1,5) << -0.26513,0.15058,0.00745374,-0.00767843,0);
+        cv::Mat distCoeffs2 = (cv::Mat_<double>(1,5) << -0.19803,0.0611625,-0.00181152,-0.000889885,0);
         cv::Size imageSize2 = image2_1.size();
 
         //stereoCalibrate
@@ -305,6 +309,9 @@ int main() {
             std::vector<cv::Point2f> corners1, corners2;
 
             if (addImage(image1_1, &corners1, scres) && addImage(image2_1, &corners2, scres)) {
+
+                cv::imwrite( "image1.jpg", image1_1 );
+                cv::imwrite( "image2.jpg", image2_1 );
 
                 imagePoints1.clear();
                 imagePoints2.clear();
@@ -331,16 +338,18 @@ int main() {
                                     distCoeffs1,
                                     cameraMatrix2,
                                     distCoeffs2,
-                                    imageSize1, R, T, E, F,
+                                    imageSize1, R, T, E, F/*,
                                     cv::TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-8),
                                     CV_CALIB_ZERO_TANGENT_DIST +
                                     CV_CALIB_FIX_INTRINSIC+
-                                    CV_CALIB_FIX_K3);
+                                    CV_CALIB_FIX_K3*/
+                                    /*cv::TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5),
+                                    CV_CALIB_SAME_FOCAL_LENGTH | CV_CALIB_ZERO_TANGENT_DIST*/);
 
                 qDebug() << "R" << matToString(R);
                 qDebug() << "T" << matToString(T);
 
-                //cv::resize(scres, scres, image2_2.size(), 0, 0, CV_INTER_LINEAR);
+                //cv::resize(scres, scres, image1_2.size(), 0, 0, CV_INTER_LINEAR);
                 //cv::imshow("scres", scres);
 
                 cv::Rect validRoi[2];
@@ -395,6 +404,7 @@ int main() {
                 for (int j = 0; j < n; j++) {
                     objpoints.push_back(cv::Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
                 }
+                //objpoints.push_back(cv::Point3f(0.0f, 0.0f, 0.0f));
                 /*double squareSize = 1.f;
                 for(int i=0;i<BOARD_HEIGHT;i++) {
                     for(int j=0;j<BOARD_WIDTH;j++) {
@@ -414,12 +424,20 @@ int main() {
                 qDebug() << "cameraMatrix1: " << matToString(cameraMatrix1);
                 qDebug() << "distCoeffs1: " << matToString(distCoeffs1);
                 for(unsigned int i = 0; i < objpoints.size(); ++i) {
-                    qDebug() << objpoints[i].x << objpoints[i].y << objpoints[i].z;
+                    //qDebug() << objpoints[i].x << objpoints[i].y << objpoints[i].z;
+                    qDebug() << obj[i].x << obj[i].y << obj[i].z;
                 }
                 qDebug() << "Start projectPoints";
                 //cv::projectPoints(cv::Mat(objpoints), r, T, cameraMatrix1, distCoeffs1, imagePoints);
+                //cv::projectPoints(cv::Mat(objpoints), r, T, cameraMatrix1, distCoeffs1, imagePoints);
+
                 cv::projectPoints(cv::Mat(objpoints), r, T, cameraMatrix1, distCoeffs1, imagePoints);
+
                 //cv::projectPoints(objpoints, r, T, cameraMatrix1, distCoeffs1, imagePointsP);
+
+                for(unsigned int i = 0; i < imagePoints.size(); ++i) {
+                    //qDebug() << "Image point: " << imagePoints[i] << " Projected to " << obj[i];
+                }
 
                 qDebug() << "Done projectPoints";
 
@@ -429,6 +447,9 @@ int main() {
                 //qDebug() << "Done drawChessboardCorners";
 
                 //imagePoints.push_back(cv::Point2d(50, 50));
+
+                qDebug() << "cols:" << image1_1.cols;
+                qDebug() << "rows:" << image1_1.rows;
 
                 for(unsigned int i = 0; i < imagePoints.size(); ++i) {
                     cv::circle(image1_1, cv::Point2d(imagePoints[i].x, imagePoints[i].y), 20, cv::Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
@@ -480,6 +501,11 @@ int main() {
                 cv::imshow("image1", image1_1);
                 cv::imshow("image2", image2_1);
             }
+        }
+
+        if (key == 's') {
+            cv::imwrite( "image1.jpg", image1_1 );
+            cv::imwrite( "image2.jpg", image2_1 );
         }
 
         if (key == 'p') {
