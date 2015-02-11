@@ -31,10 +31,6 @@ public:
 
     void checkProjectPoints(string fn1, string fn2);
 
-    void check();
-    std::vector<cv::Point2d> Generate2DPoints();
-    std::vector<cv::Point3d> Generate3DPoints();
-
 private:
     Error error;
     Camera camera;
