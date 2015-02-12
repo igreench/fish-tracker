@@ -31,6 +31,8 @@ public:
 
     void checkProjectPoints(string fn1, string fn2);
 
+    StereoSGBM sgbm;
+
 private:
     Error error;
     Camera camera;
@@ -41,9 +43,7 @@ private:
     //bool isStereoRectified = false;
     Mat scres;// stereo callibrate result with points
     Mat R, T, Q; //
-    Mat rmap1, rmap2;
-
-    StereoSGBM sgbm;
+    Mat map1x, map1y, map2x, map2y;
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
 
