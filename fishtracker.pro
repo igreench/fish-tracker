@@ -24,8 +24,10 @@ LIBS += -LC:/OpenCV/opencv/build/x86/vc10/lib \
     -lopencv_features2d2410
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    stereoscopy.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    stereoscopy.h
 
 FORMS    += mainwindow.ui
