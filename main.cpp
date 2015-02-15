@@ -7,10 +7,11 @@
 int main(int argc, char *argv[])
 {    
     Stereoscopy *stereoscopy = new Stereoscopy();
-    stereoscopy->startCapture();
+    /*stereoscopy->startCapture();
     stereoscopy->loopCapture();
-    stereoscopy->endCapture();
+    stereoscopy->endCapture();*/
     //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
+    stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
 
     return 0;
 

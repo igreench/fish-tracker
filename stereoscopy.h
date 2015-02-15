@@ -30,6 +30,8 @@ public:
     void loopCapture();
 
     void checkProjectPoints(string fn1, string fn2);
+    void checkDisparityMap(string fn1, string fn2);
+    void checkDisparityMap2(string fn1, string fn2);
 
 private:
     Error error;
