@@ -11,7 +11,9 @@ int main(int argc, char *argv[])
     stereoscopy->loopCapture();
     stereoscopy->endCapture();*/
     //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
-    stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
+    //stereoscopy->checkDisparityMap("image1_a.jpg", "image2_a.jpg");
+    //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
+    stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
 
     return 0;
 

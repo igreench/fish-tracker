@@ -43,7 +43,7 @@ private:
     //bool isStereoRectified = false;
     Mat scres;// stereo callibrate result with points
     Mat R, T, Q; //
-    Mat rmap1, rmap2;
+    Mat rmap1x, rmap1y, rmap2x, rmap2y;
 
     StereoSGBM sgbm;
 
