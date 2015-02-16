@@ -18,9 +18,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_9->setText("P1");
     ui->label_10->setText("P2");
 
-    ui->spinBox_6->setRange(0, 200);
+    ui->spinBox->setRange(0, 100);
+    ui->spinBox_2->setRange(0, 500);
+    ui->spinBox_3->setRange(0, 200);
+    ui->spinBox_4->setRange(-100, 100);
+    ui->spinBox_5->setRange(0, 200);
+    ui->spinBox_6->setRange(0, 300);
+    ui->spinBox_7->setRange(0, 200);
+    ui->spinBox_8->setRange(0, 100);
+    ui->spinBox_9->setRange(0, 4000);
+    ui->spinBox_10->setRange(0, 4000);
 
-    ui->spinBox_6->setRange(0, 200);
+    stereoscopy = new Stereoscopy();
 
     ui->spinBox->setValue(stereoscopy->sgbm.SADWindowSize);
     ui->spinBox_2->setValue(stereoscopy->sgbm.numberOfDisparities);
@@ -33,13 +42,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->spinBox_9->setValue(stereoscopy->sgbm.P1);
     ui->spinBox_10->setValue(stereoscopy->sgbm.P2);
 
-    connect(this->ui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSADWindowSize(int)));
+    /*connect(this->ui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSADWindowSize(int)));
+    connect(this->ui->spinBox_2, SIGNAL(valueChanged(int)), this, SLOT(setSgbmNumberOfDisparities(int)));
+    connect(this->ui->spinBox_3, SIGNAL(valueChanged(int)), this, SLOT(setSgbmPreFilterCap(int)));
+    connect(this->ui->spinBox_4, SIGNAL(valueChanged(int)), this, SLOT(setSgbmMinDisparity(int)));
+    connect(this->ui->spinBox_5, SIGNAL(valueChanged(int)), this, SLOT(setSgbmUniquenessRatio(int)));
+    connect(this->ui->spinBox_6, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSpeckleWindowSize(int)));
+    connect(this->ui->spinBox_7, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSpeckleRange(int)));
+    connect(this->ui->spinBox_8, SIGNAL(valueChanged(int)), this, SLOT(setSgbmDisp12MaxDiff(int)));
+    connect(this->ui->spinBox_9, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP1(int)));
+    connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));*/
 
-    stereoscopy = new Stereoscopy();
-    stereoscopy->startCapture();
-    stereoscopy->loopCapture();
-    stereoscopy->endCapture();
-    //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
+    isStarted = false;
 }
 
 void MainWindow::setSgbmSADWindowSize(int value) {
@@ -76,4 +90,31 @@ void MainWindow::setSgbmP2(int value) {
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    if (!isStarted) {
+        /*stereoscopy->startCapture();
+        stereoscopy->loopCapture();
+        stereoscopy->endCapture();*/
+        //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
+
+        //stereoscopy->checkDisparityMap("image1_a.jpg", "image2_a.jpg");
+        //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
+        stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
+        isStarted = true;
+    } else {
+        stereoscopy->sgbm.SADWindowSize = ui->spinBox->value();
+        stereoscopy->sgbm.numberOfDisparities = ui->spinBox_2->value();
+        stereoscopy->sgbm.preFilterCap = ui->spinBox_3->value();
+        stereoscopy->sgbm.minDisparity = ui->spinBox_4->value();
+        stereoscopy->sgbm.uniquenessRatio = ui->spinBox_5->value();
+        stereoscopy->sgbm.speckleWindowSize = ui->spinBox_6->value();
+        stereoscopy->sgbm.speckleRange = ui->spinBox_7->value();
+        stereoscopy->sgbm.disp12MaxDiff = ui->spinBox_8->value();
+        stereoscopy->sgbm.P1 = ui->spinBox_9->value();
+        stereoscopy->sgbm.P2 = ui->spinBox_10->value();
+        stereoscopy->showDisparityMap();
+    }
 }

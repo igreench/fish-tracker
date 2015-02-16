@@ -30,6 +30,11 @@ public:
     void loopCapture();
 
     void checkProjectPoints(string fn1, string fn2);
+    void checkDisparityMap(string fn1, string fn2);
+    void checkDisparityMap2(string fn1, string fn2);
+
+    void showDisparityMap();
+    void wait();
 
     StereoSGBM sgbm;
 
@@ -43,7 +48,9 @@ private:
     //bool isStereoRectified = false;
     Mat scres;// stereo callibrate result with points
     Mat R, T, Q; //
-    Mat map1x, map1y, map2x, map2y;
+    Mat rmap1x, rmap1y, rmap2x, rmap2y;
+
+    Mat g1, g2;
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
 

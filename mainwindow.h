@@ -17,6 +17,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+
     void setSgbmSADWindowSize(int value);
     void setSgbmNumberOfDisparities(int value);
     void setSgbmPreFilterCap(int value);
@@ -29,10 +31,14 @@ public:
     void setSgbmP2(int value);
 
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     Stereoscopy *stereoscopy;
+    bool isStarted;
 };
 
 #endif // MAINWINDOW_H
