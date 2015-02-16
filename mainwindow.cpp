@@ -95,14 +95,14 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     if (!isStarted) {
-        /*stereoscopy->startCapture();
+        stereoscopy->startCapture();
         stereoscopy->loopCapture();
-        stereoscopy->endCapture();*/
+        stereoscopy->endCapture();
         //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
 
         //stereoscopy->checkDisparityMap("image1_a.jpg", "image2_a.jpg");
         //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
-        stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
+        //stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
         isStarted = true;
     } else {
         stereoscopy->sgbm.SADWindowSize = ui->spinBox->value();

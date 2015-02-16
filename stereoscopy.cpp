@@ -118,8 +118,6 @@ void Stereoscopy::loopCapture() {
     //Mat distCoeffs1 = (Mat_<double>(1,5) << -0.160223,-0.123745,0.00997641,-0.00934415,0);
 //    Mat distCoeffs1 = (Mat_<double>(1,5) << -0.215192,0.171866,0.0118907,0.00368162,0);
 
-    Mat cameraMatrix1 = (Mat_<double>(3,3) << 6413.91,0,810.516,0,5364.43,717.19,0,0,1);
-    Mat distCoeffs1 = (Mat_<double>(1,5) << -3.62446,83.4373,-0.0860216,0.0135343,-2475.21);
 
     // camera2: undistortion
     //Mat cameraMatrix2 = (Mat_<double>(3,3) << 1849.16,0,900.797,0,1642.24,507.873,0,0,1);
@@ -127,8 +125,15 @@ void Stereoscopy::loopCapture() {
     //Mat distCoeffs2 = (Mat_<double>(1,5) << -0.26513,0.15058,0.00745374,-0.00767843,0);
 //    Mat distCoeffs2 = (Mat_<double>(1,5) << -0.19803,0.0611625,-0.00181152,-0.000889885,0);
 
+/*    Mat cameraMatrix1 = (Mat_<double>(3,3) << 6413.91,0,810.516,0,5364.43,717.19,0,0,1);
+    Mat distCoeffs1 = (Mat_<double>(1,5) << -3.62446,83.4373,-0.0860216,0.0135343,-2475.21);
     Mat cameraMatrix2 = (Mat_<double>(3,3) << 13175.3,0,787.325,0,12363.5,646.243,0,0,1);
-    Mat distCoeffs2 = (Mat_<double>(1,5) << -14.8809,391.48,-0.103346,-0.0954315,3172.4);
+    Mat distCoeffs2 = (Mat_<double>(1,5) << -14.8809,391.48,-0.103346,-0.0954315,3172.4);*/
+
+    Mat cameraMatrix1 = (Mat_<double>(3,3) << 1806.53,0,815.786,0,1595.14,590.314,0,0,1);
+    Mat distCoeffs1 = (Mat_<double>(1,5) << -0.267514,0.213748,0.00136627,0.000194796,0);
+    Mat cameraMatrix2 = (Mat_<double>(3,3) << 1739.3,0,808.929,0,1542.11,581.767,0,0,1);
+    Mat distCoeffs2 = (Mat_<double>(1,5) << -0.247249,0.161344,-0.00280154,0.000444185,0);
 
     //rvec1:  "3,1;-0.121595;0.378872;-0.181438;"
     //tvec1:  "3,1;-2.64742;-5.55454;64.7538;"
@@ -361,17 +366,23 @@ void Stereoscopy::loopCapture() {
             //resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);//
             //resize(rimage2, rimage2, image2_2.size(), 0, 0, CV_INTER_LINEAR);//
 
-            sgbm(rimage1, rimage2, disp);
-            normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
+            //sgbm(rimage1, rimage2, disp);
+            //normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
 
             if (isShowing) {
-                resize(disp8, disp8, image1_2.size(), 0, 0, CV_INTER_LINEAR);//!
-                imshow("disp", disp8);
+                //resize(disp8, disp8, image1_2.size(), 0, 0, CV_INTER_LINEAR);//!
+                //imshow("disp", disp8);
 
-                /*resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+                resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
                 resize(rimage2, rimage2, image2_2.size(), 0, 0, CV_INTER_LINEAR);
                 imshow("rimage1", rimage1);
-                imshow("rimage2", rimage2);*/
+                imshow("rimage2", rimage2);
+
+                //d
+                resize(image1_1, image1_1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
+                resize(image2_1, image2_1, image2_2.size(), 0, 0, CV_INTER_LINEAR);
+                imshow("image1", image1_1);
+                imshow("image2", image2_1);
             }
         } else {
             if (isShowing) {
