@@ -33,6 +33,11 @@ public:
     void checkDisparityMap(string fn1, string fn2);
     void checkDisparityMap2(string fn1, string fn2);
 
+    void checkDisparityMapFromCapture();
+    void checkDisparityMapFromCapture2();
+
+    void showImagesFromCameras();
+
     void showDisparityMap();
     void wait();
 
