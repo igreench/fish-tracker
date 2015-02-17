@@ -100,9 +100,9 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMapFromCapture();
         //stereoscopy->checkDisparityMapFromCapture2();
 
-        /*stereoscopy->startCapture();
+        stereoscopy->startCapture();
         stereoscopy->loopCapture();
-        stereoscopy->endCapture();*/
+        stereoscopy->endCapture();
 
         //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
 
@@ -113,7 +113,7 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
         //stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
 
-        stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
+        //stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
 
         isStarted = true;
     } else {

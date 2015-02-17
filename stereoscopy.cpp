@@ -2,6 +2,8 @@
 
 #include <opencv/cv.h>
 
+#include <windows.h>
+
 #include <QDebug>
 
 Stereoscopy::Stereoscopy() {
@@ -181,6 +183,10 @@ void Stereoscopy::loopCapture() {
     Mat rvec2 = (Mat_<double>(3,1) << -0.335479,0.106753,-0.188999);
     Mat tvec2 = (Mat_<double>(3,1) << -6.88747,-4.15174,138.473);
 
+    Mat R1, R2, P1, P2; //Q
+    Mat E, F;
+    cv::Rect validRoi[2];
+
     char key = 0;
     while (key != 'q') {
 
@@ -222,8 +228,7 @@ void Stereoscopy::loopCapture() {
 
         //stereoCalibrate
 
-        Mat E, F;
-        Mat R1, R2, P1, P2; //Q
+
 
         if (key == 'c') {
 
@@ -332,11 +337,12 @@ void Stereoscopy::loopCapture() {
                                     distCoeffs1,
                                     cameraMatrix2,
                                     distCoeffs2,
-                                    imageSize1, R, T, E, F/*,
+                                    imageSize1, R, T, E, F
+                                    ,
                                     TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-8),
                                     CV_CALIB_ZERO_TANGENT_DIST +
                                     CV_CALIB_FIX_INTRINSIC+
-                                    CV_CALIB_FIX_K3*/
+                                    CV_CALIB_FIX_K3
                                     /*TermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5),
                                     CV_CALIB_SAME_FOCAL_LENGTH | CV_CALIB_ZERO_TANGENT_DIST*/);
 
@@ -348,7 +354,7 @@ void Stereoscopy::loopCapture() {
                 qDebug() << "R" << matToString(R);
                 qDebug() << "T" << matToString(T);
 
-                cv::Rect validRoi[2];
+
 
                 qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
                 qDebug() << "distCoeffs1" << matToString(distCoeffs1);
@@ -361,11 +367,11 @@ void Stereoscopy::loopCapture() {
                                   cameraMatrix2,
                                   distCoeffs2,
                                   imageSize1,
-                                  R, T, R1, R2, P1, P2, Q//,//
-                                  //CV_CALIB_ZERO_DISPARITY, 1,
-                                  //imageSize1,
-                                  //&validRoi[0],
-                                  //&validRoi[1]
+                                  R, T, R1, R2, P1, P2, Q,
+                                  CV_CALIB_ZERO_DISPARITY, 1,
+                                  imageSize1,
+                                  &validRoi[0],
+                                  &validRoi[1]
                                   );
                 qDebug() << "Done Rectification";
                 qDebug() << "Q: " << matToString(Q);
@@ -375,12 +381,20 @@ void Stereoscopy::loopCapture() {
                 qDebug() << "R2" << matToString(R2);
                 qDebug() << "P2" << matToString(P2);
 
+                //Sleep(uint(1000));
+
                 //CV_16SC2 CV_32FC1
-                //cv::initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1, rmap2);
-                //cv::initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_32FC1, rmap1, rmap2);
+                initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1x, rmap1y);
+                initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_32FC1, rmap2x, rmap2y);
+
                 //qDebug() << "rmap1" << matToString(rmap1);
                 //qDebug() << "rmap2" << matToString(rmap2);
                 qDebug() << "Done initUndistortRectifyMap";
+
+                qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
+                qDebug() << "distCoeffs1" << matToString(distCoeffs1);
+                qDebug() << "cameraMatrix2" << matToString(cameraMatrix2);
+                qDebug() << "distCoeffs2" << matToString(distCoeffs2);
 
                 //cv::destroyAllWindows();//
 
@@ -400,17 +414,28 @@ void Stereoscopy::loopCapture() {
         }
 
         //showing
-        if (isStereoCalibrated) {
+        if (isStereoCalibrated/* && key == 'g'*/) {
             qDebug() << "showing";
 
             Mat rimage1, rimage2;
             Mat disp, disp8;
 
-            initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1x, rmap1y);
-            initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_32FC1, rmap2x, rmap2y);
+            //initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1x, rmap1y);
+            //initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_32FC1, rmap2x, rmap2y);
+
+            qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
+            qDebug() << "distCoeffs1" << matToString(distCoeffs1);
+            qDebug() << "cameraMatrix2" << matToString(cameraMatrix2);
+            qDebug() << "distCoeffs2" << matToString(distCoeffs2);
+            qDebug() << "R1" << matToString(R1);
+            qDebug() << "P1" << matToString(P1);
+            qDebug() << "R2" << matToString(R2);
+            qDebug() << "P2" << matToString(P2);
 
             remap(image1_1, rimage1, rmap1x, rmap1y, CV_INTER_LINEAR);
             remap(image2_1, rimage2, rmap2x, rmap2y, CV_INTER_LINEAR);
+
+
             //resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);//
             //resize(rimage2, rimage2, image2_2.size(), 0, 0, CV_INTER_LINEAR);//
 
@@ -421,6 +446,8 @@ void Stereoscopy::loopCapture() {
                 //resize(disp8, disp8, image1_2.size(), 0, 0, CV_INTER_LINEAR);//!
                 //imshow("disp", disp8);
 
+                rectangle(rimage1, validRoi[0], Scalar(0, 255, 0), 3);
+                rectangle(rimage2, validRoi[1], Scalar(0, 255, 0), 3);
                 resize(rimage1, rimage1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
                 resize(rimage2, rimage2, image2_2.size(), 0, 0, CV_INTER_LINEAR);
                 imshow("rimage1", rimage1);
@@ -741,6 +768,8 @@ void Stereoscopy::checkDisparityMap(string fn1, string fn2) {
         qDebug() << "P1" << matToString(P1);
         qDebug() << "R2" << matToString(R2);
         qDebug() << "P2" << matToString(P2);
+
+        //Sleep(uint(1000));
 
         //CV_16SC2 CV_32FC1
         //cv::initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1, rmap2);
@@ -1104,10 +1133,15 @@ void Stereoscopy::checkDisparityMap2(string fn1, string fn2) {
                       r, t, R1, R2, P1, P2, Q
                       );*/
 
-    Mat R1 = (Mat_<double>(3,3) << 0.980892,0.0950288,-0.169765,-0.0923844,0.995448,0.023427,0.171218,-0.00729576,0.985206);
+    /*Mat R1 = (Mat_<double>(3,3) << 0.980892,0.0950288,-0.169765,-0.0923844,0.995448,0.02347,0.171218,-0.00729576,0.985206);
     Mat P1 = (Mat_<double>(3,4) << 1381.78,0,1097.9,0,0,1381.78,568.653,0,0,0,1,0);
     Mat R2 = (Mat_<double>(3,3) << 0.981797,0.102552,-0.159869,-0.105019,0.994445,-0.0070343,0.158259,0.0236955,0.987113);
-    Mat P2 = (Mat_<double>(3,4) << 1381.78,0,1097.9,4385.48,0,1381.78,568.653,0,0,0,1,0);
+    Mat P2 = (Mat_<double>(3,4) << 1381.78,0,1097.9,4385.48,0,1381.78,568.653,0,0,0,1,0);*/
+
+    Mat R1 = (Mat_<double>(3,3) << 0.974573,0.0471726,-0.219049,-0.0468551,0.99888,0.00664693,0.219117,0.00378565,0.975691);
+    Mat P1 = (Mat_<double>(3,4) << 1183.47,0,1184.05,0,0,1183.47,574.579,0,0,0,1,0);
+    Mat R2 = (Mat_<double>(3,3) << 0.978186,0.0475122,-0.202225,-0.047805,0.998851,0.00343925,0.202156,0.00630314,0.979333);
+    Mat P2 = (Mat_<double>(3,4) << 1183.47,0,1184.05,3670.38,0,1183.47,574.579,0,0,0,1,0);
 
     qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
     qDebug() << "distCoeffs1" << matToString(distCoeffs1);
