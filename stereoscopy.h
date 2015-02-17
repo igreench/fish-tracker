@@ -37,6 +37,8 @@ public:
     void checkDisparityMapFromCapture();
     void checkDisparityMapFromCapture2();
 
+    void checkUndistortFromCapture();
+
     void showImagesFromCameras();
 
     void showDisparityMap();

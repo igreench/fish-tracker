@@ -96,13 +96,14 @@ void MainWindow::on_pushButton_clicked()
 {
 
     if (!isStarted) {
-        //stereoscopy->startCapture();
+        stereoscopy->startCapture();
+        stereoscopy->checkUndistortFromCapture();
         //stereoscopy->checkDisparityMapFromCapture();
         //stereoscopy->checkDisparityMapFromCapture2();
 
-        stereoscopy->startCapture();
+        /*stereoscopy->startCapture();
         stereoscopy->loopCapture();
-        stereoscopy->endCapture();
+        stereoscopy->endCapture();*/
 
         //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
 
@@ -127,8 +128,9 @@ void MainWindow::on_pushButton_clicked()
         stereoscopy->sgbm.disp12MaxDiff = ui->spinBox_8->value();
         stereoscopy->sgbm.P1 = ui->spinBox_9->value();
         stereoscopy->sgbm.P2 = ui->spinBox_10->value();
-        stereoscopy->showDisparityMap();
+        //stereoscopy->showDisparityMap();
         //stereoscopy->checkDisparityMapFromCapture2();
+        stereoscopy->checkUndistortFromCapture();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
