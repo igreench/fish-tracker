@@ -1758,7 +1758,7 @@ void Stereoscopy::triangulate(string fn1, string fn2) {
         imshow("drawing2", rimage2);
     }
 
-    //Get moments and mass centers
+    //Getting moments and mass centers
     vector<Moments> mu1(contours1.size());
     vector<Point2f> mc1(contours1.size());
     vector<Moments> mu2(contours2.size());
@@ -1778,11 +1778,28 @@ void Stereoscopy::triangulate(string fn1, string fn2) {
 
     if (isShowCImages) {
         resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("drawing1", rimage1);
+        imshow("cdrawing1", rimage1);
         resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("drawing2", rimage2);
+        imshow("cdrawing2", rimage2);
     }
 
+    undistortPoints(mc1, mc1, cameraMatrix1, distCoeffs1);
+    undistortPoints(mc2, mc2, cameraMatrix2, distCoeffs2);
+
     //Triangulation
-    //TODO
+    Mat R = (Mat_<double>(3,3) << 0.991532,-0.0276931,-0.126874,0.0602062,0.963683,0.260173,0.115061,-0.265608,0.95719);
+    Mat T = (Mat_<double>(3,1) << 8.33789,-17.5109,83.1614);
+    Mat points4D;
+    Mat RT;
+    hconcat(R, T, RT);
+    Mat cam1 = cameraMatrix1 * RT;
+    Mat cam2 = cameraMatrix2 * RT;
+    triangulatePoints(cam1, cam2, mc1, mc2, points4D);
+    qDebug() << "points4D" << matToString(points4D);
+
+    double w = points4D.at<double>(3,0);
+    double x = points4D.at<double>(0,0)/w;
+    double y = points4D.at<double>(1,0)/w;
+    double z = points4D.at<double>(2,0)/w;
+    qDebug() << x << ", " << y << ", " << z;
 }
