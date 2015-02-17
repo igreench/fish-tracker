@@ -10,7 +10,7 @@ Stereoscopy::Stereoscopy() {
     isStereoCalibrated = false;
     isShowing = true;
 
-    sgbm.SADWindowSize = 5;
+    /*sgbm.SADWindowSize = 5;
     sgbm.numberOfDisparities = 192;
     sgbm.preFilterCap = 4;
     sgbm.minDisparity = -64;
@@ -20,7 +20,19 @@ Stereoscopy::Stereoscopy() {
     sgbm.disp12MaxDiff = 10;
     sgbm.fullDP = false;
     sgbm.P1 = 600;
-    sgbm.P2 = 2400;
+    sgbm.P2 = 2400;*/
+
+    sgbm.SADWindowSize = 5; //5
+    sgbm.numberOfDisparities = 128; //192
+    sgbm.preFilterCap = 1; //4
+    sgbm.minDisparity = 0; //-64
+    sgbm.uniquenessRatio = 1; //1
+    sgbm.speckleWindowSize = 150; //150
+    sgbm.speckleRange = 2; //2
+    sgbm.disp12MaxDiff = 2; //10
+    sgbm.fullDP = false; //false
+    sgbm.P1 = 400; //600
+    sgbm.P2 = 1600; //2400
 }
 
 void Stereoscopy::startCapture() {
@@ -325,7 +337,9 @@ void Stereoscopy::loopCapture() {
                                 distCoeffs1,
                                 cameraMatrix2,
                                 distCoeffs2,
-                                imageSize1, R, T, E, F);
+                                imageSize1, R, T, E, F,
+                                TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 1e-6),
+                                CV_CALIB_FIX_ASPECT_RATIO);
                 stereoRectify(cameraMatrix1,
                               distCoeffs1,
                               cameraMatrix2,
@@ -1309,13 +1323,13 @@ void Stereoscopy::checkDisparityMap2(string fn1, string fn2) {
 
     //Mat g1, g2;
 
-    cvtColor(rimage1, g1, CV_BGR2GRAY);
-    cvtColor(rimage2, g2, CV_BGR2GRAY);
+    cvtColor(rimage1, g2, CV_BGR2GRAY);
+    cvtColor(rimage2, g1, CV_BGR2GRAY);
 
     qDebug() << "Start StereoBM";
 
-    /*StereoBM sbm;
-    sbm.state->SADWindowSize = 9;
+    StereoBM sbm;
+    /*sbm.state->SADWindowSize = 9;
     sbm.state->numberOfDisparities = 112; //112
     sbm.state->preFilterSize = 5;
     sbm.state->preFilterCap = 61;
@@ -1325,6 +1339,17 @@ void Stereoscopy::checkDisparityMap2(string fn1, string fn2) {
     sbm.state->speckleWindowSize = 0;
     sbm.state->speckleRange = 8;
     sbm.state->disp12MaxDiff = 1;*/
+
+    sbm.state->SADWindowSize = 9;
+    sbm.state->numberOfDisparities = 128; //112
+    sbm.state->preFilterSize = 5;
+    sbm.state->preFilterCap = 61;
+    sbm.state->minDisparity = -39;
+    sbm.state->textureThreshold = 507;
+    sbm.state->uniquenessRatio = 0;
+    sbm.state->speckleWindowSize = 0;
+    sbm.state->speckleRange = 8;
+    sbm.state->disp12MaxDiff = 10;
 
     sgbm.SADWindowSize = 5; //5
     sgbm.numberOfDisparities = 128; //192
@@ -1340,8 +1365,8 @@ void Stereoscopy::checkDisparityMap2(string fn1, string fn2) {
 
     qDebug() << "Start sbm";
 
-    //sbm(g1, g2, disp);
-    sgbm(g1, g2, disp);
+    sbm(g1, g2, disp);
+    //sgbm(g1, g2, disp);
 
     qDebug() << "Start normalize";
     normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
