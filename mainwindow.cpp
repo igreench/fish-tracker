@@ -96,8 +96,8 @@ void MainWindow::on_pushButton_clicked()
 {
 
     if (!isStarted) {
-        stereoscopy->startCapture();
-        stereoscopy->checkUndistortFromCapture();
+        //stereoscopy->startCapture();
+        //stereoscopy->checkUndistortFromCapture();
         //stereoscopy->checkDisparityMapFromCapture();
         //stereoscopy->checkDisparityMapFromCapture2();
 
@@ -114,7 +114,8 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
         //stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
 
-        //stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
+        stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
+        //stereoscopy->checkDisparityMap2("image1.jpg", "image2.jpg");
 
         isStarted = true;
     } else {
@@ -128,9 +129,9 @@ void MainWindow::on_pushButton_clicked()
         stereoscopy->sgbm.disp12MaxDiff = ui->spinBox_8->value();
         stereoscopy->sgbm.P1 = ui->spinBox_9->value();
         stereoscopy->sgbm.P2 = ui->spinBox_10->value();
-        //stereoscopy->showDisparityMap();
+        stereoscopy->showDisparityMap();
         //stereoscopy->checkDisparityMapFromCapture2();
-        stereoscopy->checkUndistortFromCapture();
+        //stereoscopy->checkUndistortFromCapture();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
