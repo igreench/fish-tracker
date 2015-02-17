@@ -100,18 +100,21 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMapFromCapture();
         //stereoscopy->checkDisparityMapFromCapture2();
 
-        stereoscopy->startCapture();
+        /*stereoscopy->startCapture();
         stereoscopy->loopCapture();
-        stereoscopy->endCapture();
+        stereoscopy->endCapture();*/
 
         //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
 
         //stereoscopy->checkDisparityMap("image1_a.jpg", "image2_a.jpg");
         //stereoscopy->checkDisparityMap("image1_cal1.jpg", "image2_cal1.jpg");
+        //stereoscopy->checkUndistort("image1_aqua3.jpg", "image2_aqua3.jpg");
 
         //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
         //stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
-        //stereoscopy->checkDisparityMap2("image1_aqua1.jpg", "image2_aqua1.jpg");
+
+        stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
+
         isStarted = true;
     } else {
         stereoscopy->sgbm.SADWindowSize = ui->spinBox->value();
@@ -124,8 +127,8 @@ void MainWindow::on_pushButton_clicked()
         stereoscopy->sgbm.disp12MaxDiff = ui->spinBox_8->value();
         stereoscopy->sgbm.P1 = ui->spinBox_9->value();
         stereoscopy->sgbm.P2 = ui->spinBox_10->value();
-        //stereoscopy->showDisparityMap();
-        stereoscopy->checkDisparityMapFromCapture2();
+        stereoscopy->showDisparityMap();
+        //stereoscopy->checkDisparityMapFromCapture2();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
