@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "stereoscopy.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -15,8 +17,28 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+
+    void setSgbmSADWindowSize(int value);
+    void setSgbmNumberOfDisparities(int value);
+    void setSgbmPreFilterCap(int value);
+    void setSgbmMinDisparity(int value);
+    void setSgbmUniquenessRatio(int value);
+    void setSgbmSpeckleWindowSize(int value);
+    void setSgbmSpeckleRange(int value);
+    void setSgbmDisp12MaxDiff(int value);
+    void setSgbmP1(int value);
+    void setSgbmP2(int value);
+
+
+private slots:
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    Stereoscopy *stereoscopy;
+    bool isStarted;
 };
 
 #endif // MAINWINDOW_H

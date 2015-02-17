@@ -30,6 +30,21 @@ public:
     void loopCapture();
 
     void checkProjectPoints(string fn1, string fn2);
+    void checkUndistort(string fn1, string fn2);
+    void checkDisparityMap(string fn1, string fn2);
+    void checkDisparityMap2(string fn1, string fn2);
+
+    void checkDisparityMapFromCapture();
+    void checkDisparityMapFromCapture2();
+
+    void checkUndistortFromCapture();
+
+    void showImagesFromCameras();
+
+    void showDisparityMap();
+    void wait();
+
+    StereoSGBM sgbm;
 
 private:
     Error error;
@@ -41,9 +56,9 @@ private:
     //bool isStereoRectified = false;
     Mat scres;// stereo callibrate result with points
     Mat R, T, Q; //
-    Mat rmap1, rmap2;
+    Mat rmap1x, rmap1y, rmap2x, rmap2y;
 
-    StereoSGBM sgbm;
+    Mat g1, g2;
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
 
