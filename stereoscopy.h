@@ -29,6 +29,8 @@ public:
     void endCapture();
     void loopCapture();
 
+    void triangulate(string fn1, string fn2);
+
     void checkProjectPoints(string fn1, string fn2);
     void checkUndistort(string fn1, string fn2);
     void checkDisparityMap(string fn1, string fn2);

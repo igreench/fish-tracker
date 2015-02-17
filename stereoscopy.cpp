@@ -1656,3 +1656,124 @@ void Stereoscopy::checkUndistortFromCapture() {
     imshow("rimage1", rimage1);
     imshow("rimage2", rimage2);
 }
+
+void Stereoscopy::triangulate(string fn1, string fn2) {
+    Mat image1 = imread(fn1);
+    if (!image1.data) {
+        qDebug() <<  "Could not open or find the image1";
+        return ;
+    }
+    Mat image2 = imread(fn2);
+    if (!image2.data) {
+        qDebug() <<  "Could not open or find the image2";
+        return ;
+    }
+
+    Mat imageSmall = Mat(image1.rows / 4, image1.cols / 4, CV_8UC3);
+    Size imageSizeSmall = imageSmall.size(); //400x300
+
+    Mat cameraMatrix1 = (Mat_<double>(3,3) << 1806.53,0,815.786,0,1595.14,590.314,0,0,1);
+    Mat distCoeffs1 = (Mat_<double>(1,5) << -0.267514,0.213748,0.00136627,0.000194796,0);
+    Mat cameraMatrix2 = (Mat_<double>(3,3) << 1739.3,0,808.929,0,1542.11,581.767,0,0,1);
+    Mat distCoeffs2 = (Mat_<double>(1,5) << -0.247249,0.161344,-0.00280154,0.000444185,0);
+
+    //Start
+
+    bool isShowImages = false;
+    bool isShowUImages = false;
+    bool isShowTImages = false;
+    bool isShowDImages = true;
+
+    Mat rimage1, rimage2;
+
+    if (isShowImages) {
+        resize(image1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        resize(image2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("image1", rimage1);
+        imshow("image2", rimage2);
+    }
+
+    //Calibration
+
+    Mat uimage1, uimage2;
+
+    undistort(image1, uimage1, cameraMatrix1, distCoeffs1);
+    undistort(image2, uimage2, cameraMatrix2, distCoeffs2);
+
+    if (isShowUImages) {
+        resize(uimage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        resize(uimage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("uimage1", rimage1);
+        imshow("uimage2", rimage2);
+    }
+
+    //Binarization
+
+    cvtColor(uimage1, g1, CV_BGR2GRAY);
+    cvtColor(uimage2, g2, CV_BGR2GRAY);
+
+    Mat timage1, timage2;
+
+    blur(g1, g1, Size(20, 20));
+    blur(g2, g2, Size(20, 20));
+
+    //It would be cool combinate threshold and adaptiveThreshold
+
+    threshold(g1, timage1, 50, 80, CV_THRESH_BINARY_INV); //50 250
+    threshold(g2, timage2, 50, 80, CV_THRESH_BINARY_INV);
+
+    if (isShowTImages) {
+        resize(timage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        resize(timage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("timage1", rimage1);
+        imshow("timage2", rimage2);
+    }
+
+    //Finding contours
+
+    vector<vector<Point> > contours1, contours2;
+    vector<Vec4i> hierarchy1, hierarchy2;
+    RNG rng(12345);
+
+    //findContours( timage1, contours1, hierarchy1, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( timage1, contours1, hierarchy1, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, Point(0, 0) );
+    Mat drawing1 = Mat::zeros( timage1.size(), CV_8UC3 );
+    for( int i = 0; i < contours1.size(); i++ ) {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing1, contours1, i, color, 2, 8, hierarchy1, 0, Point() );
+    }
+
+    findContours( timage2, contours2, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    Mat drawing2 = Mat::zeros( timage2.size(), CV_8UC3 );
+    for( int i = 0; i < contours2.size(); i++ ) {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
+    }
+
+    if (isShowDImages) {
+        resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("drawing1", rimage1);
+        resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("drawing2", rimage2);
+    }
+
+    //Searching centers of mass
+
+    /*list<Moments> mu = new ArrayList<Moments>(Contours.size());
+    for (int i = 0; i < Contours.size(); i++) {
+        mu.add(i, Imgproc.moments(Contours.get(i), false));
+        Moments p = mu.get(i);
+        int x = (int) (p.get_m10() / p.get_m00());
+        int y = (int) (p.get_m01() / p.get_m00());
+        Core.circle(rgbaImage, new Point(x, y), 4, new Scalar(255,49,0,255));
+    }*/
+
+    //Triangulation
+
+    //Showing
+
+    /*resize(timage1, timage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+    resize(timage2, timage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+    imshow("timage1", timage1);
+    imshow("timage2", timage2);*/
+}
