@@ -114,8 +114,8 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
         //stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
 
-        //stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
-        stereoscopy->checkDisparityMap2("image1.jpg", "image2.jpg");
+        stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
+        //stereoscopy->checkDisparityMap2("image1.jpg", "image2.jpg");
 
         isStarted = true;
     } else {
