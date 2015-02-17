@@ -1682,7 +1682,8 @@ void Stereoscopy::triangulate(string fn1, string fn2) {
     bool isShowImages = false;
     bool isShowUImages = false;
     bool isShowTImages = false;
-    bool isShowDImages = true;
+    bool isShowDImages = false;
+    bool isShowCImages = true;
 
     Mat rimage1, rimage2;
 
@@ -1757,23 +1758,31 @@ void Stereoscopy::triangulate(string fn1, string fn2) {
         imshow("drawing2", rimage2);
     }
 
-    //Searching centers of mass
+    //Get moments and mass centers
+    vector<Moments> mu1(contours1.size());
+    vector<Point2f> mc1(contours1.size());
+    vector<Moments> mu2(contours2.size());
+    vector<Point2f> mc2(contours2.size());
+    for(int i = 0; i < contours1.size(); i++) {
+        mu1[i] = moments(contours1[i], false);
+        mc1[i] = Point2f(mu1[i].m10/mu1[i].m00 , mu1[i].m01/mu1[i].m00);
+        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        circle(drawing1, mc1[i], 4, color, -1, 8, 0);
+    }
+    for(int i = 0; i < contours2.size(); i++) {
+        mu2[i] = moments(contours2[i], false);
+        mc2[i] = Point2f(mu2[i].m10/mu2[i].m00 , mu2[i].m01/mu2[i].m00);
+        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        circle(drawing2, mc2[i], 4, color, -1, 8, 0);
+    }
 
-    /*list<Moments> mu = new ArrayList<Moments>(Contours.size());
-    for (int i = 0; i < Contours.size(); i++) {
-        mu.add(i, Imgproc.moments(Contours.get(i), false));
-        Moments p = mu.get(i);
-        int x = (int) (p.get_m10() / p.get_m00());
-        int y = (int) (p.get_m01() / p.get_m00());
-        Core.circle(rgbaImage, new Point(x, y), 4, new Scalar(255,49,0,255));
-    }*/
+    if (isShowCImages) {
+        resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("drawing1", rimage1);
+        resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("drawing2", rimage2);
+    }
 
     //Triangulation
-
-    //Showing
-
-    /*resize(timage1, timage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-    resize(timage2, timage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-    imshow("timage1", timage1);
-    imshow("timage2", timage2);*/
+    //TODO
 }
