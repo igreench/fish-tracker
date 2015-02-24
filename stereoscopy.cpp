@@ -186,6 +186,8 @@ void Stereoscopy::loopCapture() {
     Mat cameraMatrix2 = (Mat_<double>(3,3) << 1739.3,0,808.929,0,1542.11,581.767,0,0,1);
     Mat distCoeffs2 = (Mat_<double>(1,5) << -0.247249,0.161344,-0.00280154,0.000444185,0);
 
+    Size imageSizeSmall = Size(400, 300); //400x300
+
     /*Mat rvec1 = (Mat_<double>(3,1) << -0.121595,0.378872,-0.181438);
     Mat tvec1 = (Mat_<double>(3,1) << -2.64742,-5.55454,64.7538);
     Mat rvec2 = (Mat_<double>(3,1) << -0.335479,0.106753,-0.188999);
@@ -305,6 +307,10 @@ void Stereoscopy::loopCapture() {
                 //resize(scres, scres, image1_2.size(), 0, 0, CV_INTER_LINEAR);
                 //imshow("scres1", scres);
 
+                //lets try to calculate R and T
+                //
+                //end of calculating
+
                 resize(image1_1, image1_1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
                 imshow("image1_1", image1_1);
 
@@ -348,11 +354,13 @@ void Stereoscopy::loopCapture() {
                               R, T, R1, R2, P1, P2, Q);
                 initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1x, rmap1y);
                 initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_32FC1, rmap2x, rmap2y);
-                qDebug() << "SEREOCALIBRATED";
+                qDebug() << "STEREOCALIBRATED";
                 qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
                 qDebug() << "distCoeffs1" << matToString(distCoeffs1);
                 qDebug() << "cameraMatrix2" << matToString(cameraMatrix2);
                 qDebug() << "distCoeffs2" << matToString(distCoeffs2);
+                qDebug() << "R" << matToString(R);
+                qDebug() << "T" << matToString(T);
                 qDebug() << "R1" << matToString(R1);
                 qDebug() << "P1" << matToString(P1);
                 qDebug() << "R2" << matToString(R2);
@@ -539,6 +547,18 @@ void Stereoscopy::loopCapture() {
             qDebug() << "P1" << matToString(P1);
             qDebug() << "R2" << matToString(R2);
             qDebug() << "P2" << matToString(P2);
+        }
+
+        if (key == 'u') {
+            Mat rimage1, rimage2;
+
+            undistort(image1_1, rimage1, cameraMatrix1, distCoeffs1);
+            undistort(image2_1, rimage2, cameraMatrix2, distCoeffs2);
+
+            resize(rimage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+            resize(rimage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+            imshow("rimage1", rimage1);
+            imshow("rimage2", rimage2);
         }
 
         //showing
@@ -1266,10 +1286,16 @@ void Stereoscopy::checkDisparityMap2(string fn1, string fn2) {
     Mat R2 = (Mat_<double>(3,3) << 0.981797,0.102552,-0.159869,-0.105019,0.994445,-0.0070343,0.158259,0.0236955,0.987113);
     Mat P2 = (Mat_<double>(3,4) << 1381.78,0,1097.9,4385.48,0,1381.78,568.653,0,0,0,1,0);*/
 
-    Mat R1 = (Mat_<double>(3,3) << 0.974573,0.0471726,-0.219049,-0.0468551,0.99888,0.00664693,0.219117,0.00378565,0.975691);
+    /*Mat R1 = (Mat_<double>(3,3) << 0.974573,0.0471726,-0.219049,-0.0468551,0.99888,0.00664693,0.219117,0.00378565,0.975691);
     Mat P1 = (Mat_<double>(3,4) << 1183.47,0,1184.05,0,0,1183.47,574.579,0,0,0,1,0);
     Mat R2 = (Mat_<double>(3,3) << 0.978186,0.0475122,-0.202225,-0.047805,0.998851,0.00343925,0.202156,0.00630314,0.979333);
-    Mat P2 = (Mat_<double>(3,4) << 1183.47,0,1184.05,3670.38,0,1183.47,574.579,0,0,0,1,0);
+    Mat P2 = (Mat_<double>(3,4) << 1183.47,0,1184.05,3670.38,0,1183.47,574.579,0,0,0,1,0);*/
+
+    //cal2 24.02.15
+    Mat R1 = (Mat_<double>(3,3) << 0.988342,-0.0263584,0.149952,0.0226278,0.999392,0.026531,-0.15056,-0.0228286,0.988337);
+    Mat P1 = (Mat_<double>(3,4) << 1128.78,0,534.771,0,0,1128.78,568.265,0,0,0,1,0);
+    Mat R2 = (Mat_<double>(3,3) << 0.990283,-0.0196971,0.137666,0.0231069,0.999463,-0.0232141,-0.137135,0.0261696,0.990207);
+    Mat P2 = (Mat_<double>(3,4) << 1128.78,0,534.771,2918.46,0,1128.78,568.265,0,0,0,1,0);
 
     qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
     qDebug() << "distCoeffs1" << matToString(distCoeffs1);
@@ -1679,10 +1705,10 @@ void Stereoscopy::triangulate(string fn1, string fn2) {
 
     //Start
 
-    bool isShowImages = false;
-    bool isShowUImages = false;
-    bool isShowTImages = false;
-    bool isShowDImages = false;
+    bool isShowImages = true;
+    bool isShowUImages = true;
+    bool isShowTImages = true;
+    bool isShowDImages = true;
     bool isShowCImages = true;
 
     Mat rimage1, rimage2;
@@ -1802,4 +1828,22 @@ void Stereoscopy::triangulate(string fn1, string fn2) {
     double y = points4D.at<double>(1,0)/w;
     double z = points4D.at<double>(2,0)/w;
     qDebug() << x << ", " << y << ", " << z;
+}
+
+void Stereoscopy::drawCirclesPattern() {
+    Mat image(1792, 1600, CV_8UC3);
+    //Mat image(400, 400, CV_8UC3);
+    image.setTo(Scalar(255, 255, 255));
+    int n = 9;
+    int m = 8;
+    int r = 64;
+    //int r = 10;
+    for (int i = 0; i < (n + 1) * m; i++) {
+        circle(image, Point((i % m) * (3 * r) + 2 * r, (i / n) * (3 * r) + 2 * r), r, Scalar(0, 0, 0), -1);
+    }
+    imwrite( "pattern.jpg", image );
+    qDebug() << "cols: " << image.cols << " rows: " << image.rows;
+    resize(image, image, Size(image.cols / 4, image.rows / 4), 0, 0, CV_INTER_LINEAR);
+    qDebug() << "cols: " << image.cols << " rows: " << image.rows;
+    imshow("image", image);
 }

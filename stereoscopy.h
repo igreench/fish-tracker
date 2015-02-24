@@ -46,6 +46,8 @@ public:
     void showDisparityMap();
     void wait();
 
+    void drawCirclesPattern();
+
     StereoSGBM sgbm;
 
 private:
@@ -68,8 +70,8 @@ private:
     vector<vector<Point2f> > imagePoints1;
     vector<vector<Point2f> > imagePoints2;
 
-    static const int BOARD_WIDTH = 8;
-    static const int BOARD_HEIGHT = 9;
+    static const int BOARD_WIDTH = 9; //8
+    static const int BOARD_HEIGHT = 8; //9
 
 };
 
