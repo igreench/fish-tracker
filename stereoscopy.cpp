@@ -301,14 +301,57 @@ void Stereoscopy::loopCapture() {
 
                 for(unsigned int i = 0; i < imagePoints.size(); ++i) {
                     circle(image1_1, Point2d(imagePoints[i].x, imagePoints[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
-                    qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+                    //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
                 }
 
                 //resize(scres, scres, image1_2.size(), 0, 0, CV_INTER_LINEAR);
                 //imshow("scres1", scres);
 
+
                 //lets try to calculate R and T
-                //
+                qDebug() << "start calculating R and T";
+
+                Mat R1, R2, T1, T2, r1, r2, tr1, tr2;
+
+                qDebug() << "rvecs1: " << matToString(Mat(rvecs1[0]));
+                qDebug() << "tvecs1: " << matToString(Mat(tvecs1[0]));
+                qDebug() << "rvecs2: " << matToString(Mat(rvecs2[0]));
+                qDebug() << "tvecs2: " << matToString(Mat(tvecs2[0]));
+
+                Rodrigues(Mat(rvecs1[0]), r1);
+                Rodrigues(Mat(rvecs2[0]), r2);
+                qDebug() << "r1: " << matToString(r1);
+                qDebug() << "r2: " << matToString(r2);
+
+                transpose(r1, tr1);
+                transpose(r2, tr2);
+                qDebug() << "tr1: " << matToString(tr1);
+                qDebug() << "tr2: " << matToString(tr2);
+
+                R1 = r1 * tr2;
+                T1 = -R1 * Mat(tvecs2[0]) + Mat(tvecs1[0]);
+                qDebug() << "R1: " << matToString(R1);
+                qDebug() << "T1: " << matToString(T1);
+
+                R2 = r2 * tr1;
+                T2 = -R2 * Mat(tvecs1[0]) + Mat(tvecs2[0]);
+                qDebug() << "R2: " << matToString(R2);
+                qDebug() << "T2: " << matToString(T2);
+
+                stereoCalibrate(objectPoints, imagePoints1, imagePoints2,
+                                cameraMatrix1,
+                                distCoeffs1,
+                                cameraMatrix2,
+                                distCoeffs2,
+                                imageSize1, R, T, E, F/*,
+                                TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 1e-6),
+                                CV_CALIB_FIX_ASPECT_RATIO*/);
+
+                qDebug() << "R: " << matToString(R);
+                qDebug() << "T: " << matToString(T);
+
+                qDebug() << "end calculating R and T";
+
                 //end of calculating
 
                 resize(image1_1, image1_1, image1_2.size(), 0, 0, CV_INTER_LINEAR);
@@ -1468,10 +1511,29 @@ void Stereoscopy::checkDisparityMapFromCapture2() {
     Mat cameraMatrix2 = (Mat_<double>(3,3) << 13175.3,0,787.325,0,12363.5,646.243,0,0,1);
     Mat distCoeffs2 = (Mat_<double>(1,5) << -14.8809,391.48,-0.103346,-0.0954315,3172.4);*/
 
-    Mat R1 = (Mat_<double>(3,3) << 0.980892,0.0950288,-0.169765,-0.0923844,0.995448,0.023427,0.171218,-0.00729576,0.985206);
+    //cal2 24.02.15
+//    Mat R = (Mat_<double>(3,3) << 0.999777,0.0205921,-0.00464121,-0.0206185,0.999771,-0.00572017,0.00452236,0.00581459,0.999973);
+//    Mat T = (Mat_<double>(3,1) << -3.16092,-0.0817686,2.49164);
+    Mat R = (Mat_<double>(3,3) << 0.999777,-0.0206185,0.00452236,0.0205921,0.999771,0.00581459,-0.00464121,-0.00572017,0.999973);
+    Mat T = (Mat_<double>(3,1) << 3.14727,0.132352,-2.50671);
+    /*R1:  "3,3;0.999777,0.0205921,-0.00464121;-0.0206185,0.999771,-0.00572017;0.00452236,0.00581459,0.999973);
+    T1:  "3,1;-3.16092;-0.0817686;2.49164;"
+    R2:  "3,3;0.999777,-0.0206185,0.00452236;0.0205921,0.999771,0.00581459;-0.00464121,-0.00572017,0.999973;"
+    T2:  "3,1;3.14727;0.132352;-2.50671;" */
+
+    Mat R1, R2, P1, P2, Q;
+
+/*    Mat R1 = (Mat_<double>(3,3) << 0.980892,0.0950288,-0.169765,-0.0923844,0.995448,0.023427,0.171218,-0.00729576,0.985206);
     Mat P1 = (Mat_<double>(3,4) << 1381.78,0,1097.9,0,0,1381.78,568.653,0,0,0,1,0);
     Mat R2 = (Mat_<double>(3,3) << 0.981797,0.102552,-0.159869,-0.105019,0.994445,-0.0070343,0.158259,0.0236955,0.987113);
-    Mat P2 = (Mat_<double>(3,4) << 1381.78,0,1097.9,4385.48,0,1381.78,568.653,0,0,0,1,0);
+    Mat P2 = (Mat_<double>(3,4) << 1381.78,0,1097.9,4385.48,0,1381.78,568.653,0,0,0,1,0);*/
+
+    stereoRectify(cameraMatrix1,
+                  distCoeffs1,
+                  cameraMatrix2,
+                  distCoeffs2,
+                  imageSize1,
+                  R, T, R1, R2, P1, P2, Q);
 
     /*Mat R1 = (Mat_<double>(3,3) << 0.909211,0.302429,0.286133,-0.399878,0.443026,0.802388,0.115901,-0.843958,0.523739);
     Mat P1 = (Mat_<double>(3,4) << 5848.82,0,-1744.66,0,0,5848.82,-15679.5,0,0,0,1,0);
@@ -1509,10 +1571,10 @@ void Stereoscopy::checkDisparityMapFromCapture2() {
     remap(image1, rimage1, rmap1x, rmap1y, CV_INTER_LINEAR);
     remap(image2, rimage2, rmap2x, rmap2y, CV_INTER_LINEAR);
 
-    /*resize(image1, image1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+    resize(image1, image1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
     resize(image2, image2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
     imshow("image1", image1);
-    imshow("image2", image2);*/
+    imshow("image2", image2);
 
     resize(rimage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
     resize(rimage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);

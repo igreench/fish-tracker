@@ -136,6 +136,8 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->showDisparityMap();
         //stereoscopy->checkDisparityMapFromCapture2();
         //stereoscopy->checkUndistortFromCapture();
+
+        //stereoscopy->checkDisparityMapFromCapture2();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
