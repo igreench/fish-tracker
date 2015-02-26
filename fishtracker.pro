@@ -25,9 +25,15 @@ LIBS += -LC:/OpenCV/opencv/build/x86/vc10/lib \
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    stereoscopy.cpp
+    stereoscopy.cpp \
+    pgrcamera.cpp \
+    camera3d.cpp \
+    stereoimage.cpp
 
 HEADERS  += mainwindow.h \
-    stereoscopy.h
+    stereoscopy.h \
+    pgrcamera.h \
+    camera3d.h \
+    stereoimage.h
 
 FORMS    += mainwindow.ui

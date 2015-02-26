@@ -5,6 +5,8 @@
 
 #include "stereoscopy.h"
 
+#include "camera3d.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -39,6 +41,8 @@ private:
 
     Stereoscopy *stereoscopy;
     bool isStarted;
+
+    Camera3D *camera3d;
 };
 
 #endif // MAINWINDOW_H

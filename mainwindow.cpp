@@ -54,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));*/
 
     isStarted = false;
+
+    camera3d = new Camera3D();
 }
 
 void MainWindow::setSgbmSADWindowSize(int value) {
@@ -101,9 +103,11 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMapFromCapture();
         //stereoscopy->checkDisparityMapFromCapture2();
 
-        stereoscopy->startCapture();
+        //camera3d->startCapture();
+
+        /*stereoscopy->startCapture();
         stereoscopy->loopCapture();
-        stereoscopy->endCapture();
+        stereoscopy->endCapture();*/
 
         //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
 
@@ -138,6 +142,8 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkUndistortFromCapture();
 
         //stereoscopy->checkDisparityMapFromCapture2();
+
+        //camera3d->stopCapture();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
