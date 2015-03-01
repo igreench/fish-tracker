@@ -6,6 +6,7 @@
 #include "disparitymap.h"
 #include "camera3d.h"
 #include "stereoparametres.h"
+#include "stereoprocessing.h"
 #include "iodata.h"
 
 using namespace stereo;
@@ -53,6 +54,7 @@ private:
     Camera3D *camera3d;
     StereoImage *stereoImage;
     StereoParametres *stereoParametres;
+    StereoProcessing *stereoProcessing;
     DisparityMap *disparityMap;
     IOData *ioData;
 

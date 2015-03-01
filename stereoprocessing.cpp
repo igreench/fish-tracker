@@ -38,9 +38,13 @@ StereoParametres* StereoProcessing::getStereoParametres() {
 StereoImage* StereoProcessing::undistortStereoImage() {
     StereoImage* undistortStereoImage = new StereoImage();
     Mat left, right;
+    qDebug() << "start undistort";
+    //stereoParametres->print();
     undistort(stereoImage->getLeft(), left, stereoParametres->getCameraMatrix1(), stereoParametres->getDistCoeffs1());
     undistort(stereoImage->getRight(), right, stereoParametres->getCameraMatrix2(), stereoParametres->getDistCoeffs2());
     undistortStereoImage->setImages(left, right);
+    qDebug() << "end undistort";
+    //undistortStereoImage->setImages(stereoImage->getLeft(), stereoImage->getRight());
     return undistortStereoImage;
 }
 

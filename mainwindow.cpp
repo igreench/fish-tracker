@@ -58,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ioData = new IOData();
     ioData->loadStereoParametres("data.txt", stereoParametres);
     stereoParametres->print();
+    stereoProcessing = new StereoProcessing();
+    stereoProcessing->setStereoParametres(stereoParametres);
 
     isStarted = false;
 
@@ -115,11 +117,9 @@ void MainWindow::on_pushButton_clicked()
 
     if (!isStarted) {
         loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
+        stereoProcessing->setStereoImage(stereoImage);
         showStereoImage();
 
-        Mat cameraMatrix1 = (Mat_<double>(3,3) << 1806.53,0,815.786,0,1595.14,590.314,0,0,1);
-        qDebug() << matToString(cameraMatrix1);
-        qDebug() << matToString(stringToMat(matToString(cameraMatrix1)));
         //stereoscopy->startCapture();
         //stereoscopy->checkUndistortFromCapture();
         //stereoscopy->checkDisparityMapFromCapture();
@@ -176,6 +176,7 @@ void MainWindow::on_pushButton_clicked()
     stereoscopy->endCapture();*/
 }
 
+//need move to IOData
 void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
     Mat image1 = IOData::getMatFromFile(fn1);
     Mat image2 = IOData::getMatFromFile(fn2);
@@ -193,6 +194,7 @@ void MainWindow::showStereoImage() {
         } else {
             size = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
         }
+
         cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
         cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
 
@@ -204,8 +206,17 @@ void MainWindow::showStereoImage() {
         }
 
         if (isShowingStereoImage2) {
-            ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
-            ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
+            StereoImage *undistortStereoImage = new StereoImage();
+            undistortStereoImage = stereoProcessing->undistortStereoImage();
+
+            Mat uimage1 = undistortStereoImage->getLeft();
+            Mat uimage2 = undistortStereoImage->getRight();
+
+            cv::resize(uimage1, uimage1, size, 0, 0, CV_INTER_LINEAR);
+            cv::resize(uimage2, uimage2, size, 0, 0, CV_INTER_LINEAR);
+
+            ui->label_13->setPixmap(ASM::cvMatToQPixmap(uimage1));
+            ui->label_14->setPixmap(ASM::cvMatToQPixmap(uimage2));
         }
         if (isShowingStereoImage3) {
             ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
