@@ -89,7 +89,7 @@ namespace ASM {
          case QImage::Format_RGB888:
          {
             if ( !inCloneImageData )
-               qWarning() << "ASM::QImageToCvMat() - Conversion requires cloning since we use a temporary QImage";
+               qDebug() << "ASM::QImageToCvMat() - Conversion requires cloning since we use a temporary QImage";
  
             QImage   swapped = inImage.rgbSwapped();
  
@@ -105,7 +105,7 @@ namespace ASM {
          }
  
          default:
-            qWarning() << "ASM::QImageToCvMat() - QImage format not handled in switch:" << inImage.format();
+            qDebug() << "ASM::QImageToCvMat() - QImage format not handled in switch:" << inImage.format();
             break;
       }
  

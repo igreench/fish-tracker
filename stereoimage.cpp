@@ -1,6 +1,13 @@
 #include "stereoimage.h"
 
+using namespace stereo;
+
 StereoImage::StereoImage() {
+}
+
+StereoImage::StereoImage(Mat left, Mat right) {
+    this->left = left;
+    this->right = right;
 }
 
 void StereoImage::setLeft(Mat image) {

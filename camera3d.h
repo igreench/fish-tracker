@@ -7,6 +7,8 @@
 #include "pgrcamera.h"
 #include "stereoimage.h"
 
+using namespace stereo;
+
 class Camera3D : public QObject
 {
     Q_OBJECT

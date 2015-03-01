@@ -25,18 +25,22 @@ LIBS += -LC:/OpenCV/opencv/build/x86/vc10/lib \
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    stereoscopy.cpp \
     pgrcamera.cpp \
     camera3d.cpp \
     stereoimage.cpp \
-    iodata.cpp
+    iodata.cpp \
+    stereoprocessing.cpp \
+    stereoparametres.cpp \
+    disparitymap.cpp
 
 HEADERS  += mainwindow.h \
-    stereoscopy.h \
     pgrcamera.h \
     camera3d.h \
     stereoimage.h \
     iodata.h \
-    asmopencv.h
+    asmopencv.h \
+    stereoprocessing.h \
+    stereoparametres.h \
+    disparitymap.h
 
 FORMS    += mainwindow.ui

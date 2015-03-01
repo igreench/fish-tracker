@@ -5,10 +5,13 @@
 
 using namespace cv;
 
+namespace stereo {
+
 class StereoImage
 {
 public:
     StereoImage();
+    StereoImage(Mat left, Mat right);
 
     void setLeft(Mat image);
     void setRight(Mat image);
@@ -24,5 +27,7 @@ private:
     Mat left;
     Mat right;
 };
+
+}
 
 #endif // STEREOIMAGE_H

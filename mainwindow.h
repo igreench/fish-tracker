@@ -3,9 +3,12 @@
 
 #include <QMainWindow>
 
-#include "stereoscopy.h"
-
+#include "disparitymap.h"
 #include "camera3d.h"
+#include "stereoparametres.h"
+#include "iodata.h"
+
+using namespace stereo;
 
 namespace Ui {
 class MainWindow;
@@ -45,11 +48,13 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    Stereoscopy *stereoscopy;
     bool isStarted;
 
     Camera3D *camera3d;
     StereoImage *stereoImage;
+    StereoParametres *stereoParametres;
+    DisparityMap *disparityMap;
+    IOData *ioData;
 
     void loadLocalStereoImage(string fn1, string fn2);
     void showStereoImage();
