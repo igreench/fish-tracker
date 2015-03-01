@@ -2,7 +2,10 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
+#include <QApplication>
 #include <QFile>
+#include <QTextStream>
+#include <QIODevice>
 #include <QDebug>
 
 //using namespace stereo;
@@ -34,8 +37,8 @@ void IOData::saveStereoParametres(QString filename, StereoParametres* stereoPara
 }
 
 void IOData::loadStereoParametres(QString filename, StereoParametres* stereoParametres, int mode) {
+    //QFile file(QApplication::applicationDirPath() + "/" + filename);
     QFile file(filename);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Error opening file: " << file.error();
         return;
@@ -43,6 +46,7 @@ void IOData::loadStereoParametres(QString filename, StereoParametres* stereoPara
     QTextStream in(&file);
     while(!in.atEnd()) {
         QString line = in.readLine();
+        line.replace("\"", "");
         QStringList fields = line.split(" ");
         if (mode == 0 || mode == 1) {
             if ("cameraMatrix1" == fields[0]) {
@@ -67,6 +71,7 @@ void IOData::loadStereoParametres(QString filename, StereoParametres* stereoPara
             }
         }
     }
+    file.close();
 }
 
 void IOData::loadStereoParametres(QString filename, StereoParametres* stereoParametres) {
