@@ -28,12 +28,15 @@ SOURCES += main.cpp\
     stereoscopy.cpp \
     pgrcamera.cpp \
     camera3d.cpp \
-    stereoimage.cpp
+    stereoimage.cpp \
+    iodata.cpp
 
 HEADERS  += mainwindow.h \
     stereoscopy.h \
     pgrcamera.h \
     camera3d.h \
-    stereoimage.h
+    stereoimage.h \
+    iodata.h \
+    asmopencv.h
 
 FORMS    += mainwindow.ui

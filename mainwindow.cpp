@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+#include "asmopencv.h"
+#include "iodata.h"
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     ui->label->setText("SADWindowSize");
@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     isStarted = false;
 
     camera3d = new Camera3D();
+    stereoImage = new StereoImage();
 }
 
 void MainWindow::setSgbmSADWindowSize(int value) {
@@ -96,7 +97,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-
+    showLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
     if (!isStarted) {
         //stereoscopy->startCapture();
         //stereoscopy->checkUndistortFromCapture();
@@ -148,4 +149,18 @@ void MainWindow::on_pushButton_clicked()
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
     stereoscopy->endCapture();*/
+}
+
+void MainWindow::showLocalStereoImage(string fn1, string fn2) {
+    Mat image1 = IOData::getMatFromFile(fn1);
+    Mat image2 = IOData::getMatFromFile(fn2);
+    stereoImage->setImages(image1, image2);
+    ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
+    ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
+
+    //
+    ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
+    ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
+    ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
+    ui->label_16->setPixmap(ASM::cvMatToQPixmap(image2));
 }

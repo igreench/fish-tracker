@@ -5,6 +5,7 @@
 #include <QTimer>
 
 #include "pgrcamera.h"
+#include "stereoimage.h"
 
 class Camera3D : public QObject
 {
@@ -22,6 +23,7 @@ public slots:
 private:
     PGRCamera *camera1;
     PGRCamera *camera2;
+    StereoImage *stereoImage;
 
     QTimer *timer;
 };

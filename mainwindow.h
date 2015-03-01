@@ -32,7 +32,6 @@ public slots:
     void setSgbmP1(int value);
     void setSgbmP2(int value);
 
-
 private slots:
     void on_pushButton_clicked();
 
@@ -43,6 +42,9 @@ private:
     bool isStarted;
 
     Camera3D *camera3d;
+    StereoImage *stereoImage;
+
+    void showLocalStereoImage(string fn1, string fn2);
 };
 
 #endif // MAINWINDOW_H

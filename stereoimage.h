@@ -10,9 +10,12 @@ class StereoImage
 public:
     StereoImage();
 
-    void setLeftImage(Mat image);
-    void setRightImage(Mat image);
+    void setLeft(Mat image);
+    void setRight(Mat image);
     void setImages(Mat left, Mat right);
+
+    Mat getLeft();
+    Mat getRight();
 
 private:
     Mat left;
