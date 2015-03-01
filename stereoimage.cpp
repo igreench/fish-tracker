@@ -23,3 +23,12 @@ Mat StereoImage::getLeft() {
 Mat StereoImage::getRight() {
     return right;
 }
+
+bool StereoImage::isEmpty() {
+    return (!left.data || !right.data);
+}
+
+void StereoImage::clear() {
+    left = Mat();
+    right = Mat();
+}

@@ -14,6 +14,9 @@ public:
     void setRight(Mat image);
     void setImages(Mat left, Mat right);
 
+    bool isEmpty();
+    void clear();
+
     Mat getLeft();
     Mat getRight();
 

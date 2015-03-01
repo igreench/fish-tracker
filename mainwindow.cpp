@@ -53,10 +53,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this->ui->spinBox_9, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP1(int)));
     connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));*/
 
-    isStarted = false;
-
     camera3d = new Camera3D();
     stereoImage = new StereoImage();
+
+    isStarted = false;
+
+    isShowingStereoImage1 = true;
+    isShowingStereoImage2 = true;
+    isShowingStereoImage3 = false;
+
+    ui->label_15->setVisible(false);
+    ui->label_16->setVisible(false);
+
+    connect(this->ui->actionStereoImage1, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage1(bool)));
+    connect(this->ui->actionStereoImage2, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage2(bool)));
+    connect(this->ui->actionStereoImage3, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage3(bool)));
 }
 
 void MainWindow::setSgbmSADWindowSize(int value) {
@@ -97,8 +108,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    showLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
+
     if (!isStarted) {
+        loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
+        showStereoImage();
+
         //stereoscopy->startCapture();
         //stereoscopy->checkUndistortFromCapture();
         //stereoscopy->checkDisparityMapFromCapture();
@@ -145,22 +159,81 @@ void MainWindow::on_pushButton_clicked()
         //stereoscopy->checkDisparityMapFromCapture2();
 
         //camera3d->stopCapture();
+
+        showStereoImage();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
     stereoscopy->endCapture();*/
 }
 
-void MainWindow::showLocalStereoImage(string fn1, string fn2) {
+void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
     Mat image1 = IOData::getMatFromFile(fn1);
     Mat image2 = IOData::getMatFromFile(fn2);
     stereoImage->setImages(image1, image2);
-    ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
-    ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
+}
 
-    //
-    ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
-    ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
-    ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
-    ui->label_16->setPixmap(ASM::cvMatToQPixmap(image2));
+void MainWindow::showStereoImage() {
+    if (!stereoImage->isEmpty()) {
+        Mat image1 = stereoImage->getLeft();
+        Mat image2 = stereoImage->getRight();
+        Size size;
+        qDebug() << ui->label_11->width() << ui->label_11->height();
+        if ((double)ui->label_11->width() / ui->label_11->height() < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
+            size = Size(ui->label_11->width(), ui->label_11->width() * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
+        } else {
+            size = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
+        }
+        cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
+        cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
+
+        if (isShowingStereoImage1) {
+            ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
+            ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
+        }
+
+        if (isShowingStereoImage2) {
+            ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
+            ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
+        }
+        if (isShowingStereoImage3) {
+            ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
+            ui->label_16->setPixmap(ASM::cvMatToQPixmap(image2));
+        }
+    }
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+   QMainWindow::resizeEvent(event);
+   showStereoImage();
+}
+
+void MainWindow::resizeDone() {
+   showStereoImage();
+   qDebug() << "resizeDone";
+}
+
+void MainWindow::setIsShowingStereoImage1(bool value) {
+    //qDebug() << value;
+    isShowingStereoImage1 = value;
+    ui->label_11->setVisible(value);
+    ui->label_12->setVisible(value);
+    showStereoImage();
+}
+
+void MainWindow::setIsShowingStereoImage2(bool value) {
+    //qDebug() << value;
+    isShowingStereoImage2 = value;
+    ui->label_13->setVisible(value);
+    ui->label_14->setVisible(value);
+    showStereoImage();
+}
+
+void MainWindow::setIsShowingStereoImage3(bool value) {
+    qDebug() << value;
+    isShowingStereoImage3 = value;
+    ui->label_15->setVisible(value);
+    ui->label_16->setVisible(value);
+    showStereoImage();
+
 }

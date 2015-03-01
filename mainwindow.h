@@ -20,7 +20,6 @@ public:
     ~MainWindow();
 
 public slots:
-
     void setSgbmSADWindowSize(int value);
     void setSgbmNumberOfDisparities(int value);
     void setSgbmPreFilterCap(int value);
@@ -32,8 +31,16 @@ public slots:
     void setSgbmP1(int value);
     void setSgbmP2(int value);
 
+protected:
+    void resizeEvent(QResizeEvent* event);
+    void resizeDone();
+
 private slots:
     void on_pushButton_clicked();
+
+    void setIsShowingStereoImage1(bool value);
+    void setIsShowingStereoImage2(bool value);
+    void setIsShowingStereoImage3(bool value);
 
 private:
     Ui::MainWindow *ui;
@@ -44,7 +51,12 @@ private:
     Camera3D *camera3d;
     StereoImage *stereoImage;
 
-    void showLocalStereoImage(string fn1, string fn2);
+    void loadLocalStereoImage(string fn1, string fn2);
+    void showStereoImage();
+
+    bool isShowingStereoImage1;
+    bool isShowingStereoImage2;
+    bool isShowingStereoImage3;
 };
 
 #endif // MAINWINDOW_H
