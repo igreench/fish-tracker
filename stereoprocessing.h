@@ -15,19 +15,19 @@ class StereoProcessing
 public:
     StereoProcessing();
 
-    void setStereoImage(StereoImage* stereoImage);
+    /*void setStereoImage(StereoImage* stereoImage);
     void setStereoParametres(StereoParametres* stereoParametres);
 
     StereoImage* getStereoImage();
-    StereoParametres* getStereoParametres();
+    StereoParametres* getStereoParametres();*/
 
-    StereoImage* undistortStereoImage();
-    void triangulate();
+    StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void drawCirclesPattern();
 
 private:
-    StereoImage* stereoImage;
-    StereoParametres* stereoParametres;
+    //StereoImage* stereoImage;
+    //StereoParametres* stereoParametres;
 };
 
 }

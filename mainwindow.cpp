@@ -54,12 +54,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     camera3d = new Camera3D();
     stereoImage = new StereoImage();
+    stereoImage1 = new StereoImage();
+    stereoImage2 = new StereoImage();
+    stereoImage3 = new StereoImage();
     stereoParametres = new StereoParametres();
     ioData = new IOData();
     ioData->loadStereoParametres("data.txt", stereoParametres);
     stereoParametres->print();
     stereoProcessing = new StereoProcessing();
-    stereoProcessing->setStereoParametres(stereoParametres);
+    //stereoProcessing->setStereoParametres(stereoParametres);
 
     isStarted = false;
 
@@ -117,8 +120,9 @@ void MainWindow::on_pushButton_clicked()
 
     if (!isStarted) {
         loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
-        stereoProcessing->setStereoImage(stereoImage);
-        showStereoImage();
+        //stereoProcessing->setStereoImage(stereoImage);
+        calcStereoImages();
+        showStereoImages();
 
         //stereoscopy->startCapture();
         //stereoscopy->checkUndistortFromCapture();
@@ -169,7 +173,7 @@ void MainWindow::on_pushButton_clicked()
         //camera3d->stopCapture();
 
         //BUG!!! sometimes not update labels
-        showStereoImage();
+        showStereoImages();
     }
     /*stereoscopy->startCapture();
     stereoscopy->showImagesFromCameras();
@@ -183,10 +187,16 @@ void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
     stereoImage->setImages(image1, image2);
 }
 
-void MainWindow::showStereoImage() {
+void MainWindow::calcStereoImages() {
+    stereoImage1 = stereoImage;
+    stereoImage2 = stereoProcessing->undistortStereoImage(stereoImage, stereoParametres);
+    stereoImage3 = stereoImage;
+}
+
+void MainWindow::showStereoImages() {
     if (!stereoImage->isEmpty()) {
-        Mat image1 = stereoImage->getLeft();
-        Mat image2 = stereoImage->getRight();
+        //Mat image1 = stereoImage->getLeft();
+        //Mat image2 = stereoImage->getRight();
         Size size;
         //qDebug() << ui->label_11->width() << ui->label_11->height();
         if ((double)ui->label_11->width() / ui->label_11->height() < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
@@ -195,30 +205,48 @@ void MainWindow::showStereoImage() {
             size = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
         }
 
-        cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
-        cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
+
 
         //BUG!!! sometimes not update labels
 
         if (isShowingStereoImage1) {
+            Mat image1 = stereoImage1->getLeft();
+            Mat image2 = stereoImage1->getRight();
+
+            cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
+            cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
+
             ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
             ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
         }
 
         if (isShowingStereoImage2) {
-            StereoImage *undistortStereoImage = new StereoImage();
+            /*StereoImage *undistortStereoImage = new StereoImage();
             undistortStereoImage = stereoProcessing->undistortStereoImage();
 
             Mat uimage1 = undistortStereoImage->getLeft();
             Mat uimage2 = undistortStereoImage->getRight();
 
             cv::resize(uimage1, uimage1, size, 0, 0, CV_INTER_LINEAR);
-            cv::resize(uimage2, uimage2, size, 0, 0, CV_INTER_LINEAR);
+            cv::resize(uimage2, uimage2, size, 0, 0, CV_INTER_LINEAR);*/
 
-            ui->label_13->setPixmap(ASM::cvMatToQPixmap(uimage1));
-            ui->label_14->setPixmap(ASM::cvMatToQPixmap(uimage2));
+            Mat image1 = stereoImage2->getLeft();
+            Mat image2 = stereoImage2->getRight();
+
+            cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
+            cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
+
+            ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
+            ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
         }
         if (isShowingStereoImage3) {
+
+            Mat image1 = stereoImage3->getLeft();
+            Mat image2 = stereoImage3->getRight();
+
+            cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
+            cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
+
             ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
             ui->label_16->setPixmap(ASM::cvMatToQPixmap(image2));
         }
@@ -227,11 +255,11 @@ void MainWindow::showStereoImage() {
 
 void MainWindow::resizeEvent(QResizeEvent* event) {
    QMainWindow::resizeEvent(event);
-   showStereoImage();
+   showStereoImages();
 }
 
 void MainWindow::resizeDone() {
-   showStereoImage();
+   showStereoImages();
    qDebug() << "resizeDone";
 }
 
@@ -241,7 +269,7 @@ void MainWindow::setIsShowingStereoImage1(bool value) {
     ui->groupBox->setVisible(value);
     //ui->label_11->setVisible(value);
     //ui->label_12->setVisible(value);
-    showStereoImage();
+    showStereoImages();
 }
 
 void MainWindow::setIsShowingStereoImage2(bool value) {
@@ -250,7 +278,7 @@ void MainWindow::setIsShowingStereoImage2(bool value) {
     ui->groupBox_2->setVisible(value);
     //ui->label_13->setVisible(value);
     //ui->label_14->setVisible(value);
-    showStereoImage();
+    showStereoImages();
 }
 
 void MainWindow::setIsShowingStereoImage3(bool value) {
@@ -259,6 +287,6 @@ void MainWindow::setIsShowingStereoImage3(bool value) {
     ui->groupBox_3->setVisible(value);
     //ui->label_15->setVisible(value);
     //ui->label_16->setVisible(value);
-    showStereoImage();
+    showStereoImages();
 
 }

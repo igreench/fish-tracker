@@ -53,13 +53,17 @@ private:
 
     Camera3D *camera3d;
     StereoImage *stereoImage;
+    StereoImage *stereoImage1;
+    StereoImage *stereoImage2;
+    StereoImage *stereoImage3;
     StereoParametres *stereoParametres;
     StereoProcessing *stereoProcessing;
     DisparityMap *disparityMap;
     IOData *ioData;
 
     void loadLocalStereoImage(string fn1, string fn2);
-    void showStereoImage();
+    void calcStereoImages();
+    void showStereoImages();
 
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;

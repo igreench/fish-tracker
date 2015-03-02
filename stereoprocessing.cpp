@@ -18,7 +18,7 @@ using namespace cv;
 StereoProcessing::StereoProcessing()
 {
 }
-
+/*
 void StereoProcessing::setStereoImage(StereoImage* stereoImage) {
     this->stereoImage = stereoImage;
 }
@@ -34,8 +34,9 @@ StereoImage* StereoProcessing::getStereoImage() {
 StereoParametres* StereoProcessing::getStereoParametres() {
     return stereoParametres;
 }
+*/
 
-StereoImage* StereoProcessing::undistortStereoImage() {
+StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     StereoImage* undistortStereoImage = new StereoImage();
     Mat left, right;
     qDebug() << "start undistort";
@@ -48,7 +49,7 @@ StereoImage* StereoProcessing::undistortStereoImage() {
     return undistortStereoImage;
 }
 
-void StereoProcessing::triangulate() {
+void StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft();
     Mat image2 = stereoImage->getRight();
 
