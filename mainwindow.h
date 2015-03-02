@@ -40,7 +40,6 @@ public slots:
 
 protected:
     void resizeEvent(QResizeEvent* event);
-    void resizeDone();
 
 private slots:
     void on_pushButton_clicked();
@@ -75,6 +74,7 @@ private:
     void showStereoImage(StereoImage *stereoImage, int countView);
     void showStereoImages();
 
+    Size sizeStereoImage(int w, int h);
     void updateDisparityMap();
 
     bool isShowingStereoImage1;

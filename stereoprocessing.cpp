@@ -49,7 +49,80 @@ StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, St
     return undistortStereoImage;
 }
 
-void StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft();
+    Mat image2 = stereoImage->getRight();
+
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    vector<Point2f> corners1, corners2;
+
+    Mat scres;
+
+    if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres)) {
+
+        vector<vector<Point3f> > objectPoints;
+        vector<vector<Point2f> > imagePoints1;
+        vector<vector<Point2f> > imagePoints2;
+
+        imagePoints1.push_back(corners1);
+        imagePoints2.push_back(corners2);
+
+        int n = BOARD_WIDTH * BOARD_HEIGHT;
+        vector<Point3f> obj;
+        for (int j = 0; j < n; j++) {
+            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+        }
+        objectPoints.push_back(obj);
+
+        /*qDebug() << "imagePoints1 size:" << imagePoints1.size();
+        qDebug() << "imagePoints2 size:" << imagePoints2.size();
+        qDebug() << "corners1 size:" << corners1.size();
+        qDebug() << "corners2 size:" << corners2.size();
+        qDebug() << "objectPoints size:" << objectPoints.size();
+        qDebug() << "obj size:" << obj.size();*/
+
+        qDebug() << "Done creation objectPoints";
+
+        vector<Point2f> imagePoints;
+
+        vector<Mat> rvecs1, tvecs1;
+        vector<Mat> rvecs2, tvecs2;
+        calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+
+        qDebug() << "cameraMatrix1: " << matToString(cameraMatrix1);
+        qDebug() << "distCoeffs1: " << matToString(distCoeffs1);
+
+        cv::projectPoints(Mat(obj), rvecs1[0], tvecs1[0], cameraMatrix1, distCoeffs1, imagePoints);
+
+        /*Size pattern_size = Size(BOARD_WIDTH, BOARD_HEIGHT);
+        drawChessboardCorners(image1_1, pattern_size, imagePoints1, true);*/
+
+        for(unsigned int i = 0; i < imagePoints.size(); ++i) {
+            circle(image1, Point2d(imagePoints[i].x, imagePoints[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
+            //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+        }
+        return image1;
+    }
+    qDebug() << "StereoProcessing::projectPoints: didn't find calibration desks";
+    return stereoImage->getLeft();
+}
+
+StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    //TODO
+    return stereoImage;
+}
+
+Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    //TODO
+    return stereoImage->getLeft();
+}
+
+StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft();
     Mat image2 = stereoImage->getRight();
 
@@ -68,11 +141,11 @@ void StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* s
 
     //Start
 
-    bool isShowImages = true;
-    bool isShowUImages = true;
-    bool isShowTImages = true;
-    bool isShowDImages = true;
-    bool isShowCImages = true;
+    bool isShowImages = false;
+    bool isShowUImages = false;
+    bool isShowTImages = false;
+    bool isShowDImages = false;
+    bool isShowCImages = false;
 
     Mat rimage1, rimage2;
 
@@ -173,6 +246,8 @@ void StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* s
         imshow("cdrawing2", rimage2);
     }
 
+    return new StereoImage(drawing1, drawing2); //?
+
     undistortPoints(mc1, mc1, cameraMatrix1, distCoeffs1);
     undistortPoints(mc2, mc2, cameraMatrix2, distCoeffs2);
 
@@ -196,22 +271,16 @@ void StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* s
     qDebug() << x << ", " << y << ", " << z;
 }
 
-void StereoProcessing::drawCirclesPattern() {
+Mat StereoProcessing::circlesPattern() {
     Mat image(1792, 1600, CV_8UC3);
-    //Mat image(400, 400, CV_8UC3);
     image.setTo(Scalar(255, 255, 255));
     int n = 9;
     int m = 8;
     int r = 64;
-    //int r = 10;
     for (int i = 0; i < (n + 1) * m; i++) {
         circle(image, Point((i % m) * (3 * r) + 2 * r, (i / n) * (3 * r) + 2 * r), r, Scalar(0, 0, 0), -1);
     }
-    imwrite( "pattern.jpg", image );
-    qDebug() << "cols: " << image.cols << " rows: " << image.rows;
-    resize(image, image, Size(image.cols / 4, image.rows / 4), 0, 0, CV_INTER_LINEAR);
-    qDebug() << "cols: " << image.cols << " rows: " << image.rows;
-    imshow("image", image);
+    return image;
 }
 
 bool StereoProcessing::addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result) {

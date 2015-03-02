@@ -164,12 +164,12 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_pushButton_clicked() {
     if (!isStarted) {
-        loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
+        //loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
+        loadLocalStereoImage("image1.jpg", "image2.jpg");
         calcStereoImages();
         showStereoImages();
         isStarted = true;
     } else {
-        //BUG!!! sometimes not update labels
         showStereoImages();
     }
 }
@@ -182,21 +182,27 @@ void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
 }
 
 StereoImage *MainWindow::currentStereoImage(int countMode) {
+    Mat image;
     switch(countMode) {
         case 0:
         return stereoImage;
         case 1:
         return stereoProcessing->undistortStereoImage(stereoImage, stereoParametres);
         case 2:
-        return stereoImage;
+        //BUG! projectPoints by init
+        //BUG! projectPoints changing stereoImage
+        image = stereoProcessing->projectPoints(stereoImage, stereoParametres);
+        return new StereoImage(image, image);
         case 3:
-        return stereoImage;
+        return stereoProcessing->undistortRectify(stereoImage, stereoParametres);
         case 4:
-        return stereoImage;
+        image = stereoProcessing->disparityMap(stereoImage, stereoParametres);
+        return new StereoImage(image, image);
         case 5:
-        return stereoImage;
+        return stereoProcessing->triangulate(stereoImage, stereoParametres);
         case 6:
-        return stereoImage;
+        image = stereoProcessing->circlesPattern();
+        return new StereoImage(image, image);
     }
     return stereoImage;
 }
@@ -212,8 +218,11 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
     Mat image1 = stereoImage->getLeft();
     Mat image2 = stereoImage->getRight();
 
-    cv::resize(image1, image1, currentSizeStereoImage, 0, 0, CV_INTER_LINEAR);
-    cv::resize(image2, image2, currentSizeStereoImage, 0, 0, CV_INTER_LINEAR);
+    //BUG! incorrect size
+    Size size = sizeStereoImage(ui->label_11->width(), ui->label_11->height());
+
+    cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
+    cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
 
     if (1 == countView) {
         ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
@@ -231,9 +240,6 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
 
 void MainWindow::showStereoImages() {
     if (!stereoImage->isEmpty()) {
-        resizeDone();
-
-        //BUG!!! sometimes not update labels
         if (isShowingStereoImage1) {
             showStereoImage(stereoImage1, 1);
         }
@@ -251,12 +257,11 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
    showStereoImages();
 }
 
-void MainWindow::resizeDone() {
-   if ((double)ui->label_11->width() / ui->label_11->height() < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
-       currentSizeStereoImage = Size(ui->label_11->width(), ui->label_11->width() * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
-   } else {
-       currentSizeStereoImage = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
+Size MainWindow::sizeStereoImage(int w, int h) {
+   if ((double)w / h < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
+       return currentSizeStereoImage = Size(w, w * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
    }
+   return currentSizeStereoImage = Size(h * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, h);
 }
 
 void MainWindow::setIsShowingStereoImage(bool value) {

@@ -15,8 +15,12 @@ class StereoProcessing {
 public:
     StereoProcessing();
     StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void drawCirclesPattern();
+    Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    StereoImage* undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    StereoImage* triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    Mat circlesPattern();
+
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
 
 private:
