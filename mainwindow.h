@@ -61,9 +61,15 @@ private:
     DisparityMap *disparityMap;
     IOData *ioData;
 
+    Size currentSizeStereoImage;
+
     void loadLocalStereoImage(string fn1, string fn2);
+    StereoImage *currentStereoImage(int countMode);
     void calcStereoImages();
+    void showStereoImage(StereoImage *stereoImage, int countView);
     void showStereoImages();
+
+    void updateDisparityMap();
 
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;

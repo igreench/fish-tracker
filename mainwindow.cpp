@@ -115,12 +115,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-
+void MainWindow::on_pushButton_clicked() {
     if (!isStarted) {
         loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
-        //stereoProcessing->setStereoImage(stereoImage);
         calcStereoImages();
         showStereoImages();
 
@@ -187,68 +184,67 @@ void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
     stereoImage->setImages(image1, image2);
 }
 
+StereoImage *MainWindow::currentStereoImage(int countMode) {
+    switch(countMode) {
+        case 0:
+        return stereoImage;
+        case 1:
+        return stereoProcessing->undistortStereoImage(stereoImage, stereoParametres);
+        case 2:
+        return stereoImage;
+        case 3:
+        return stereoImage;
+    }
+    return stereoImage;
+}
+
 void MainWindow::calcStereoImages() {
-    stereoImage1 = stereoImage;
-    stereoImage2 = stereoProcessing->undistortStereoImage(stereoImage, stereoParametres);
-    stereoImage3 = stereoImage;
+    stereoImage1 = currentStereoImage(0);
+    stereoImage2 = currentStereoImage(1);
+    stereoImage3 = currentStereoImage(2);
+}
+
+void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
+    Mat image1 = stereoImage->getLeft();
+    Mat image2 = stereoImage->getRight();
+
+    cv::resize(image1, image1, currentSizeStereoImage, 0, 0, CV_INTER_LINEAR);
+    cv::resize(image2, image2, currentSizeStereoImage, 0, 0, CV_INTER_LINEAR);
+
+    if (1 == countView) {
+        ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
+        ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
+    }
+    if (2 == countView) {
+        ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
+        ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
+    }
+    if (3 == countView) {
+        ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
+        ui->label_16->setPixmap(ASM::cvMatToQPixmap(image2));
+    }
 }
 
 void MainWindow::showStereoImages() {
     if (!stereoImage->isEmpty()) {
         //Mat image1 = stereoImage->getLeft();
         //Mat image2 = stereoImage->getRight();
-        Size size;
         //qDebug() << ui->label_11->width() << ui->label_11->height();
         if ((double)ui->label_11->width() / ui->label_11->height() < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
-            size = Size(ui->label_11->width(), ui->label_11->width() * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
+            currentSizeStereoImage = Size(ui->label_11->width(), ui->label_11->width() * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
         } else {
-            size = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
+            currentSizeStereoImage = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
         }
-
-
 
         //BUG!!! sometimes not update labels
-
         if (isShowingStereoImage1) {
-            Mat image1 = stereoImage1->getLeft();
-            Mat image2 = stereoImage1->getRight();
-
-            cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
-            cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
-
-            ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
-            ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
+            showStereoImage(stereoImage1, 1);
         }
-
         if (isShowingStereoImage2) {
-            /*StereoImage *undistortStereoImage = new StereoImage();
-            undistortStereoImage = stereoProcessing->undistortStereoImage();
-
-            Mat uimage1 = undistortStereoImage->getLeft();
-            Mat uimage2 = undistortStereoImage->getRight();
-
-            cv::resize(uimage1, uimage1, size, 0, 0, CV_INTER_LINEAR);
-            cv::resize(uimage2, uimage2, size, 0, 0, CV_INTER_LINEAR);*/
-
-            Mat image1 = stereoImage2->getLeft();
-            Mat image2 = stereoImage2->getRight();
-
-            cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
-            cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
-
-            ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
-            ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
+            showStereoImage(stereoImage2, 2);
         }
         if (isShowingStereoImage3) {
-
-            Mat image1 = stereoImage3->getLeft();
-            Mat image2 = stereoImage3->getRight();
-
-            cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
-            cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);
-
-            ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
-            ui->label_16->setPixmap(ASM::cvMatToQPixmap(image2));
+            showStereoImage(stereoImage3, 3);
         }
     }
 }
@@ -288,5 +284,17 @@ void MainWindow::setIsShowingStereoImage3(bool value) {
     //ui->label_15->setVisible(value);
     //ui->label_16->setVisible(value);
     showStereoImages();
+}
 
+void MainWindow::updateDisparityMap() {
+    disparityMap->sgbm.SADWindowSize = ui->spinBox->value();
+    disparityMap->sgbm.numberOfDisparities = ui->spinBox_2->value();
+    disparityMap->sgbm.preFilterCap = ui->spinBox_3->value();
+    disparityMap->sgbm.minDisparity = ui->spinBox_4->value();
+    disparityMap->sgbm.uniquenessRatio = ui->spinBox_5->value();
+    disparityMap->sgbm.speckleWindowSize = ui->spinBox_6->value();
+    disparityMap->sgbm.speckleRange = ui->spinBox_7->value();
+    disparityMap->sgbm.disp12MaxDiff = ui->spinBox_8->value();
+    disparityMap->sgbm.P1 = ui->spinBox_9->value();
+    disparityMap->sgbm.P2 = ui->spinBox_10->value();
 }
