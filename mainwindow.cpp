@@ -74,13 +74,54 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     isShowingStereoImage2 = true;
     isShowingStereoImage3 = false;
 
-    stereoViews.push_back(new StereoView(1));
-    stereoViews.push_back(new StereoView(2));
-    stereoViews.push_back(new StereoView(3));
+    QStringList commands;
+    commands.append("Original");
+    commands.append("Undistort");
+    commands.append("UndistortRectify");
+
+    int n = 3;
+    for (int i = 0; i < n; i++) {
+
+        QMenu *menu;
+        vector< QAction* > actions;
+
+        QActionGroup* group = new QActionGroup( this );
+
+        for (int j = 0; j < commands.size(); j++) {
+            QString name = commands[j];
+            QAction *action = new QAction(name, this);
+            action->setData(QString::number(i) + ";" + QString::number(j));
+            /*StereoViewCounts *a;
+            a->countMode = i;
+            a->countView = j;
+            action->setData(a);*/
+            connect(action, SIGNAL(triggered()), this, SLOT(setStereoViewMode(/*i, j*/)));
+            actions.push_back(action);
+        }
+
+        /*ui->actionTest1->setCheckable(true);
+        ui->actionTest2->setCheckable(true);
+        ui->actionTest3->setCheckable(true);
+
+        ui->actionTest1->setActionGroup(group);
+        ui->actionTest2->setActionGroup(group);
+        ui->actionTest3->setActionGroup(group);*/
+
+        //menu = menuBar()->addMenu(tr("&File"));
+        menu = new QMenu("View" + QString::number(i));
+        for (int i = 0; i < actions.size(); i++) {
+            menu->addAction(actions[i]);
+        }
+
+        menuBar()->addMenu(menu);
+    }
+    /*stereoViews.push_back(new StereoView(1, commands));
+    stereoViews.push_back(new StereoView(2, commands));
+    stereoViews.push_back(new StereoView(3, commands));
 
     for (int i = 0; i < stereoViews.size(); i++) {
         menuBar()->addMenu(stereoViews[i]->menu);
-    }
+    }*/
 
     //ui->label_15->setVisible(false);
     //ui->label_16->setVisible(false);
@@ -312,17 +353,32 @@ void MainWindow::updateDisparityMap() {
     disparityMap->sgbm.P2 = ui->spinBox_10->value();
 }
 
-void MainWindow::setStereoViewMode(int countView, int countMode) {
+void MainWindow::setStereoViewMode(/*int countView, int countMode*/) {
     //TODO
+    //qDebug() << "countView: " << countView;
+    //qDebug() << "countMode: " << countMode;
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action) {
+        QString url = action->data().toString();
+        //do something with the url
+        qDebug() << url;
+    }
 }
 
-StereoView::StereoView(int countView) {
+StereoView::StereoView(int countView, QStringList commands) {
     this->countView = countView;
     QActionGroup* group = new QActionGroup( this );
 
     actions.push_back(new QAction(tr("&New"), this));
     actions.push_back(new QAction(tr("&We"), this));
     actions.push_back(new QAction(tr("&RE"), this));
+
+    for (int i = 0; i < commands.size(); i++) {
+        /*QString name = commands[i];
+        QAction *action = new QAction(name, );
+        connect(action, SIGNAL(triggered()), MainWindow, SLOT(setStereoViewMode(countView, i)));
+        actions.push_back(action);*/
+    }
 
     /*ui->actionTest1->setCheckable(true);
     ui->actionTest2->setCheckable(true);

@@ -16,12 +16,17 @@ namespace Ui {
 class MainWindow;
 }
 
+struct StereoViewCounts {
+    int countView;
+    int countMode;
+};
+
 class StereoView : public QObject
 {
     Q_OBJECT
 
 public:
-    StereoView(int countView);
+    StereoView(int countView, QStringList commands);
 
     QMenu *menu;
     vector< QAction* > actions;
@@ -49,6 +54,8 @@ public slots:
     void setSgbmP1(int value);
     void setSgbmP2(int value);
 
+    void setStereoViewMode(/*int countView, int countMode*/);
+
 protected:
     void resizeEvent(QResizeEvent* event);
     void resizeDone();
@@ -60,7 +67,7 @@ private slots:
     void setIsShowingStereoImage2(bool value);
     void setIsShowingStereoImage3(bool value);
 
-    void setStereoViewMode(int countView, int countMode);
+
 
 private:
     Ui::MainWindow *ui;
