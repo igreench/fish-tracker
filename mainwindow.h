@@ -10,10 +10,24 @@
 #include "iodata.h"
 
 using namespace stereo;
+using namespace std;
 
 namespace Ui {
 class MainWindow;
 }
+
+class StereoView : public QObject
+{
+    Q_OBJECT
+
+public:
+    StereoView(int countView);
+
+    QMenu *menu;
+    vector< QAction* > actions;
+private:
+    int countView;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -46,6 +60,8 @@ private slots:
     void setIsShowingStereoImage2(bool value);
     void setIsShowingStereoImage3(bool value);
 
+    void setStereoViewMode(int countView, int countMode);
+
 private:
     Ui::MainWindow *ui;
 
@@ -56,11 +72,15 @@ private:
     StereoImage *stereoImage1;
     StereoImage *stereoImage2;
     StereoImage *stereoImage3;
+
     StereoParametres *stereoParametres;
     StereoProcessing *stereoProcessing;
     DisparityMap *disparityMap;
     IOData *ioData;
 
+    int countMode1;
+    int countMode2;
+    int countMode3;
     Size currentSizeStereoImage;
 
     void loadLocalStereoImage(string fn1, string fn2);
@@ -74,6 +94,8 @@ private:
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;
     bool isShowingStereoImage3;
+
+    vector< StereoView* > stereoViews;
 };
 
 #endif // MAINWINDOW_H

@@ -64,11 +64,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     stereoProcessing = new StereoProcessing();
     //stereoProcessing->setStereoParametres(stereoParametres);
 
+    countMode1 = 0;
+    countMode2 = 1;
+    countMode3 = 2;
+
     isStarted = false;
 
     isShowingStereoImage1 = true;
     isShowingStereoImage2 = true;
     isShowingStereoImage3 = false;
+
+    stereoViews.push_back(new StereoView(1));
+    stereoViews.push_back(new StereoView(2));
+    stereoViews.push_back(new StereoView(3));
+
+    for (int i = 0; i < stereoViews.size(); i++) {
+        menuBar()->addMenu(stereoViews[i]->menu);
+    }
 
     //ui->label_15->setVisible(false);
     //ui->label_16->setVisible(false);
@@ -198,10 +210,11 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
     return stereoImage;
 }
 
+//Am I need in StereoView class?
 void MainWindow::calcStereoImages() {
-    stereoImage1 = currentStereoImage(0);
-    stereoImage2 = currentStereoImage(1);
-    stereoImage3 = currentStereoImage(2);
+    stereoImage1 = currentStereoImage(countMode1);
+    stereoImage2 = currentStereoImage(countMode2);
+    stereoImage3 = currentStereoImage(countMode3);
 }
 
 void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
@@ -297,4 +310,31 @@ void MainWindow::updateDisparityMap() {
     disparityMap->sgbm.disp12MaxDiff = ui->spinBox_8->value();
     disparityMap->sgbm.P1 = ui->spinBox_9->value();
     disparityMap->sgbm.P2 = ui->spinBox_10->value();
+}
+
+void MainWindow::setStereoViewMode(int countView, int countMode) {
+    //TODO
+}
+
+StereoView::StereoView(int countView) {
+    this->countView = countView;
+    QActionGroup* group = new QActionGroup( this );
+
+    actions.push_back(new QAction(tr("&New"), this));
+    actions.push_back(new QAction(tr("&We"), this));
+    actions.push_back(new QAction(tr("&RE"), this));
+
+    /*ui->actionTest1->setCheckable(true);
+    ui->actionTest2->setCheckable(true);
+    ui->actionTest3->setCheckable(true);
+
+    ui->actionTest1->setActionGroup(group);
+    ui->actionTest2->setActionGroup(group);
+    ui->actionTest3->setActionGroup(group);*/
+
+    //menu = menuBar()->addMenu(tr("&File"));
+    menu = new QMenu("View" + QString::number(countView));
+    for (int i = 0; i < actions.size(); i++) {
+        menu->addAction(actions[i]);
+    }
 }
