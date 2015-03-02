@@ -52,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this->ui->spinBox_9, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP1(int)));
     connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));*/
 
+    ui->groupBox_3->setVisible(false);
+    isStarted = false;
     camera3d = new Camera3D();
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
@@ -62,18 +64,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ioData->loadStereoParametres("data.txt", stereoParametres);
     stereoParametres->print();
     stereoProcessing = new StereoProcessing();
-    //stereoProcessing->setStereoParametres(stereoParametres);
-
     countMode1 = 0;
     countMode2 = 1;
     countMode3 = 2;
-
-    isStarted = false;
-
     isShowingStereoImage1 = true;
     isShowingStereoImage2 = true;
     isShowingStereoImage3 = false;
+    createMenu();
+}
 
+void MainWindow::createMenu() {
     QStringList commands;
     commands.append("Original");
     commands.append("Undistort");
@@ -81,76 +81,39 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     int n = 3;
     for (int i = 0; i < n; i++) {
-
         QMenu *menu = new QMenu("View" + QString::number(i + 1));
-
-
         QAction *action = new QAction("Enabled", this);
         action->setCheckable(true);
-
         if (i < 2) {
             action->setChecked(true);
         }
         action->setData(QString::number(i));
-
         connect(action, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage(bool)));
-
         menu->addAction(action);
         menu->addSeparator();
-
         QActionGroup* group = new QActionGroup( this );
-
         vector< QAction* > actions;
         for (int j = 0; j < commands.size(); j++) {
             QString name = commands[j];
             QAction *action = new QAction(name, this);
             action->setCheckable(true);
-            if (0 == j) {
+            if (1 != i && 0 == j) {
+                action->setChecked(true);
+            }
+            if (1 == i && 1 == j) {
                 action->setChecked(true);
             }
             action->setActionGroup(group);
             action->setData(QString::number(i) + ";" + QString::number(j));
-            /*StereoViewCounts *a;
-            a->countMode = i;
-            a->countView = j;
-            action->setData(a);*/
-            connect(action, SIGNAL(triggered()), this, SLOT(setStereoViewMode(/*i, j*/)));
+            connect(action, SIGNAL(triggered()), this, SLOT(setStereoViewMode()));
             actions.push_back(action);
         }
-
-        /*ui->actionTest1->setCheckable(true);
-        ui->actionTest2->setCheckable(true);
-        ui->actionTest3->setCheckable(true);
-
-        ui->actionTest1->setActionGroup(group);
-        ui->actionTest2->setActionGroup(group);
-        ui->actionTest3->setActionGroup(group);*/
-
-        //menu = menuBar()->addMenu(tr("&File"));
-
+        //Why two fors?
         for (int i = 0; i < actions.size(); i++) {
             menu->addAction(actions[i]);
         }
-
         menuBar()->addMenu(menu);
     }
-
-
-    /*stereoViews.push_back(new StereoView(1, commands));
-    stereoViews.push_back(new StereoView(2, commands));
-    stereoViews.push_back(new StereoView(3, commands));
-
-    for (int i = 0; i < stereoViews.size(); i++) {
-        menuBar()->addMenu(stereoViews[i]->menu);
-    }*/
-
-    //ui->label_15->setVisible(false);
-    //ui->label_16->setVisible(false);
-    ui->groupBox_3->setVisible(false);
-
-    connect(this->ui->actionVisible1, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage1(bool)));
-    connect(this->ui->actionVisible2, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage2(bool)));
-    connect(this->ui->actionVisible3, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage3(bool)));
 }
 
 void MainWindow::setSgbmSADWindowSize(int value) {
@@ -224,17 +187,6 @@ void MainWindow::on_pushButton_clicked() {
 
         isStarted = true;
     } else {
-        /*disparityMap->sgbm.SADWindowSize = ui->spinBox->value();
-        disparityMap->sgbm.numberOfDisparities = ui->spinBox_2->value();
-        disparityMap->sgbm.preFilterCap = ui->spinBox_3->value();
-        disparityMap->sgbm.minDisparity = ui->spinBox_4->value();
-        disparityMap->sgbm.uniquenessRatio = ui->spinBox_5->value();
-        disparityMap->sgbm.speckleWindowSize = ui->spinBox_6->value();
-        disparityMap->sgbm.speckleRange = ui->spinBox_7->value();
-        disparityMap->sgbm.disp12MaxDiff = ui->spinBox_8->value();
-        disparityMap->sgbm.P1 = ui->spinBox_9->value();
-        disparityMap->sgbm.P2 = ui->spinBox_10->value();*/
-
         //stereoscopy->showDisparityMap();
         //stereoscopy->checkDisparityMapFromCapture2();
         //stereoscopy->checkUndistortFromCapture();
@@ -338,8 +290,7 @@ void MainWindow::setIsShowingStereoImage(bool value) {
     QAction* action = qobject_cast<QAction*>(sender());
     if (action) {
         QString data = action->data().toString();
-        //do something with the url
-        qDebug() << data;
+        //qDebug() << data;
         QStringList list = data.split(";");
         if (0 == list[0].toInt()) {
             isShowingStereoImage1 = value;
@@ -359,33 +310,6 @@ void MainWindow::setIsShowingStereoImage(bool value) {
     }
 }
 
-void MainWindow::setIsShowingStereoImage1(bool value) {
-    //qDebug() << value;
-    isShowingStereoImage1 = value;
-    ui->groupBox->setVisible(value);
-    //ui->label_11->setVisible(value);
-    //ui->label_12->setVisible(value);
-    showStereoImages();
-}
-
-void MainWindow::setIsShowingStereoImage2(bool value) {
-    //qDebug() << value;
-    isShowingStereoImage2 = value;
-    ui->groupBox_2->setVisible(value);
-    //ui->label_13->setVisible(value);
-    //ui->label_14->setVisible(value);
-    showStereoImages();
-}
-
-void MainWindow::setIsShowingStereoImage3(bool value) {
-    qDebug() << value;
-    isShowingStereoImage3 = value;
-    ui->groupBox_3->setVisible(value);
-    //ui->label_15->setVisible(value);
-    //ui->label_16->setVisible(value);
-    showStereoImages();
-}
-
 void MainWindow::updateDisparityMap() {
     disparityMap->sgbm.SADWindowSize = ui->spinBox->value();
     disparityMap->sgbm.numberOfDisparities = ui->spinBox_2->value();
@@ -399,15 +323,11 @@ void MainWindow::updateDisparityMap() {
     disparityMap->sgbm.P2 = ui->spinBox_10->value();
 }
 
-void MainWindow::setStereoViewMode(/*int countView, int countMode*/) {
-    //TODO
-    //qDebug() << "countView: " << countView;
-    //qDebug() << "countMode: " << countMode;
+void MainWindow::setStereoViewMode() {
     QAction* action = qobject_cast<QAction*>(sender());
     if (action) {
         QString data = action->data().toString();
-        //do something with the url
-        qDebug() << data;
+        //qDebug() << data;
         QStringList list = data.split(";");
         if (0 == list[0].toInt()) {
             countMode1 = list[1].toInt();
@@ -430,36 +350,5 @@ void MainWindow::setStereoViewMode(/*int countView, int countMode*/) {
                 showStereoImage(stereoImage2, 2);
             }
         }
-
-    }
-}
-
-StereoView::StereoView(int countView, QStringList commands) {
-    this->countView = countView;
-    QActionGroup* group = new QActionGroup( this );
-
-    actions.push_back(new QAction(tr("&New"), this));
-    actions.push_back(new QAction(tr("&We"), this));
-    actions.push_back(new QAction(tr("&RE"), this));
-
-    for (int i = 0; i < commands.size(); i++) {
-        /*QString name = commands[i];
-        QAction *action = new QAction(name, );
-        connect(action, SIGNAL(triggered()), MainWindow, SLOT(setStereoViewMode(countView, i)));
-        actions.push_back(action);*/
-    }
-
-    /*ui->actionTest1->setCheckable(true);
-    ui->actionTest2->setCheckable(true);
-    ui->actionTest3->setCheckable(true);
-
-    ui->actionTest1->setActionGroup(group);
-    ui->actionTest2->setActionGroup(group);
-    ui->actionTest3->setActionGroup(group);*/
-
-    //menu = menuBar()->addMenu(tr("&File"));
-    menu = new QMenu("View" + QString::number(countView));
-    for (int i = 0; i < actions.size(); i++) {
-        menu->addAction(actions[i]);
     }
 }

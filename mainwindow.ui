@@ -577,28 +577,7 @@
     <addaction name="actionLoad"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuView1">
-    <property name="title">
-     <string>View1</string>
-    </property>
-    <addaction name="actionVisible1"/>
-   </widget>
-   <widget class="QMenu" name="menuView2">
-    <property name="title">
-     <string>View2</string>
-    </property>
-    <addaction name="actionVisible2"/>
-   </widget>
-   <widget class="QMenu" name="menuView3">
-    <property name="title">
-     <string>View3</string>
-    </property>
-    <addaction name="actionVisible3"/>
-   </widget>
    <addaction name="menuMenu"/>
-   <addaction name="menuView1"/>
-   <addaction name="menuView2"/>
-   <addaction name="menuView3"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
