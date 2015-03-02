@@ -82,14 +82,33 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     int n = 3;
     for (int i = 0; i < n; i++) {
 
-        QMenu *menu;
-        vector< QAction* > actions;
+        QMenu *menu = new QMenu("View" + QString::number(i + 1));
+
+
+        QAction *action = new QAction("Enabled", this);
+        action->setCheckable(true);
+
+        if (i < 2) {
+            action->setChecked(true);
+        }
+        action->setData(QString::number(i));
+
+        connect(action, SIGNAL(triggered(bool)), this, SLOT(setIsShowingStereoImage(bool)));
+
+        menu->addAction(action);
+        menu->addSeparator();
 
         QActionGroup* group = new QActionGroup( this );
 
+        vector< QAction* > actions;
         for (int j = 0; j < commands.size(); j++) {
             QString name = commands[j];
             QAction *action = new QAction(name, this);
+            action->setCheckable(true);
+            if (0 == j) {
+                action->setChecked(true);
+            }
+            action->setActionGroup(group);
             action->setData(QString::number(i) + ";" + QString::number(j));
             /*StereoViewCounts *a;
             a->countMode = i;
@@ -108,13 +127,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionTest3->setActionGroup(group);*/
 
         //menu = menuBar()->addMenu(tr("&File"));
-        menu = new QMenu("View" + QString::number(i));
+
         for (int i = 0; i < actions.size(); i++) {
             menu->addAction(actions[i]);
         }
 
         menuBar()->addMenu(menu);
     }
+
+
     /*stereoViews.push_back(new StereoView(1, commands));
     stereoViews.push_back(new StereoView(2, commands));
     stereoViews.push_back(new StereoView(3, commands));
@@ -313,6 +334,31 @@ void MainWindow::resizeDone() {
    qDebug() << "resizeDone";
 }
 
+void MainWindow::setIsShowingStereoImage(bool value) {
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action) {
+        QString data = action->data().toString();
+        //do something with the url
+        qDebug() << data;
+        QStringList list = data.split(";");
+        if (0 == list[0].toInt()) {
+            isShowingStereoImage1 = value;
+            ui->groupBox->setVisible(value);
+        }
+        if (1 == list[0].toInt()) {
+            isShowingStereoImage3 = value;
+            ui->groupBox_3->setVisible(value);
+        }
+        if (2 == list[0].toInt()) {
+            isShowingStereoImage3 = value;
+            ui->groupBox_3->setVisible(value);
+        }
+        if (isStarted) {
+            showStereoImages();
+        }
+    }
+}
+
 void MainWindow::setIsShowingStereoImage1(bool value) {
     //qDebug() << value;
     isShowingStereoImage1 = value;
@@ -359,9 +405,32 @@ void MainWindow::setStereoViewMode(/*int countView, int countMode*/) {
     //qDebug() << "countMode: " << countMode;
     QAction* action = qobject_cast<QAction*>(sender());
     if (action) {
-        QString url = action->data().toString();
+        QString data = action->data().toString();
         //do something with the url
-        qDebug() << url;
+        qDebug() << data;
+        QStringList list = data.split(";");
+        if (0 == list[0].toInt()) {
+            countMode1 = list[1].toInt();
+            if (isStarted) {
+                stereoImage1 = currentStereoImage(countMode1);
+                showStereoImage(stereoImage1, 1);
+            }
+        }
+        if (1 == list[0].toInt()) {
+            countMode2 = list[1].toInt();
+            if (isStarted) {
+                stereoImage2 = currentStereoImage(countMode2);
+                showStereoImage(stereoImage2, 2);
+            }
+        }
+        if (2 == list[0].toInt()) {
+            countMode3 = list[1].toInt();
+            if (isStarted) {
+                stereoImage3 = currentStereoImage(countMode3);
+                showStereoImage(stereoImage2, 2);
+            }
+        }
+
     }
 }
 

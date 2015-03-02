@@ -63,6 +63,7 @@ protected:
 private slots:
     void on_pushButton_clicked();
 
+    void setIsShowingStereoImage(bool value);
     void setIsShowingStereoImage1(bool value);
     void setIsShowingStereoImage2(bool value);
     void setIsShowingStereoImage3(bool value);
