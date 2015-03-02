@@ -14,6 +14,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     isShowingStereoImage3 = false;
     isStarted = false;
 
+    commands.append("Original");
+    commands.append("Undistort");
+    commands.append("ProjectPoints");
+    commands.append("UndistortRectify");
+    commands.append("DisparityMap");
+    commands.append("Triangulate");
+    commands.append("CirclesPattern");
+
     camera3d = new Camera3D();
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
@@ -29,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     createMenu();
 
+    ui->groupBox->setTitle("View1 - " + commands[countMode1]);
+    ui->groupBox_2->setTitle("View2 - " + commands[countMode2]);
+    ui->groupBox_3->setTitle("View3 - " + commands[countMode3]);
     ui->groupBox_3->setVisible(false);
 
     ui->label->setText("SADWindowSize");
@@ -79,11 +90,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 void MainWindow::createMenu() {
-    QStringList commands;
-    commands.append("Original");
-    commands.append("Undistort");
-    commands.append("UndistortRectify");
-
     int n = 3;
     for (int i = 0; i < n; i++) {
         QMenu *menu = new QMenu("View" + QString::number(i + 1));
@@ -161,13 +167,6 @@ void MainWindow::on_pushButton_clicked() {
         loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
         calcStereoImages();
         showStereoImages();
-
-        //Undistort
-        //ProjectPoints
-        //DisparityMap
-        //Triangulate
-        //CirclesPattern
-
         isStarted = true;
     } else {
         //BUG!!! sometimes not update labels
@@ -191,6 +190,12 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         case 2:
         return stereoImage;
         case 3:
+        return stereoImage;
+        case 4:
+        return stereoImage;
+        case 5:
+        return stereoImage;
+        case 6:
         return stereoImage;
     }
     return stereoImage;
@@ -299,6 +304,7 @@ void MainWindow::setStereoViewMode() {
         QStringList list = data.split(";");
         if (0 == list[0].toInt()) {
             countMode1 = list[1].toInt();
+            ui->groupBox->setTitle("View1 - " + commands[countMode1]);
             if (isStarted) {
                 stereoImage1 = currentStereoImage(countMode1);
                 showStereoImage(stereoImage1, 1);
@@ -306,6 +312,7 @@ void MainWindow::setStereoViewMode() {
         }
         if (1 == list[0].toInt()) {
             countMode2 = list[1].toInt();
+            ui->groupBox_2->setTitle("View2 - " + commands[countMode2]);
             if (isStarted) {
                 stereoImage2 = currentStereoImage(countMode2);
                 showStereoImage(stereoImage2, 2);
@@ -313,6 +320,7 @@ void MainWindow::setStereoViewMode() {
         }
         if (2 == list[0].toInt()) {
             countMode3 = list[1].toInt();
+            ui->groupBox_3->setTitle("View3 - " + commands[countMode3]);
             if (isStarted) {
                 stereoImage3 = currentStereoImage(countMode3);
                 showStereoImage(stereoImage3, 3);

@@ -80,6 +80,8 @@ private:
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;
     bool isShowingStereoImage3;
+
+    QStringList commands;
 };
 
 #endif // MAINWINDOW_H
