@@ -158,49 +158,17 @@ void MainWindow::on_pushButton_clicked() {
         calcStereoImages();
         showStereoImages();
 
-        //stereoscopy->startCapture();
-        //stereoscopy->checkUndistortFromCapture();
-        //stereoscopy->checkDisparityMapFromCapture();
-        //stereoscopy->checkDisparityMapFromCapture2();
-
-        //camera3d->startCapture();
-
-        /*stereoscopy->startCapture();
-        stereoscopy->loopCapture();
-        stereoscopy->endCapture();*/
-
-        //stereoscopy->checkProjectPoints("image1_1.jpg", "image2_1.jpg");
-
-        //stereoscopy->checkDisparityMap("image1_a.jpg", "image2_a.jpg");
-        //stereoscopy->checkDisparityMap("image1_cal1.jpg", "image2_cal1.jpg");
-        //stereoscopy->checkUndistort("image1_aqua3.jpg", "image2_aqua3.jpg");
-
-        //stereoscopy->checkDisparityMap2("image1_a.jpg", "image2_a.jpg");
-        //stereoscopy->checkDisparityMap2("image1_b.jpg", "image2_b.jpg");
-
-        //stereoscopy->checkDisparityMap2("image1_aqua3.jpg", "image2_aqua3.jpg");
-        //stereoscopy->checkDisparityMap2("image1.jpg", "image2.jpg");
-
-        //stereoscopy->triangulate("image1_aqua1.jpg", "image2_aqua1.jpg");
-
-        //stereoscopy->drawCirclesPattern();
+        //Undistort
+        //ProjectPoints
+        //DisparityMap
+        //Triangulate
+        //CirclesPattern
 
         isStarted = true;
     } else {
-        //stereoscopy->showDisparityMap();
-        //stereoscopy->checkDisparityMapFromCapture2();
-        //stereoscopy->checkUndistortFromCapture();
-
-        //stereoscopy->checkDisparityMapFromCapture2();
-
-        //camera3d->stopCapture();
-
         //BUG!!! sometimes not update labels
         showStereoImages();
     }
-    /*stereoscopy->startCapture();
-    stereoscopy->showImagesFromCameras();
-    stereoscopy->endCapture();*/
 }
 
 //need move to IOData

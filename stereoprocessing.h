@@ -10,24 +10,13 @@ using namespace cv;
 
 namespace stereo {
 
-class StereoProcessing
-{
+class StereoProcessing {
 public:
     StereoProcessing();
-
-    /*void setStereoImage(StereoImage* stereoImage);
-    void setStereoParametres(StereoParametres* stereoParametres);
-
-    StereoImage* getStereoImage();
-    StereoParametres* getStereoParametres();*/
 
     StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void drawCirclesPattern();
-
-private:
-    //StereoImage* stereoImage;
-    //StereoParametres* stereoParametres;
 };
 
 }
