@@ -213,3 +213,48 @@ void StereoProcessing::drawCirclesPattern() {
     qDebug() << "cols: " << image.cols << " rows: " << image.rows;
     imshow("image", image);
 }
+
+bool StereoProcessing::addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result) {
+    Size pattern_size = Size(BOARD_WIDTH, BOARD_HEIGHT);//!< Размер шахматной доски
+    Size imsize; //!< Размер изображение вычисляется в addImage
+
+    qDebug() << "addImage";
+    if(im.empty()) {
+        qDebug() << "Empty image exit";
+        return false;
+    }
+
+    Mat grey;
+    imsize = Size(im.rows, im.cols);
+
+    if (1 != im.channels()) {
+        cvtColor(im, grey, CV_BGR2GRAY);
+        result = im.clone();
+    } else {
+        grey = im.clone();
+        cvtColor(grey, result, CV_GRAY2BGR);
+    }
+
+    imsize = Size(grey.cols,grey.rows);
+    try {
+        qDebug() << "findChessboardCorners";
+        Mat small_gray;
+        small_gray = grey;
+        bool found = false;
+        result = grey;
+        found = findCirclesGrid(small_gray, pattern_size, *imageCorners, CALIB_CB_SYMMETRIC_GRID);
+        if (!found) {
+            qDebug() << "Not found";
+            return false;
+        }
+
+        qDebug() << "found";
+        drawChessboardCorners(result, pattern_size, *imageCorners, true);
+        return true;
+    } catch(...) {
+        qDebug() << "Exception";
+    }
+
+
+    return false;
+}

@@ -4,7 +4,32 @@
 #include "asmopencv.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-    ui->setupUi(this);
+    ui->setupUi(this);    
+
+    countMode1 = 0;
+    countMode2 = 1;
+    countMode3 = 2;
+    isShowingStereoImage1 = true;
+    isShowingStereoImage2 = true;
+    isShowingStereoImage3 = false;
+    isStarted = false;
+
+    camera3d = new Camera3D();
+    stereoImage = new StereoImage();
+    stereoImage1 = new StereoImage();
+    stereoImage2 = new StereoImage();
+    stereoImage3 = new StereoImage();
+    stereoParametres = new StereoParametres();
+    stereoProcessing = new StereoProcessing();
+    disparityMap = new DisparityMap();
+
+    ioData = new IOData();
+    ioData->loadStereoParametres("data.txt", stereoParametres);
+    stereoParametres->print();
+
+    createMenu();
+
+    ui->groupBox_3->setVisible(false);
 
     ui->label->setText("SADWindowSize");
     ui->label_2->setText("numberOfDisparities");
@@ -28,8 +53,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->spinBox_9->setRange(0, 4000);
     ui->spinBox_10->setRange(0, 4000);
 
-    disparityMap = new DisparityMap();
-
     ui->spinBox->setValue(disparityMap->sgbm.SADWindowSize);
     ui->spinBox_2->setValue(disparityMap->sgbm.numberOfDisparities);
     ui->spinBox_3->setValue(disparityMap->sgbm.preFilterCap);
@@ -41,7 +64,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->spinBox_9->setValue(disparityMap->sgbm.P1);
     ui->spinBox_10->setValue(disparityMap->sgbm.P2);
 
-    /*connect(this->ui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSADWindowSize(int)));
+    /*
+    connect(this->ui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSADWindowSize(int)));
     connect(this->ui->spinBox_2, SIGNAL(valueChanged(int)), this, SLOT(setSgbmNumberOfDisparities(int)));
     connect(this->ui->spinBox_3, SIGNAL(valueChanged(int)), this, SLOT(setSgbmPreFilterCap(int)));
     connect(this->ui->spinBox_4, SIGNAL(valueChanged(int)), this, SLOT(setSgbmMinDisparity(int)));
@@ -50,27 +74,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this->ui->spinBox_7, SIGNAL(valueChanged(int)), this, SLOT(setSgbmSpeckleRange(int)));
     connect(this->ui->spinBox_8, SIGNAL(valueChanged(int)), this, SLOT(setSgbmDisp12MaxDiff(int)));
     connect(this->ui->spinBox_9, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP1(int)));
-    connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));*/
-
-    ui->groupBox_3->setVisible(false);
-    isStarted = false;
-    camera3d = new Camera3D();
-    stereoImage = new StereoImage();
-    stereoImage1 = new StereoImage();
-    stereoImage2 = new StereoImage();
-    stereoImage3 = new StereoImage();
-    stereoParametres = new StereoParametres();
-    ioData = new IOData();
-    ioData->loadStereoParametres("data.txt", stereoParametres);
-    stereoParametres->print();
-    stereoProcessing = new StereoProcessing();
-    countMode1 = 0;
-    countMode2 = 1;
-    countMode3 = 2;
-    isShowingStereoImage1 = true;
-    isShowingStereoImage2 = true;
-    isShowingStereoImage3 = false;
-    createMenu();
+    connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));
+    */
 }
 
 void MainWindow::createMenu() {
@@ -147,8 +152,7 @@ void MainWindow::setSgbmP2(int value) {
     disparityMap->sgbm.P2 = value;
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
@@ -222,14 +226,7 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
 
 void MainWindow::showStereoImages() {
     if (!stereoImage->isEmpty()) {
-        //Mat image1 = stereoImage->getLeft();
-        //Mat image2 = stereoImage->getRight();
-        //qDebug() << ui->label_11->width() << ui->label_11->height();
-        if ((double)ui->label_11->width() / ui->label_11->height() < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
-            currentSizeStereoImage = Size(ui->label_11->width(), ui->label_11->width() * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
-        } else {
-            currentSizeStereoImage = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
-        }
+        resizeDone();
 
         //BUG!!! sometimes not update labels
         if (isShowingStereoImage1) {
@@ -250,8 +247,11 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
 }
 
 void MainWindow::resizeDone() {
-   showStereoImages();
-   qDebug() << "resizeDone";
+   if ((double)ui->label_11->width() / ui->label_11->height() < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
+       currentSizeStereoImage = Size(ui->label_11->width(), ui->label_11->width() * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
+   } else {
+       currentSizeStereoImage = Size(ui->label_11->height() * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, ui->label_11->height());
+   }
 }
 
 void MainWindow::setIsShowingStereoImage(bool value) {
@@ -265,8 +265,8 @@ void MainWindow::setIsShowingStereoImage(bool value) {
             ui->groupBox->setVisible(value);
         }
         if (1 == list[0].toInt()) {
-            isShowingStereoImage3 = value;
-            ui->groupBox_3->setVisible(value);
+            isShowingStereoImage2 = value;
+            ui->groupBox_2->setVisible(value);
         }
         if (2 == list[0].toInt()) {
             isShowingStereoImage3 = value;
@@ -315,7 +315,7 @@ void MainWindow::setStereoViewMode() {
             countMode3 = list[1].toInt();
             if (isStarted) {
                 stereoImage3 = currentStereoImage(countMode3);
-                showStereoImage(stereoImage2, 2);
+                showStereoImage(stereoImage3, 3);
             }
         }
     }
