@@ -37,12 +37,14 @@ StereoParametres* StereoProcessing::getStereoParametres() {
 */
 
 StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
     StereoImage* undistortStereoImage = new StereoImage();
     Mat left, right;
     //qDebug() << "start undistort";
     //stereoParametres->print();
-    undistort(stereoImage->getLeft(), left, stereoParametres->getCameraMatrix1(), stereoParametres->getDistCoeffs1());
-    undistort(stereoImage->getRight(), right, stereoParametres->getCameraMatrix2(), stereoParametres->getDistCoeffs2());
+    undistort(image1, left, stereoParametres->getCameraMatrix1(), stereoParametres->getDistCoeffs1());
+    undistort(image2, right, stereoParametres->getCameraMatrix2(), stereoParametres->getDistCoeffs2());
     undistortStereoImage->setImages(left, right);
     //qDebug() << "end undistort";
     //undistortStereoImage->setImages(stereoImage->getLeft(), stereoImage->getRight());
@@ -50,8 +52,8 @@ StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, St
 }
 
 Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    Mat image1 = stereoImage->getLeft();
-    Mat image2 = stereoImage->getRight();
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
@@ -119,12 +121,13 @@ StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, Stereo
 
 Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     //TODO
+    //use undistortRectify
     return stereoImage->getLeft();
 }
 
 StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    Mat image1 = stereoImage->getLeft();
-    Mat image2 = stereoImage->getRight();
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
 
     Mat imageSmall = Mat(image1.rows / 4, image1.cols / 4, CV_8UC3);
     Size imageSizeSmall = imageSmall.size(); //400x300

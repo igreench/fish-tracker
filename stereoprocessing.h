@@ -13,6 +13,7 @@ namespace stereo {
 
 class StereoProcessing {
 public:
+    //Is it utility class?
     StereoProcessing();
     StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);

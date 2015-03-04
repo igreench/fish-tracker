@@ -12,6 +12,7 @@ using namespace stereo;
 class IOData
 {
 public:
+    //Is it utility class?
     IOData();
 
     static Mat getMatFromFile(string filename);
