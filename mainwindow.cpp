@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     countMode1 = 0;
     countMode2 = 1;
-    countMode3 = 2;
+    countMode3 = 0;
     isShowingStereoImage1 = true;
     isShowingStereoImage2 = true;
     isShowingStereoImage3 = false;
@@ -127,7 +127,6 @@ void MainWindow::createMenu() {
         menu->addAction(action);
         menu->addSeparator();
         QActionGroup* group = new QActionGroup( this );
-        vector< QAction* > actions;
         for (int j = 0; j < commands.size(); j++) {
             QString name = commands[j];
             QAction *action = new QAction(name, this);
@@ -141,11 +140,7 @@ void MainWindow::createMenu() {
             action->setActionGroup(group);
             action->setData(QString::number(i) + ";" + QString::number(j));
             connect(action, SIGNAL(triggered()), this, SLOT(setStereoViewMode()));
-            actions.push_back(action);
-        }
-        //Why two fors?
-        for (int i = 0; i < actions.size(); i++) {
-            menu->addAction(actions[i]);
+            menu->addAction(action);
         }
         menuBar()->addMenu(menu);
     }
@@ -159,7 +154,6 @@ void MainWindow::resizeStereoViews() {
         int w = (ui->groupBox->width() - space) / 2 - offsetx;
         int h = ui->groupBox->height() - offsety * 1.5;
         cv::Size size = sizeStereoImage(stereoImage1->getLeft().cols, stereoImage1->getLeft().rows, w, h);
-        qDebug() << "w: " << size.width << " h: " << size.height;
         ui->label_11->setGeometry(offsetx, offsety, size.width, size.height);
         size = sizeStereoImage(stereoImage1->getRight().cols, stereoImage1->getRight().rows, w, h);
         ui->label_12->setGeometry(offsetx + size.width + space, offsety, size.width, size.height);
