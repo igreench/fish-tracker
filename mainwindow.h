@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStringListModel>
 
 #include "disparitymap.h"
 #include "camera3d.h"
@@ -15,6 +16,8 @@ using namespace std;
 namespace Ui {
 class MainWindow;
 }
+
+static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
 class MainWindow : public QMainWindow
 {
@@ -67,6 +70,7 @@ private:
     Size currentSizeStereoImage;
 
     void createMenu();
+    void resizeStereoViews();
 
     void loadLocalStereoImage(string fn1, string fn2);
     StereoImage *currentStereoImage(int countMode);
@@ -74,7 +78,7 @@ private:
     void showStereoImage(StereoImage *stereoImage, int countView);
     void showStereoImages();
 
-    Size sizeStereoImage(int w, int h);
+    Size sizeStereoImage(int sourceWidth, int sourseHeight, int destWidth, int destHeight);
     void updateDisparityMap();
 
     bool isShowingStereoImage1;
