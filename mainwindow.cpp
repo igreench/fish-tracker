@@ -93,8 +93,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this->ui->spinBox_9, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP1(int)));
     connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));
     */
-
-    //resizeStereoViews();
 }
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -154,46 +152,12 @@ void MainWindow::createMenu() {
 }
 
 void MainWindow::resizeStereoViews() {
-    qDebug() << "resizeStereoViews()";
-    /*int k = (isShowingStereoImage1 + isShowingStereoImage2 + isShowingStereoImage3);
-    qDebug() << "k: " << k;
-    if (0 != k) {
-        ui->groupBox->setGeometry(310, 0, width() - 320, height() / k);
-        ui->groupBox_2->setGeometry(310, ui->groupBox->y() + ui->groupBox->height(), width() - 320, height() / k);
-        ui->groupBox_3->setGeometry(310, ui->groupBox_2->y() + ui->groupBox_2->height(), width() - 320, height() / k);
-    }*/
     int space = 10;
     int offsetx = 10;
     int offsety = 15;
-
-    /*if (isShowingStereoImage1) {
-        cv::Size size = sizeStereoImage(ui->groupBox->width() / 2, ui->groupBox->height());
-        ui->label_11->setGeometry(0, 0, size.width, size.height);
-        ui->label_12->setGeometry(size.width, 0, size.width, size.height);
-    }
-    if (isShowingStereoImage2) {
-        cv::Size size = sizeStereoImage(ui->groupBox_2->width() / 2, ui->groupBox_2->height());
-        ui->label_13->setGeometry(0, 0, size.width, size.height);
-        ui->label_14->setGeometry(size.width, 0, size.width, size.height);
-    }
-    if (isShowingStereoImage3) {
-        cv::Size size = sizeStereoImage(ui->groupBox_3->width() / 2, ui->groupBox_3->height());
-        ui->label_15->setGeometry(0, 0, size.width, size.height);
-        ui->label_16->setGeometry(size.width, 0, size.width, size.height);
-    }*/
-
-    /*
-    if ((double)w / h < (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows) {
-        return currentSizeStereoImage = Size(w, w * (double)stereoImage->getLeft().rows / stereoImage->getLeft().cols);
-    }
-    return currentSizeStereoImage = Size(h * (double)stereoImage->getLeft().cols / stereoImage->getLeft().rows, h);
-    */
-
     if (isShowingStereoImage1) {
         int w = (ui->groupBox->width() - space) / 2 - offsetx;
         int h = ui->groupBox->height() - offsety * 1.5;
-        qDebug() << "ui->groupBox->height(): " << ui->groupBox->height();
-        //cv::Size size = sizeStereoImage(w, h);
         cv::Size size = sizeStereoImage(stereoImage1->getLeft().cols, stereoImage1->getLeft().rows, w, h);
         qDebug() << "w: " << size.width << " h: " << size.height;
         ui->label_11->setGeometry(offsetx, offsety, size.width, size.height);
@@ -203,8 +167,6 @@ void MainWindow::resizeStereoViews() {
     if (isShowingStereoImage2) {
         int w = (ui->groupBox_2->width() - space) / 2 - offsetx;
         int h = ui->groupBox_2->height() - offsety * 1.5;
-        //cv::Size size = sizeStereoImage(w, h);
-        //cv::Size size = Size(w, h);
         cv::Size size = sizeStereoImage(stereoImage2->getLeft().cols, stereoImage2->getLeft().rows, w, h);
         ui->label_13->setGeometry(offsetx, offsety, size.width, size.height);
         size = sizeStereoImage(stereoImage2->getRight().cols, stereoImage2->getRight().rows, w, h);
@@ -213,15 +175,11 @@ void MainWindow::resizeStereoViews() {
     if (isShowingStereoImage3) {
         int w = (ui->groupBox_3->width() - space) / 2 - offsetx;
         int h = ui->groupBox_3->height() - offsety * 1.5;
-        //cv::Size size = sizeStereoImage(w, h);
-        //cv::Size size = Size(w, h);
         cv::Size size = sizeStereoImage(stereoImage3->getLeft().cols, stereoImage3->getLeft().rows, w, h);
         ui->label_15->setGeometry(offsetx, offsety, size.width, size.height);
         size = sizeStereoImage(stereoImage3->getRight().cols, stereoImage3->getRight().rows, w, h);
         ui->label_16->setGeometry(offsetx + size.width + space, offsety, size.width, size.height);
     }
-    //ui->label_11->setGeometry(16, 16, (ui->groupBox->width() - /*18*/ 32) / 2, ui->groupBox->height() - 32);
-    //ui->label_12->setGeometry(ui->label_11->width() + 12, 16, (ui->groupBox->width() - 32) / 2, ui->groupBox->height() - 32);
 }
 
 void MainWindow::setSgbmSADWindowSize(int value) {
@@ -310,20 +268,9 @@ void MainWindow::calcStereoImages() {
     stereoImage3 = currentStereoImage(countMode3);
 }
 
-//Need to delete the method
 void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
     Mat image1 = stereoImage->getLeft();
     Mat image2 = stereoImage->getRight();
-
-    //BUG! incorrect size
-    //Size size = sizeStereoImage(ui->label_11->width(), ui->label_11->height());
-/*    cv::Size size = cv::Size(ui->label_11->width(), ui->label_11->height());
-    qDebug() << "ui->label_11->width(): " << ui->label_11->width();
-    qDebug() << "ui->label_11->height(): " << ui->label_11->height();
-
-    cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
-    cv::resize(image2, image2, size, 0, 0, CV_INTER_LINEAR);*/
-
     if (1 == countView) {
         cv::Size size = cv::Size(ui->label_11->width(), ui->label_11->height());
         cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
@@ -352,7 +299,6 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
 
 void MainWindow::showStereoImages() {
     if (!stereoImage->isEmpty()) {
-        //resizeStereoViews();
         if (isShowingStereoImage1) {
             showStereoImage(stereoImage1, 1);
         }
@@ -403,7 +349,6 @@ void MainWindow::setIsShowingStereoImage(bool value) {
             isShowingStereoImage3 = value;
             ui->groupBox_3->setVisible(value);
         }        
-        //update();
         QCoreApplication::processEvents();
         if (isStarted) {
             resizeStereoViews();
