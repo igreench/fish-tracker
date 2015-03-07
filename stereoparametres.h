@@ -32,6 +32,7 @@ public:
     Mat getR();
     Mat getT();
 
+    bool isEmpty();
     void print();
 
 private:

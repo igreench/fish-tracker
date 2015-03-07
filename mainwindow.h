@@ -42,6 +42,8 @@ public slots:
 
     void setStereoViewMode();
 
+    void start();
+
 protected:
     void resizeEvent(QResizeEvent* event);
 
@@ -52,6 +54,10 @@ private slots:
     void on_pushButton_8_clicked();
 
     void on_pushButton_9_clicked();
+
+    void on_pushButton_5_clicked();
+
+    void on_pushButton_4_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -89,6 +95,9 @@ private:
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;
     bool isShowingStereoImage3;
+
+    bool isExistStereoImage;
+    bool isExistStereoParametres;
 
     QStringList commands;
 };

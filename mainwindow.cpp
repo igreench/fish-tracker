@@ -32,8 +32,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     disparityMap = new DisparityMap();
 
     ioData = new IOData();
-    ioData->loadStereoParametres("data.txt", stereoParametres);
-    stereoParametres->print();
+    //ioData->loadStereoParametres("data.txt", stereoParametres);
+    //stereoParametres->print();
+
+    isExistStereoImage= false;
+    isExistStereoParametres = false;
 
     createMenu();
 
@@ -50,12 +53,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QStringList list = dir.entryList(QStringList()
                                      << "image*.jpg",
                                      QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+    QStringList list2;
+    for (int i = 0; i < list.size(); i++) {
+        if (list[i].contains("image1")) {
+            //qDebug() << "list[i].contains(image1) " << list[i].contains("image1");
+            QString s = list[i].right(list[i].size() - 6);
+            //qDebug() << "s " << s;
+            if (list.contains("image2" + s) && (s.size() > 4)) {
+                list2.append(s.left(s.size() - 4));
+                //qDebug() << "s.left(s.size() - 4: " << s.left(s.size() - 4);
+                //qDebug() << "s size: " << s.size();
+            }
+        }
+    }
     //qDebug() << list;
-    model->setStringList(list);
+    model->setStringList(list2);
     ui->listView->setModel(model);
 
     list = dir.entryList(QStringList()
-                         << "data*.txt",
+                         << "*.txt",
                          QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
     //qDebug() << list;
     model = new QStringListModel(this);
@@ -230,10 +246,10 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked() {
-    if (!isStarted) {
+void MainWindow::start() {
+    if (!isStarted && isExistStereoImage && isExistStereoParametres) {
         //loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
-        loadLocalStereoImage("image1.jpg", "image2.jpg");
+        //loadLocalStereoImage("image1.jpg", "image2.jpg");
         calcStereoImages();
         resizeStereoViews();
         showStereoImages();
@@ -241,6 +257,10 @@ void MainWindow::on_pushButton_clicked() {
     } else {
         showStereoImages();
     }
+}
+
+void MainWindow::on_pushButton_clicked() {
+    start();
 }
 
 //need move to IOData
@@ -440,5 +460,29 @@ void MainWindow::on_pushButton_9_clicked()
         ioData->saveStereoParametres(ui->lineEdit_2->text() + ".txt", stereoParametres);
     } else {
         qDebug() << "ui->lineEdit_2->text().isEmpty()";
+    }
+}
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    qDebug() << ui->listView_2->currentIndex().data().toString();
+    ioData->loadStereoParametres(ui->listView_2->currentIndex().data().toString(), stereoParametres);
+    if (!stereoParametres->isEmpty()) {
+        isExistStereoParametres = true;
+        stereoParametres->print();
+    } else {
+        qDebug() << "Exception: stereoParametres are empty";
+    }
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    qDebug() << ui->listView->currentIndex().data().toString();
+    QString s = ui->listView->currentIndex().data().toString();
+    loadLocalStereoImage("image1" + s.toStdString() + ".jpg", "image2" + s.toStdString() + ".jpg");
+    if (!stereoImage->isEmpty()) {
+        isExistStereoImage = true;
+    } else {
+        qDebug() << "Exception: stereoImage is empty";
     }
 }

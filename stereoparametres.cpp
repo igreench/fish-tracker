@@ -64,6 +64,13 @@ void StereoParametres::print() {
     qDebug() << "T" << matToString(T);
 }
 
+bool StereoParametres::isEmpty() {
+    return (!cameraMatrix1.empty() &&
+            !cameraMatrix2.empty() &&
+            !distCoeffs1.empty() &&
+            !distCoeffs2.empty());
+}
+
 template<class T>
 QString stereo::templateMatToString(Mat mat) {
     QString str;
