@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStringListModel>
+#include <QDir>
 
 #include "disparitymap.h"
 #include "camera3d.h"
@@ -47,6 +48,10 @@ protected:
 private slots:
     void on_pushButton_clicked();
     void setIsShowingStereoImage(bool value);
+
+    void on_pushButton_8_clicked();
+
+    void on_pushButton_9_clicked();
 
 private:
     Ui::MainWindow *ui;

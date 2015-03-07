@@ -23,16 +23,21 @@ Mat IOData::getMatFromFile(string filename) {
     return image;
 }
 
+void IOData::saveMat(Mat image, string filename) {
+    imwrite(filename, image);
+
+}
+
 void IOData::saveStereoParametres(QString filename, StereoParametres* stereoParametres) {
     QFile file(filename);
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream out(&file);
-        out << matToString(stereoParametres->getCameraMatrix1());
-        out << matToString(stereoParametres->getCameraMatrix2());
-        out << matToString(stereoParametres->getDistCoeffs1());
-        out << matToString(stereoParametres->getDistCoeffs2());
-        out << matToString(stereoParametres->getR());
-        out << matToString(stereoParametres->getT());
+        out << "cameraMatrix1 \"" << matToString(stereoParametres->getCameraMatrix1()) << "\"" << endl;
+        out << "cameraMatrix2 \"" << matToString(stereoParametres->getCameraMatrix2()) << "\"" << endl;
+        out << "distCoeffs1 \"" << matToString(stereoParametres->getDistCoeffs1()) << "\"" << endl;
+        out << "distCoeffs2 \"" << matToString(stereoParametres->getDistCoeffs2()) << "\"" << endl;
+        out << "R \"" << matToString(stereoParametres->getR()) << "\"" << endl;
+        out << "T \"" << matToString(stereoParametres->getT()) << "\"" << endl;
     }
 }
 

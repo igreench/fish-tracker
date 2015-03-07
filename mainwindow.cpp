@@ -37,11 +37,30 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     createMenu();
 
+    ui->pushButton_10->setVisible(false);
+
     //qInstallMessageHandler(myMessageOutput);
-    QStringListModel *model;
-    model = new QStringListModel(this);
+    QStringListModel *model = new QStringListModel(this);
     model->setStringList(commands);
     ui->listView_3->setModel(model);
+
+    //QDir dir(QApplication::applicationDirPath());
+    QDir dir("");
+    model = new QStringListModel(this);
+    QStringList list = dir.entryList(QStringList()
+                                     << "image*.jpg",
+                                     QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+    //qDebug() << list;
+    model->setStringList(list);
+    ui->listView->setModel(model);
+
+    list = dir.entryList(QStringList()
+                         << "data*.txt",
+                         QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+    //qDebug() << list;
+    model = new QStringListModel(this);
+    model->setStringList(list);
+    ui->listView_2->setModel(model);
 
     ui->groupBox->setTitle("View1 - " + commands[countMode1]);
     ui->groupBox_2->setTitle("View2 - " + commands[countMode2]);
@@ -263,9 +282,9 @@ void MainWindow::calcStereoImages() {
 }
 
 void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
-    Mat image1 = stereoImage->getLeft();
-    Mat image2 = stereoImage->getRight();
     if (1 == countView) {
+        Mat image1 = stereoImage1->getLeft();
+        Mat image2 = stereoImage1->getRight();
         cv::Size size = cv::Size(ui->label_11->width(), ui->label_11->height());
         cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
         ui->label_11->setPixmap(ASM::cvMatToQPixmap(image1));
@@ -274,6 +293,8 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
         ui->label_12->setPixmap(ASM::cvMatToQPixmap(image2));
     }
     if (2 == countView) {
+        Mat image1 = stereoImage2->getLeft();
+        Mat image2 = stereoImage2->getRight();
         cv::Size size = cv::Size(ui->label_13->width(), ui->label_13->height());
         cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
         ui->label_13->setPixmap(ASM::cvMatToQPixmap(image1));
@@ -282,6 +303,8 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
         ui->label_14->setPixmap(ASM::cvMatToQPixmap(image2));
     }
     if (3 == countView) {
+        Mat image1 = stereoImage3->getLeft();//?
+        Mat image2 = stereoImage3->getRight();// BUG! not update by circlepattern
         cv::Size size = cv::Size(ui->label_15->width(), ui->label_15->height());
         cv::resize(image1, image1, size, 0, 0, CV_INTER_LINEAR);
         ui->label_15->setPixmap(ASM::cvMatToQPixmap(image1));
@@ -394,5 +417,28 @@ void MainWindow::setStereoViewMode() {
                 showStereoImage(stereoImage3, 3);
             }
         }
+    }
+}
+
+void MainWindow::on_pushButton_8_clicked()
+{
+    if (!ui->lineEdit->text().isEmpty()) {
+        if (isStarted) {
+            ioData->saveMat(stereoImage->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
+            ioData->saveMat(stereoImage->getRight(), "image2" + ui->lineEdit->text().toStdString() + ".jpg");
+        } else {
+            qDebug() << "!isStarted";
+        }
+    } else {
+        qDebug() << "ui->lineEdit->text().isEmpty()";
+    }
+}
+
+void MainWindow::on_pushButton_9_clicked()
+{
+    if (!ui->lineEdit_2->text().isEmpty()) {
+        ioData->saveStereoParametres(ui->lineEdit_2->text() + ".txt", stereoParametres);
+    } else {
+        qDebug() << "ui->lineEdit_2->text().isEmpty()";
     }
 }

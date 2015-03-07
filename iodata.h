@@ -16,6 +16,7 @@ public:
     IOData();
 
     static Mat getMatFromFile(string filename);
+    void saveMat(Mat image, string filename);
     void saveStereoParametres(QString filename, StereoParametres* stereoParametres);
     void loadStereoParametres(QString filename, StereoParametres* stereoParametres, int mode);
     void loadStereoParametres(QString filename, StereoParametres* stereoParametres);
