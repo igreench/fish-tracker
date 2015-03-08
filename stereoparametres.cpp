@@ -65,10 +65,10 @@ void StereoParametres::print() {
 }
 
 bool StereoParametres::isEmpty() {
-    return (!cameraMatrix1.empty() &&
-            !cameraMatrix2.empty() &&
-            !distCoeffs1.empty() &&
-            !distCoeffs2.empty());
+    return (cameraMatrix1.empty() ||
+            cameraMatrix2.empty() ||
+            distCoeffs1.empty() ||
+            distCoeffs2.empty());
 }
 
 template<class T>

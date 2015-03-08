@@ -467,6 +467,7 @@ void MainWindow::on_pushButton_5_clicked()
 {
     qDebug() << ui->listView_2->currentIndex().data().toString();
     ioData->loadStereoParametres(ui->listView_2->currentIndex().data().toString(), stereoParametres);
+    //ioData->loadStereoParametres("data.txt", stereoParametres);
     if (!stereoParametres->isEmpty()) {
         isExistStereoParametres = true;
         stereoParametres->print();
