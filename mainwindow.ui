@@ -125,7 +125,7 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -256,6 +256,9 @@
              <string>StereoImage</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="spacing">
+              <number>3</number>
+             </property>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_11">
                <item>
@@ -284,6 +287,37 @@
               <widget class="QLineEdit" name="lineEdit"/>
              </item>
              <item>
+              <widget class="QRadioButton" name="radioButton">
+               <property name="text">
+                <string>StereoView</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton_2">
+               <property name="text">
+                <string>StereoView1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton_3">
+               <property name="text">
+                <string>StereoView2</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioButton_4">
+               <property name="text">
+                <string>StereoView3</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="verticalSpacer_3">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -291,7 +325,7 @@
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>82</height>
+                 <height>0</height>
                 </size>
                </property>
               </spacer>
@@ -305,6 +339,9 @@
              <string>StereoParametres</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_11">
+             <property name="spacing">
+              <number>3</number>
+             </property>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_13">
                <item>
@@ -333,6 +370,40 @@
               <widget class="QLineEdit" name="lineEdit_2"/>
              </item>
              <item>
+              <widget class="QCheckBox" name="checkBox_2">
+               <property name="text">
+                <string>Intrinsic (CameraMatrix, DistCoeffs)</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_3">
+               <property name="text">
+                <string>Extrinsic (RT)</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_4">
+               <property name="text">
+                <string>Rectification and projection matrices (RP)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_5">
+               <property name="text">
+                <string>Rectification map</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="verticalSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -340,7 +411,7 @@
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>82</height>
+                 <height>0</height>
                 </size>
                </property>
               </spacer>
