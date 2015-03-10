@@ -32,6 +32,38 @@ void StereoParametres::setT(Mat T) {
     this->T = T;
 }
 
+void StereoParametres::setR1(Mat R1) {
+    this->R1 = R1;
+}
+
+void StereoParametres::setR2(Mat R2) {
+    this->R2 = R2;
+}
+
+void StereoParametres::setP1(Mat P1) {
+    this->P1 = P1;
+}
+
+void StereoParametres::setP2(Mat P2) {
+    this->P2 = P2;
+}
+
+void StereoParametres::setRMap1x(Mat rmap1x) {
+    this->rmap1x = rmap1x;
+}
+
+void StereoParametres::setRMap1y(Mat rmap1y) {
+    this->rmap1y = rmap1y;
+}
+
+void StereoParametres::setRMap2x(Mat rmap2x) {
+    this->rmap2x = rmap2x;
+}
+
+void StereoParametres::setRMap2y(Mat rmap2y) {
+    this->rmap2y = rmap2y;
+}
+
 Mat StereoParametres::getCameraMatrix1() {
     return cameraMatrix1;
 }
@@ -55,6 +87,38 @@ Mat StereoParametres::getT() {
     return T;
 }
 
+Mat StereoParametres::getR1() {
+    return R1;
+}
+
+Mat StereoParametres::getR2() {
+    return R2;
+}
+
+Mat StereoParametres::getP1() {
+    return P1;
+}
+
+Mat StereoParametres::getP2() {
+    return P2;
+}
+
+Mat StereoParametres::getRMap1x() {
+    return rmap1x;
+}
+
+Mat StereoParametres::getRMap1y() {
+    return rmap1y;
+}
+
+Mat StereoParametres::getRMap2x() {
+    return rmap2x;
+}
+
+Mat StereoParametres::getRMap2y() {
+    return rmap2y;
+}
+
 void StereoParametres::print() {
     qDebug() << "cameraMatrix1" << matToString(cameraMatrix1);
     qDebug() << "cameraMatrix2" << matToString(cameraMatrix2);
@@ -64,11 +128,30 @@ void StereoParametres::print() {
     qDebug() << "T" << matToString(T);
 }
 
-bool StereoParametres::isEmpty() {
+bool StereoParametres::isEmpty() { //isEmptyIntrinsic
     return (cameraMatrix1.empty() ||
             cameraMatrix2.empty() ||
             distCoeffs1.empty() ||
             distCoeffs2.empty());
+}
+
+bool StereoParametres::isEmptyRT() { //isEmptyExternal
+    return (R.empty() ||
+            T.empty());
+}
+
+bool StereoParametres::isEmptyRP() {
+    return (R1.empty() ||
+            R2.empty() ||
+            P1.empty() ||
+            P2.empty());
+}
+
+bool StereoParametres::isEmptyRMap() {
+    return (rmap1x.empty() ||
+            rmap1y.empty() ||
+            rmap2x.empty() ||
+            rmap2y.empty());
 }
 
 template<class T>
