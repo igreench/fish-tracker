@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>FIshTracker</string>
+   <string>FishTracker</string>
   </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonTextOnly</enum>
