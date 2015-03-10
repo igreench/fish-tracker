@@ -534,5 +534,7 @@ void MainWindow::update() {
 
 void MainWindow::on_pushButton_10_clicked() {
     timer->stop();
+    isResized = false;
+    isCapture = false;
     ui->pushButton_10->setVisible(false);
 }
