@@ -115,8 +115,52 @@ Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* 
 }
 
 StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    //TODO
-    return stereoImage;
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+    Mat R = stereoParametres->getR();
+    Mat T = stereoParametres->getT();
+    Mat R1 = stereoParametres->getR1();
+    Mat R2 = stereoParametres->getR2();
+    Mat P1 = stereoParametres->getP1();
+    Mat P2 = stereoParametres->getP2();
+    Mat rmap1x = stereoParametres->getRMap1x();
+    Mat rmap1y = stereoParametres->getRMap1y();
+    Mat rmap2x = stereoParametres->getRMap2x();
+    Mat rmap2y = stereoParametres->getRMap2y();
+    StereoImage* undistortRectifyStereoImage = new StereoImage();
+    undistortRectifyStereoImage->setImages(image1, image2);
+
+    if (stereoParametres->isEmptyRT()) {
+        qDebug() << "Exception: isEmptyRT";
+        return undistortRectifyStereoImage;
+    }
+
+    if (stereoParametres->isEmptyRP()) {
+        qDebug() << "Exception: isEmptyRP";
+        Mat Q;
+        stereoRectify(cameraMatrix1,
+                      distCoeffs1,
+                      cameraMatrix2,
+                      distCoeffs2,
+                      image1.size(),
+                      R, T, R1, R2, P1, P2, Q);
+    }
+
+    if (stereoParametres->isEmptyRMap()) {
+        qDebug() << "Exception: isEmptyRMap";
+        initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, image1.size(), CV_32FC1, rmap1x, rmap1y);
+        initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, image2.size(), CV_32FC1, rmap2x, rmap2y);
+    }
+
+    remap(image1, image1, rmap1x, rmap1y, CV_INTER_LINEAR);
+    remap(image2, image2, rmap2x, rmap2y, CV_INTER_LINEAR);
+
+    undistortRectifyStereoImage->setImages(image1, image2);
+    return undistortRectifyStereoImage;
 }
 
 Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres) {
