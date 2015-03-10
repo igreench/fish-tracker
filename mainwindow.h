@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QStringListModel>
 #include <QDir>
+#include <QTimer>
 
 #include "disparitymap.h"
 #include "camera3d.h"
@@ -50,14 +51,13 @@ protected:
 private slots:
     void on_pushButton_clicked();
     void setIsShowingStereoImage(bool value);
-
     void on_pushButton_8_clicked();
-
     void on_pushButton_9_clicked();
-
     void on_pushButton_5_clicked();
-
     void on_pushButton_4_clicked();
+    void on_pushButton_3_clicked();
+    void on_pushButton_10_clicked();
+    void update();
 
 private:
     Ui::MainWindow *ui;
@@ -95,11 +95,15 @@ private:
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;
     bool isShowingStereoImage3;
-
     bool isExistStereoImage;
     bool isExistStereoParametres;
+    bool isCapture;
+    bool isResized;
+
+    QTimer *timer;
 
     QStringList commands;
+
 };
 
 #endif // MAINWINDOW_H

@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     isShowingStereoImage2 = true;
     isShowingStereoImage3 = false;
     isStarted = false;
+    isResized = false;
 
     commands.append("Original");
     commands.append("Undistort");
@@ -22,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     commands.append("Triangulate");
     commands.append("CirclesPattern");
 
-    camera3d = new Camera3D();
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
     stereoImage2 = new StereoImage();
@@ -30,6 +30,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     stereoParametres = new StereoParametres();
     stereoProcessing = new StereoProcessing();
     disparityMap = new DisparityMap();
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    isCapture = false;
 
     ioData = new IOData();
     //ioData->loadStereoParametres("data.txt", stereoParametres);
@@ -248,14 +252,22 @@ MainWindow::~MainWindow() {
 
 void MainWindow::start() {
     if (!isStarted && isExistStereoImage && isExistStereoParametres) {
-        //loadLocalStereoImage("image1_aqua1.jpg", "image2_aqua1.jpg");
-        //loadLocalStereoImage("image1.jpg", "image2.jpg");
-        calcStereoImages();
-        resizeStereoViews();
-        showStereoImages();
+        if (isCapture) {
+            timer->start(30); //30
+            ui->pushButton_10->setVisible(true);
+        } else {
+            calcStereoImages();
+            resizeStereoViews();
+            showStereoImages();
+        }
         isStarted = true;
     } else {
-        showStereoImages();
+        if (!isCapture) {
+            showStereoImages();
+        } else {
+            timer->start(30);
+            ui->pushButton_10->setVisible(true);
+        }
     }
 }
 
@@ -296,9 +308,15 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
 
 //Am I need in StereoView class?
 void MainWindow::calcStereoImages() {
-    stereoImage1 = currentStereoImage(countMode1);
-    stereoImage2 = currentStereoImage(countMode2);
-    stereoImage3 = currentStereoImage(countMode3);
+    if (isShowingStereoImage1) {
+        stereoImage1 = currentStereoImage(countMode1);
+    }
+    if (isShowingStereoImage2) {
+        stereoImage2 = currentStereoImage(countMode2);
+    }
+    if (isShowingStereoImage3) {
+        stereoImage3 = currentStereoImage(countMode3);
+    }
 }
 
 void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
@@ -486,4 +504,35 @@ void MainWindow::on_pushButton_4_clicked()
     } else {
         qDebug() << "Exception: stereoImage is empty";
     }
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    if (!isCapture) {
+        camera3d = new Camera3D();
+        if (camera3d->isConnected()) {
+            qDebug() << "camera3d->isConnected()";
+            isExistStereoImage = true;
+            isCapture = true;
+        } else {
+            qDebug() << "Exception: camera3d don't connect";
+        }
+    }
+}
+
+void MainWindow::update() {
+    camera3d->update();
+    //Pointers? Really???
+    stereoImage->setImages(*camera3d->getStereoImage()); // ???
+    calcStereoImages();
+    if (!isResized) {
+        resizeStereoViews();
+        isResized = true;
+    }
+    showStereoImages();
+}
+
+void MainWindow::on_pushButton_10_clicked() {
+    timer->stop();
+    ui->pushButton_10->setVisible(false);
 }

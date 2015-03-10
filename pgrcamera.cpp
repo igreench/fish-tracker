@@ -4,6 +4,11 @@
 
 PGRCamera::PGRCamera(int id) {
     this->id = id;
+    isConnect = false;
+}
+
+bool PGRCamera::isConnected() {
+    return isConnect;
 }
 
 void PGRCamera::startCapture() {
@@ -41,9 +46,11 @@ void PGRCamera::startCapture() {
             return ; //exception
         }
     }
+    isConnect = true;
 }
 
 void PGRCamera::stopCapture() {
+    isConnect = false;
     qDebug() << "Stop capture";
     error = camera.StopCapture();
     if (error != PGRERROR_OK) {
@@ -65,6 +72,7 @@ Mat PGRCamera::getFrame() {
     Image rgbImage;
     rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage);
     unsigned int rowBytes = (double)rgbImage.GetReceivedDataSize() / (double)rgbImage.GetRows();
-    Mat image = Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);
-    return image;
+    Mat image = Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);    
+
+    return image.clone();
 }

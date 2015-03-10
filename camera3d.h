@@ -2,7 +2,6 @@
 #define CAMERA3D_H
 
 #include <QObject>
-#include <QTimer>
 
 #include "pgrcamera.h"
 #include "stereoimage.h"
@@ -19,6 +18,10 @@ public:
     void startCapture();
     void stopCapture();
 
+    bool isConnected();
+
+    StereoImage *getStereoImage();
+
 public slots:
     void update();
 
@@ -27,7 +30,7 @@ private:
     PGRCamera *camera2;
     StereoImage *stereoImage;
 
-    QTimer *timer;
+    bool isConnect;
 };
 
 #endif // CAMERA3D_H

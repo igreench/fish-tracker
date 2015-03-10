@@ -16,11 +16,13 @@ public:
     void startCapture();
     Mat getFrame();
     void stopCapture();
+    bool isConnected();
 
 private:
     int id;
     Error error;
     Camera camera;
+    bool isConnect;
 };
 
 #endif // PGRCAMERA_H
