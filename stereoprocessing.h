@@ -24,6 +24,11 @@ public:
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
 
+    void calculateRT(StereoParametres* stereoParametres);
+    void calculateRT2(StereoParametres* stereoParametres);
+    void calculateRP(StereoParametres* stereoParametres);
+    void calculateRMap(StereoParametres* stereoParametres);
+
 private:
     static const int BOARD_WIDTH = 9; //8
     static const int BOARD_HEIGHT = 8; //9
