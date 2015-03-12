@@ -164,7 +164,11 @@ StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, Stereo
     return undistortRectifyStereoImage;
 }
 
-void StereoProcessing::calculateRT(StereoParametres* stereoParametres) {
+void StereoProcessing::calculateRT(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+    Mat R, T, E, F;
+
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
@@ -178,7 +182,7 @@ void StereoProcessing::calculateRT(StereoParametres* stereoParametres) {
                     distCoeffs1,
                     cameraMatrix2,
                     distCoeffs2,
-                    imageSize1, R, T, E, F/*,
+                    image1.size(), R, T, E, F/*,
                                                     TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 1e-6),
                                                     CV_CALIB_FIX_ASPECT_RATIO*/);
 
@@ -186,15 +190,21 @@ void StereoProcessing::calculateRT(StereoParametres* stereoParametres) {
     qDebug() << "T: " << matToString(T);
 }
 
-void StereoProcessing::calculateRT2(StereoParametres* stereoParametres) {
+void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
+    vector<Mat> rvecs1, tvecs1;
+    vector<Mat> rvecs2, tvecs2;
+
     Mat objectPoints, imagePoints1, imagePoints2;
-    calibrateCamera(objectPoints, imagePoints1, imageSize1, cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
-    calibrateCamera(objectPoints, imagePoints2, imageSize2, cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+    calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+    calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
 
     qDebug() << "start calculating R and T";
 
@@ -230,43 +240,60 @@ void StereoProcessing::calculateRT2(StereoParametres* stereoParametres) {
     //end of calculating
 }
 
-void StereoProcessing::calculateRP(StereoParametres* stereoParametres) {
+void StereoProcessing::calculateRP(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     if (stereoParametres->isEmptyRT()) {
         qDebug() << "calculateRP: Error: isEmptyRT";
         return;
     }
 
-    stereoRectify(cameraMatrix1,
-                  distCoeffs1,
-                  cameraMatrix2,
-                  distCoeffs2,
-                  imageSize1,
-                  R, T, R1, R2, P1, P2, Q);
-}
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
 
-void StereoProcessing::calculateRP2(StereoParametres* stereoParametres) {
-    if (stereoParametres->isEmptyRT()) {
-        qDebug() << "calculateRP2: Error: isEmptyRT";
-        return;
-    }
+    Mat R, T, R1, R2, P1, P2, Q;
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
-    Mat objectPoints, imagePoints1, imagePoints2;
+    stereoRectify(cameraMatrix1,
+                  distCoeffs1,
+                  cameraMatrix2,
+                  distCoeffs2,
+                  image1.size(),
+                  R, T, R1, R2, P1, P2, Q);
+}
+
+void StereoProcessing::calculateRP2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    if (stereoParametres->isEmptyRT()) {
+        qDebug() << "calculateRP2: Error: isEmptyRT";
+        return;
+    }
+
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    vector<vector<Point3f> > objectPoints;
+    vector<vector<Point2f> > imagePoints1;
+    vector<vector<Point2f> > imagePoints2;
 
     // use intrinsic parameters of each camera, but
     // compute the rectification transformation directly
     // from the fundamental matrix
+
+    Mat F, R1, R2, P1, P2;
 
     vector<Point2f> allimgpt[2];
     std::copy(imagePoints1[0].begin(), imagePoints1[0].end(), back_inserter(allimgpt[0]));
     std::copy(imagePoints2[0].begin(), imagePoints2[0].end(), back_inserter(allimgpt[1]));
     F = findFundamentalMat(Mat(allimgpt[0]), Mat(allimgpt[1]), FM_8POINT, 0, 0);
     Mat H1, H2;
-    stereoRectifyUncalibrated(Mat(allimgpt[0]), Mat(allimgpt[1]), F, imageSize1, H1, H2, 3);
+    stereoRectifyUncalibrated(Mat(allimgpt[0]), Mat(allimgpt[1]), F, image1.size(), H1, H2, 3);
     R1 = cameraMatrix1.inv() * H1 * cameraMatrix1;
     R2 = cameraMatrix2.inv() * H2 * cameraMatrix2;
     P1 = cameraMatrix1;
@@ -274,14 +301,26 @@ void StereoProcessing::calculateRP2(StereoParametres* stereoParametres) {
 
 }
 
-void StereoProcessing::calculateRMap(StereoParametres* stereoParametres) {
+void StereoProcessing::calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     if (stereoParametres->isEmptyRP()) {
         qDebug() << "calculateRMap: Error: isEmptyRP";
         return;
     }
 
-    initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, imageSize1, CV_32FC1, rmap1x, rmap1y);
-    initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, imageSize2, CV_32FC1, rmap2x, rmap2y);
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    Mat R1, R2, P1, P2;
+
+    Mat rmap1x, rmap1y, rmap2x, rmap2y;
+
+    initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, image1.size(), CV_32FC1, rmap1x, rmap1y);
+    initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, image2.size(), CV_32FC1, rmap2x, rmap2y);
 }
 
 Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres) {
