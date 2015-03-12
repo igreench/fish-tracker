@@ -167,27 +167,51 @@ StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, Stereo
 void StereoProcessing::calculateRT(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
-    Mat R, T, E, F;
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
+    Mat R = stereoParametres->getR();
+    Mat T = stereoParametres->getT();
+
+    Mat E, F;
+
+    vector<Point2f> corners1, corners2;
     Mat objectPoints, imagePoints1, imagePoints2;
+    Mat scres;
 
-    Mat R1, R2, T1, T2, r1, r2, tr1, tr2;
-    stereoCalibrate(objectPoints, imagePoints1, imagePoints2,
-                    cameraMatrix1,
-                    distCoeffs1,
-                    cameraMatrix2,
-                    distCoeffs2,
-                    image1.size(), R, T, E, F/*,
-                                                    TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 1e-6),
-                                                    CV_CALIB_FIX_ASPECT_RATIO*/);
+    if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres)) {
 
-    qDebug() << "R: " << matToString(R);
-    qDebug() << "T: " << matToString(T);
+        imagePoints1.push_back(corners1);
+        imagePoints2.push_back(corners2);
+
+        int n = BOARD_WIDTH * BOARD_HEIGHT;
+        vector<Point3f> obj;
+        for (int j = 0; j < n; j++) {
+            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+        }
+        objectPoints.push_back(obj);
+
+        /*qDebug() << "imagePoints1 size:" << imagePoints1.size();
+                    qDebug() << "imagePoints2 size:" << imagePoints2.size();
+                    qDebug() << "corners1 size:" << corners1.size();
+                    qDebug() << "corners2 size:" << corners2.size();
+                    qDebug() << "objectPoints size:" << objectPoints.size();
+                    qDebug() << "obj size:" << obj.size();*/
+
+        qDebug() << "Done creation objectPoints";
+
+        stereoCalibrate(objectPoints,
+                        imagePoints1,
+                        imagePoints2,
+                        cameraMatrix1,
+                        distCoeffs1,
+                        cameraMatrix2,
+                        distCoeffs2,
+                        image1.size(), R, T, E, F);
+    }
 }
 
 void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
@@ -199,43 +223,71 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
-    vector<Mat> rvecs1, tvecs1;
-    vector<Mat> rvecs2, tvecs2;
+    Mat R = stereoParametres->getR();
+    Mat T = stereoParametres->getT();
 
+    vector<Point2f> corners1, corners2;
     Mat objectPoints, imagePoints1, imagePoints2;
-    calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
-    calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+    Mat scres;
 
-    qDebug() << "start calculating R and T";
+    if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres)) {
 
-    Mat R1, R2, T1, T2, r1, r2, tr1, tr2;
+        imagePoints1.push_back(corners1);
+        imagePoints2.push_back(corners2);
 
-    qDebug() << "rvecs1: " << matToString(Mat(rvecs1[0]));
-    qDebug() << "tvecs1: " << matToString(Mat(tvecs1[0]));
-    qDebug() << "rvecs2: " << matToString(Mat(rvecs2[0]));
-    qDebug() << "tvecs2: " << matToString(Mat(tvecs2[0]));
+        int n = BOARD_WIDTH * BOARD_HEIGHT;
+        vector<Point3f> obj;
+        for (int j = 0; j < n; j++) {
+            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+        }
+        objectPoints.push_back(obj);
 
-    Rodrigues(Mat(rvecs1[0]), r1);
-    Rodrigues(Mat(rvecs2[0]), r2);
-    qDebug() << "r1: " << matToString(r1);
-    qDebug() << "r2: " << matToString(r2);
+        /*qDebug() << "imagePoints1 size:" << imagePoints1.size();
+                    qDebug() << "imagePoints2 size:" << imagePoints2.size();
+                    qDebug() << "corners1 size:" << corners1.size();
+                    qDebug() << "corners2 size:" << corners2.size();
+                    qDebug() << "objectPoints size:" << objectPoints.size();
+                    qDebug() << "obj size:" << obj.size();*/
 
-    transpose(r1, tr1);
-    transpose(r2, tr2);
-    qDebug() << "tr1: " << matToString(tr1);
-    qDebug() << "tr2: " << matToString(tr2);
+        qDebug() << "Done creation objectPoints";
 
-    R1 = r1 * tr2;
-    T1 = -R1 * Mat(tvecs2[0]) + Mat(tvecs1[0]);
-    qDebug() << "R1: " << matToString(R1);
-    qDebug() << "T1: " << matToString(T1);
+        vector<Mat> rvecs1, tvecs1;
+        vector<Mat> rvecs2, tvecs2;
 
-    R2 = r2 * tr1;
-    T2 = -R2 * Mat(tvecs1[0]) + Mat(tvecs2[0]);
-    qDebug() << "R2: " << matToString(R2);
-    qDebug() << "T2: " << matToString(T2);
+        calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
 
-    qDebug() << "end calculating R and T";
+        qDebug() << "start calculating R and T";
+
+        Mat R1, R2, T1, T2, r1, r2, tr1, tr2;
+
+        qDebug() << "rvecs1: " << matToString(Mat(rvecs1[0]));
+        qDebug() << "tvecs1: " << matToString(Mat(tvecs1[0]));
+        qDebug() << "rvecs2: " << matToString(Mat(rvecs2[0]));
+        qDebug() << "tvecs2: " << matToString(Mat(tvecs2[0]));
+
+        Rodrigues(Mat(rvecs1[0]), r1);
+        Rodrigues(Mat(rvecs2[0]), r2);
+        qDebug() << "r1: " << matToString(r1);
+        qDebug() << "r2: " << matToString(r2);
+
+        transpose(r1, tr1);
+        transpose(r2, tr2);
+        qDebug() << "tr1: " << matToString(tr1);
+        qDebug() << "tr2: " << matToString(tr2);
+
+        R1 = r1 * tr2;
+        T1 = -R1 * Mat(tvecs2[0]) + Mat(tvecs1[0]);
+        qDebug() << "R1: " << matToString(R1);
+        qDebug() << "T1: " << matToString(T1);
+
+        R2 = r2 * tr1;
+        T2 = -R2 * Mat(tvecs1[0]) + Mat(tvecs2[0]);
+        qDebug() << "R2: " << matToString(R2);
+        qDebug() << "T2: " << matToString(T2);
+
+        qDebug() << "end calculating R and T";
+    }
 
     //end of calculating
 }
@@ -247,14 +299,21 @@ void StereoProcessing::calculateRP(StereoImage* stereoImage, StereoParametres* s
     }
 
     Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
-
-    Mat R, T, R1, R2, P1, P2, Q;
+    //Mat image2 = stereoImage->getRight().clone();//
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    Mat R = stereoParametres->getR();
+    Mat T = stereoParametres->getT();
+    Mat R1 = stereoParametres->getR1();
+    Mat R2 = stereoParametres->getR2();
+    Mat P1 = stereoParametres->getP1();
+    Mat P2 = stereoParametres->getP2();
+
+    Mat Q;
 
     stereoRectify(cameraMatrix1,
                   distCoeffs1,

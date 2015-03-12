@@ -23,6 +23,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     commands.append("Triangulate");
     commands.append("CirclesPattern");
 
+    calculations.append("calculateRT");
+    calculations.append("calculateRT2");
+    calculations.append("calculateRP");
+    calculations.append("calculateRP2");
+    calculations.append("calculateRMap");
+
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
     stereoImage2 = new StereoImage();
@@ -153,6 +159,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 }
 
 void MainWindow::createMenu() {
+    //StereoViews
     int n = 3;
     for (int i = 0; i < n; i++) {
         QMenu *menu = new QMenu("View" + QString::number(i + 1));
@@ -183,6 +190,20 @@ void MainWindow::createMenu() {
         }
         menuBar()->addMenu(menu);
     }
+    //Calculationsr
+    QMenu *menu = new QMenu("Calculations");
+    QAction *action = new QAction("Print parametres", this);
+    menu->addAction(action);
+    menu->addSeparator();
+    connect(action, SIGNAL(triggered()), stereoParametres, SLOT(print()));
+    for (int i = 0; i < calculations.size(); i++) {
+        QString name = calculations[i];
+        QAction *action = new QAction(name, this);
+        action->setData(QString::number(i));
+        connect(action, SIGNAL(triggered()), this, SLOT(setCalculationMode()));
+        menu->addAction(action);
+    }
+    menuBar()->addMenu(menu);
 }
 
 void MainWindow::resizeStereoViews() {
@@ -409,6 +430,30 @@ void MainWindow::setIsShowingStereoImage(bool value) {
             resizeStereoViews();
             showStereoImages();
         }
+    }
+}
+
+void MainWindow::setCalculationMode() {
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action) {
+        switch (action->data().toString().toInt()) {
+        case 0:
+            stereoProcessing->calculateRT(stereoImage, stereoParametres);
+            break;
+        case 1:
+            stereoProcessing->calculateRT2(stereoImage, stereoParametres);
+            break;
+        case 2:
+            stereoProcessing->calculateRP(stereoImage, stereoParametres);
+            break;
+        case 3:
+            stereoProcessing->calculateRP2(stereoImage, stereoParametres);
+            break;
+        case 4:
+            stereoProcessing->calculateRMap(stereoImage, stereoParametres);
+            break;
+        }
+        //QCoreApplication::processEvents();
     }
 }
 

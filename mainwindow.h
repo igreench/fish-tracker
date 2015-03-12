@@ -42,6 +42,7 @@ public slots:
     void setSgbmP2(int value);
 
     void setStereoViewMode();
+    void setCalculationMode();
 
     void start();
 
@@ -103,6 +104,7 @@ private:
     QTimer *timer;
 
     QStringList commands;
+    QStringList calculations;
 
 };
 

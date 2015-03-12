@@ -3,6 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 
+#include <QObject>
 #include <QString>
 
 using namespace cv;
@@ -14,7 +15,8 @@ QString templateMatToString(Mat mat);
 QString matToString(Mat mat);
 Mat stringToMat(QString str);
 
-class StereoParametres {
+class StereoParametres : public QObject {
+    Q_OBJECT
 public:
     StereoParametres();
 
@@ -56,6 +58,8 @@ public:
     bool isEmptyRT();
     bool isEmptyRP();
     bool isEmptyRMap();
+
+public slots:
     void print();
 
 private:
