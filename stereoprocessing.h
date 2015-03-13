@@ -11,6 +11,17 @@ using namespace std;
 
 namespace stereo {
 
+struct Description {
+    std::string source;//!< Source name
+    cv::Mat A;//!< Intristics
+    cv::Mat d;//!< Distorsion coefficents
+    cv::Mat R;//!< Cam rotation matrix
+    cv::Mat t;//!< Tramslation vector
+    std::vector<cv::Point3d> points;//!< Undistort point on image plane (u,v,1)
+    int cols;//!< Number of cols in the source image
+    int rows;//!< Number of rows int the source image
+};
+
 class StereoProcessing {
 public:
     //Is it utility class?
@@ -30,9 +41,14 @@ public:
     void calculateRP2(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
 
+    std::vector<cv::Point3d> intersect(Description* a,Description* b);
+
 private:
     static const int BOARD_WIDTH = 9; //8
     static const int BOARD_HEIGHT = 8; //9
+
+    Description descriptionLeft;
+    Description descriptionRight;
 };
 
 }

@@ -178,8 +178,11 @@ void StereoProcessing::calculateRT(StereoImage* stereoImage, StereoParametres* s
 
     Mat E, F;
 
+    vector<vector<Point3f> > objectPoints;
+    vector<vector<Point2f> > imagePoints1;
+    vector<vector<Point2f> > imagePoints2;
+
     vector<Point2f> corners1, corners2;
-    Mat objectPoints, imagePoints1, imagePoints2;
     Mat scres;
 
     if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres)) {
@@ -211,6 +214,20 @@ void StereoProcessing::calculateRT(StereoImage* stereoImage, StereoParametres* s
                         cameraMatrix2,
                         distCoeffs2,
                         image1.size(), R, T, E, F);
+
+
+        //WTF
+        /*qDebug() << "R: " << matToString(R);
+        qDebug() << "T: " << matToString(T);
+
+        qDebug() << "R: " << matToString(stereoParametres->getR());
+        qDebug() << "T: " << matToString(stereoParametres->getT());*/
+
+        stereoParametres->setR(R);
+        stereoParametres->setT(T);
+
+        qDebug() << "R: " << matToString(stereoParametres->getR());
+        qDebug() << "T: " << matToString(stereoParametres->getT());
     }
 }
 
@@ -226,8 +243,11 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
     Mat R = stereoParametres->getR();
     Mat T = stereoParametres->getT();
 
+    vector<vector<Point3f> > objectPoints;
+    vector<vector<Point2f> > imagePoints1;
+    vector<vector<Point2f> > imagePoints2;
+
     vector<Point2f> corners1, corners2;
-    Mat objectPoints, imagePoints1, imagePoints2;
     Mat scres;
 
     if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres)) {
