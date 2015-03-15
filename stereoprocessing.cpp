@@ -11,32 +11,17 @@
 
 #include <QDebug>
 
-#define VERBOSE false
+#define VERBOSE true
 
 using namespace stereo;
 using namespace std;
 using namespace cv;
 
-StereoProcessing::StereoProcessing()
-{
+StereoProcessing::StereoProcessing() {
+    descriptionLeft = new Description();
+    descriptionRight = new Description();
+    isDescription = false;
 }
-/*
-void StereoProcessing::setStereoImage(StereoImage* stereoImage) {
-    this->stereoImage = stereoImage;
-}
-
-void StereoProcessing::setStereoParametres(StereoParametres* stereoParametres) {
-    this->stereoParametres = stereoParametres;
-}
-
-StereoImage* StereoProcessing::getStereoImage() {
-    return stereoImage;
-}
-
-StereoParametres* StereoProcessing::getStereoParametres() {
-    return stereoParametres;
-}
-*/
 
 StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
@@ -278,11 +263,43 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
         vector<Mat> rvecs1, tvecs1;
         vector<Mat> rvecs2, tvecs2;
 
-        //calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
-        //calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+        calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
 
-        solvePnP(objectPoints, imagePoints1, cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
-        solvePnP(objectPoints, imagePoints2, cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+        //solvePnP(objectPoints, imagePoints1, cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        //solvePnP(objectPoints, imagePoints2, cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+
+        //Description
+
+        std::vector<cv::Point3d> points1;
+        for (int i = 0; i < corners1.size(); i++) {
+            points1.push_back(Point3d(corners1[i].x, corners1[i].y, 1));
+        }
+
+        std::vector<cv::Point3d> points2;
+        for (int i = 0; i < corners2.size(); i++) {
+            points2.push_back(Point3d(corners2[i].x, corners2[i].y, 1));
+        }
+
+        descriptionLeft->source = "left";
+        descriptionLeft->A = cameraMatrix1;
+        descriptionLeft->d = distCoeffs1;
+        descriptionLeft->R = rvecs1[0];
+        descriptionLeft->t = tvecs1[0];
+        descriptionLeft->points = points1;
+        descriptionLeft->cols = image1.cols;
+        descriptionLeft->rows = image1.rows;
+
+        descriptionRight->source = "right";
+        descriptionRight->A = cameraMatrix2;
+        descriptionRight->d = distCoeffs2;
+        descriptionRight->R = rvecs2[0];
+        descriptionRight->t = tvecs2[0];
+        descriptionRight->points = points2;
+        descriptionRight->cols = image2.cols;
+        descriptionRight->rows = image2.rows;
+
+        isDescription = true;
 
         qDebug() << "start calculating R and T";
 
@@ -760,18 +777,29 @@ StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoPara
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
-    Mat imageSmall = Mat(image1.rows / 4, image1.cols / 4, CV_8UC3);
-    Size imageSizeSmall = imageSmall.size(); //400x300
-
-    /*Mat cameraMatrix1 = (Mat_<double>(3,3) << 1806.53,0,815.786,0,1595.14,590.314,0,0,1);
-    Mat distCoeffs1 = (Mat_<double>(1,5) << -0.267514,0.213748,0.00136627,0.000194796,0);
-    Mat cameraMatrix2 = (Mat_<double>(3,3) << 1739.3,0,808.929,0,1542.11,581.767,0,0,1);
-    Mat distCoeffs2 = (Mat_<double>(1,5) << -0.247249,0.161344,-0.00280154,0.000444185,0);*/
-
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    if (isDescription) {
+        qDebug() << "Intersection";
+        vector<Point3d> obj1 = intersect(descriptionLeft, descriptionRight);
+        vector<Point3d> obj2 = intersect(descriptionRight, descriptionRight);
+        vector<Point2f> imagePoints1, imagePoints2;
+        qDebug() << "Projecting points";
+        cv::projectPoints(Mat(obj1), descriptionLeft->R, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
+        cv::projectPoints(Mat(obj2), descriptionRight->R, descriptionRight->t, cameraMatrix2, distCoeffs2, imagePoints2);
+        for(unsigned int i = 0; i < imagePoints1.size(); ++i) {
+            circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
+            //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+        }
+        for(unsigned int i = 0; i < imagePoints2.size(); ++i) {
+            circle(image2, Point2d(imagePoints2[i].x, imagePoints2[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
+            //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+        }
+        return new StereoImage(image1, image2);
+    }
 
     return stereoImage;
 }

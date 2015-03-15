@@ -319,7 +319,7 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         image = stereoProcessing->disparityMap(stereoImage, stereoParametres);
         return new StereoImage(image, image);
         case 5:
-        return stereoProcessing->triangulate(stereoImage, stereoParametres);
+        return stereoProcessing->triangulate2(stereoImage, stereoParametres);
         case 6:
         image = stereoProcessing->circlesPattern();
         return new StereoImage(image, image);

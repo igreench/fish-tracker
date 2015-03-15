@@ -54,8 +54,10 @@ private:
     static const int BOARD_WIDTH = 9; //8
     static const int BOARD_HEIGHT = 8; //9
 
-    Description descriptionLeft;
-    Description descriptionRight;
+    Description *descriptionLeft;
+    Description *descriptionRight;
+
+    bool isDescription;
 };
 
 }
