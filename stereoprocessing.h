@@ -11,12 +11,18 @@ using namespace std;
 
 namespace stereo {
 
+struct sort_pred {
+    bool operator()(const std::pair<double,cv::Point3d> &left, const std::pair<double,cv::Point3d> &right) {
+        return left.first < right.first;
+    }
+};
+
 struct Description {
     std::string source;//!< Source name
     cv::Mat A;//!< Intristics
     cv::Mat d;//!< Distorsion coefficents
     cv::Mat R;//!< Cam rotation matrix
-    cv::Mat t;//!< Tramslation vector
+    cv::Mat t;//!< Translation vector
     std::vector<cv::Point3d> points;//!< Undistort point on image plane (u,v,1)
     int cols;//!< Number of cols in the source image
     int rows;//!< Number of rows int the source image
@@ -27,10 +33,11 @@ public:
     //Is it utility class?
     StereoProcessing();
     StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
     StereoImage* undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
     StereoImage* triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    StereoImage* triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat circlesPattern();
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
