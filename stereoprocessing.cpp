@@ -140,6 +140,7 @@ StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, Stereo
 
     if (stereoParametres->isEmptyRMap()) {
         qDebug() << "Exception: isEmptyRMap";
+        //CV_<bit_depth>(S|U|F)C<number_channels>
         initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, image1.size(), CV_32FC1, rmap1x, rmap1y);
         initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, image2.size(), CV_32FC1, rmap2x, rmap2y);
     }
@@ -643,8 +644,8 @@ bool StereoProcessing::addImage(const Mat im, vector<Point2f> *imageCorners, Mat
 std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description* b)
 {
     int _maxdepth = 1000;
-    int _width = 1600;
-    int _height = 1200;
+    int _width = a->cols;
+    int _height = a->rows;
 
     std::vector<std::pair<double,cv::Point3d> > pairs;
     std::vector<cv::Point3d> result;
@@ -672,6 +673,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
         cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
 
 
+        qDebug() << "intersect: 1";
         for(unsigned int i=0;i<a->points.size();i++)
         {
             cv::Mat p1 = cv::Mat(a->points[i]);
@@ -760,6 +762,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
         qDebug() << "Exception:" << ex.what();
     }
 
+    qDebug() << "intersect: 2";
     std::sort(pairs.begin(), pairs.end(), sort_pred());
 
     //Find minimal number of points )))
