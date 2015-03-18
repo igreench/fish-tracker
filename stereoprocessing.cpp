@@ -40,7 +40,7 @@ StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, St
 
 Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
+    Mat image2 = stereoImage->getRight().clone();    
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
@@ -100,6 +100,93 @@ Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* 
     qDebug() << "StereoProcessing::projectPoints: didn't find calibration desks";
     return stereoImage->getLeft();
 }
+
+Mat StereoProcessing::projectUndistortPoints(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+    Mat image = undistortStereoImage(stereoImage, stereoParametres)->getLeft();
+
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    vector<Point2f> corners1, corners2;
+
+    Mat scres;
+
+    if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres)) {
+
+        vector<vector<Point3f> > objectPoints;
+        vector<vector<Point2f> > imagePoints1;
+        vector<vector<Point2f> > imagePoints2;
+
+        imagePoints1.push_back(corners1);
+        imagePoints2.push_back(corners2);
+
+        int n = BOARD_WIDTH * BOARD_HEIGHT;
+        vector<Point3f> obj;
+        for (int j = 0; j < n; j++) {
+            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+        }
+        objectPoints.push_back(obj);
+
+        /*qDebug() << "imagePoints1 size:" << imagePoints1.size();
+        qDebug() << "imagePoints2 size:" << imagePoints2.size();
+        qDebug() << "corners1 size:" << corners1.size();
+        qDebug() << "corners2 size:" << corners2.size();
+        qDebug() << "objectPoints size:" << objectPoints.size();
+        qDebug() << "obj size:" << obj.size();*/
+
+        qDebug() << "Done creation objectPoints";
+
+        vector<Point2f> imagePoints;
+
+        vector<Mat> rvecs1, tvecs1;
+        vector<Mat> rvecs2, tvecs2;
+        calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+
+        undistortPoints(corners1, corners1, cameraMatrix1, distCoeffs1);
+        undistortPoints(corners2, corners2, cameraMatrix2, distCoeffs2);
+
+        double fx = cameraMatrix1.at<double>(0,0);
+        double fy = cameraMatrix1.at<double>(1,1);
+        double cx = cameraMatrix1.at<double>(0,2);
+        double cy = cameraMatrix1.at<double>(1,2);
+
+        for (int i = 0; i < corners1.size(); ++i) {
+            // perform transformation.
+            // In fact this is equivalent to multiplication to camera matrix
+            corners1[i].x = corners1[i].x * fx + cx;
+            corners1[i].y = corners1[i].y * fy + cy;
+        }
+
+        qDebug() << "cameraMatrix1: " << matToString(cameraMatrix1);
+        qDebug() << "distCoeffs1: " << matToString(distCoeffs1);
+
+        cv::projectPoints(Mat(obj), rvecs1[0], tvecs1[0], cameraMatrix1, distCoeffs1, imagePoints);
+
+        /*Size pattern_size = Size(BOARD_WIDTH, BOARD_HEIGHT);
+        drawChessboardCorners(image1_1, pattern_size, imagePoints1, true);*/
+
+        qDebug() << "imagePoints size:" << imagePoints.size();
+        for(unsigned int i = 0; i < imagePoints.size(); ++i) {
+            circle(image, Point2d(imagePoints[i].x, imagePoints[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
+            qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+        }
+
+        qDebug() << "corners1 size:" << corners1.size();
+        for(unsigned int i = 0; i < corners1.size(); ++i) {
+            circle(image, Point2d(corners1[i].x, corners1[i].y), 10, Scalar( 0, 0, 255 ), CV_FILLED, 8, 0);
+            qDebug() << "x:" << corners1[i].x << "y:" << corners1[i].y;
+        }
+        return image;
+    }
+    qDebug() << "StereoProcessing::projectPoints: didn't find calibration desks";
+    return stereoImage->getLeft();
+}
+
 
 StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
@@ -272,6 +359,45 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
 
         //Description
 
+        /*std::vector<cv::Point3d> undistortImagePoints1(corners1.size());
+        std::vector<cv::Point3d> undistortImagePoints2(corners2.size());
+        undistortPoints(corners1, undistortImagePoints1, cameraMatrix1, distCoeffs1);
+        undistortPoints(corners2, undistortImagePoints2, cameraMatrix2, distCoeffs2);*/
+
+        //!
+        undistortPoints(corners1, corners1, cameraMatrix1, distCoeffs1);
+        undistortPoints(corners2, corners2, cameraMatrix2, distCoeffs2);
+
+        double fx = cameraMatrix1.at<double>(0,0);
+        double fy = cameraMatrix1.at<double>(1,1);
+        double cx = cameraMatrix1.at<double>(0,2);
+        double cy = cameraMatrix1.at<double>(1,2);
+
+        for (int i = 0; i < corners1.size(); ++i) {
+            // perform transformation.
+            // In fact this is equivalent to multiplication to camera matrix
+            corners1[i].x = corners1[i].x * fx + cx;
+            corners1[i].y = corners1[i].y * fy + cy;
+        }
+
+        fx = cameraMatrix2.at<double>(0,0);
+        fy = cameraMatrix2.at<double>(1,1);
+        cx = cameraMatrix2.at<double>(0,2);
+        cy = cameraMatrix2.at<double>(1,2);
+
+        for (int i = 0; i < corners2.size(); ++i) {
+            // perform transformation.
+            // In fact this is equivalent to multiplication to camera matrix
+            corners2[i].x = corners2[i].x * fx + cx;
+            corners2[i].y = corners2[i].y * fy + cy;
+        }
+
+        qDebug() << "corners1 size:" << corners1.size();
+        qDebug() << "corners2 size:" << corners2.size();
+
+        //undistortPoints(corners1, corners1, cameraMatrix1, distCoeffs1);
+        //undistortPoints(corners2, corners2, cameraMatrix2, distCoeffs2);
+
         std::vector<cv::Point3d> points1;
         for (int i = 0; i < corners1.size(); i++) {
             points1.push_back(Point3d(corners1[i].x, corners1[i].y, 1));
@@ -283,7 +409,6 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
         }
 
         Mat rr1, rr2;
-
         descriptionLeft->source = "left";
         descriptionLeft->A = cameraMatrix1;
         descriptionLeft->d = distCoeffs1;

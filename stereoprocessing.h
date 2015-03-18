@@ -39,6 +39,7 @@ public:
     StereoImage* triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    Mat projectUndistortPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat circlesPattern();
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);

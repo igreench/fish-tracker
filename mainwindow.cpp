@@ -312,6 +312,7 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         return stereoProcessing->undistortStereoImage(stereoImage, stereoParametres);
         case 2:
         image = stereoProcessing->projectPoints(stereoImage, stereoParametres);
+        //image = stereoProcessing->projectUndistortPoints(stereoImage, stereoParametres);
         return new StereoImage(image, image);
         case 3:
         return stereoProcessing->undistortRectify(stereoImage, stereoParametres);
