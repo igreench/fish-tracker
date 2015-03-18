@@ -282,10 +282,16 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
             points2.push_back(Point3d(corners2[i].x, corners2[i].y, 1));
         }
 
+        Mat rr1, rr2;
+
         descriptionLeft->source = "left";
         descriptionLeft->A = cameraMatrix1;
         descriptionLeft->d = distCoeffs1;
-        descriptionLeft->R = rvecs1[0];
+        temp = rvecs1[0];
+        qDebug() << "temp: " << matToString(temp);
+        Rodrigues(rvecs1[0], rr1);
+        //descriptionLeft->R = rvecs1[0];
+        descriptionLeft->R = rr1;
         descriptionLeft->t = tvecs1[0];
         descriptionLeft->points = points1;
         descriptionLeft->cols = image1.cols;
@@ -294,7 +300,9 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
         descriptionRight->source = "right";
         descriptionRight->A = cameraMatrix2;
         descriptionRight->d = distCoeffs2;
-        descriptionRight->R = rvecs2[0];
+        Rodrigues(rvecs2[0], rr2);
+        //descriptionRight->R = rvecs2[0];
+        descriptionRight->R = rr2;
         descriptionRight->t = tvecs2[0];
         descriptionRight->points = points2;
         descriptionRight->cols = image2.cols;
@@ -647,7 +655,184 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
     int _width = a->cols;
     int _height = a->rows;
 
+    qDebug() << "a->A: " << matToString(a->A);
+    qDebug() << "a->d: " << matToString(a->d);
+    qDebug() << "a->R: " << matToString(a->R);
+    qDebug() << "a->t: " << matToString(a->t);
+
+    qDebug() << "b->A: " << matToString(b->A);
+    qDebug() << "b->d: " << matToString(b->d);
+    qDebug() << "b->R: " << matToString(b->R);
+    qDebug() << "b->t: " << matToString(b->t);
+/*
+    a->A.convertTo(a->A, CV_64F);
+    a->d.convertTo(a->d, CV_64F);
+    a->R.convertTo(a->R, CV_64F);
+    a->t.convertTo(a->t, CV_64F);
+
+    b->A.convertTo(b->A, CV_64F);
+    b->d.convertTo(b->d, CV_64F);
+    b->R.convertTo(b->R, CV_64F);
+    b->t.convertTo(b->t, CV_64F);
+    */
+
+    qDebug() << "a->A: " << matToString(a->A);
+    qDebug() << "a->d: " << matToString(a->d);
+    qDebug() << "a->R: " << matToString(a->R);
+    qDebug() << "a->t: " << matToString(a->t);
+
+    qDebug() << "b->A: " << matToString(b->A);
+    qDebug() << "b->d: " << matToString(b->d);
+    qDebug() << "b->R: " << matToString(b->R);
+    qDebug() << "b->t: " << matToString(b->t);
+
     std::vector<std::pair<double,cv::Point3d> > pairs;
+    std::vector<cv::Point3d> result;
+    try{
+
+        cv::Mat Ainv1,Ainv2;
+        cv::invert(a->A,Ainv1);
+        cv::invert(b->A,Ainv2);
+
+        //Переходим к системе координат камеры а
+        cv::Mat R1 = a->R;
+        cv::Mat R2 = b->R;
+        cv::Mat t1 = a->t;
+        cv::Mat t2 = b->t;
+
+      /*qDebug() << "A1:" << (Ainv1.depth()==CV_64FC1)<< "A2:" << (Ainv2.depth()==CV_64FC1);
+        qDebug() << "t1:" << (t1.depth()==CV_64FC1)<< "t2:" << (t2.depth()==CV_64FC1);
+        qDebug() << "R1:" << (R1.depth()==CV_64FC1)<< "R2:" << (R2.depth()==CV_64FC1);*/
+
+        cv::Mat R = R2*R1.t();
+        qDebug() << "R: " << matToString(R);
+        cv::Mat t = -R*t1+t2;
+        qDebug() << "t: " << matToString(t);
+
+        cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
+        cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
+
+        for(unsigned int i=0;i<a->points.size();i++) {
+            cv::Mat p1 = cv::Mat(a->points[i]);
+            F.at<double>(0,0) = cv::Mat(p1.t()*Ainv1.t()*Ainv1*p1).at<double>(0,0);
+            cv::Mat J1 = -p1.t()*Ainv1.t()*R.t();
+
+            for(unsigned int j=0;j<b->points.size();j++)
+            {
+                cv::Mat p2 = cv::Mat(b->points[j]);
+                F.at<double>(0,1) = F.at<double>(1,0) = cv::Mat(-p1.t()*Ainv1.t()*R.t()*Ainv2*p2).at<double>(0,0);
+                F.at<double>(1,1) = cv::Mat(p2.t()*Ainv2.t()*Ainv2*p2).at<double>(0,0);
+
+                cv::Mat J2 = p2.t()*Ainv2.t();
+
+                for(int k=0;k<3;k++) {
+                    J.at<double>(0,k)=J1.at<double>(0,k);
+                    J.at<double>(1,k)=J2.at<double>(0,k);
+                }
+
+                cv::Mat Finv;
+                cv::invert(F,Finv);
+
+                cv::Mat Z= Finv*J*t;
+
+                cv::Mat pp1=Z.at<double>(0,0)*Ainv1*p1;
+                cv::Mat pp2=Z.at<double>(1,0)*Ainv2*p2;
+
+                if(pp1.at<double>(2,0)<=0||pp2.at<double>(2,0)<=0) {
+                    //Bad intersection
+                    if(VERBOSE) {
+                        qDebug() << "Bad intersection";
+                    }
+                    continue;
+                }
+
+
+                if(pp1.at<double>(2,0)>_maxdepth||pp2.at<double>(2,0)>_maxdepth) {
+                    //To far
+                    if(VERBOSE) {
+                        qDebug() << "To far";
+                    }
+                    continue;
+                }
+
+                double u1 = a->A.at<double>(0,0)*pp1.at<double>(0,0)/pp1.at<double>(2,0)+a->A.at<double>(0,2);
+                double v1 = a->A.at<double>(1,1)*pp1.at<double>(1,0)/pp1.at<double>(2,0)+a->A.at<double>(1,2);
+
+                if(u1<0||u1>=_width||v1<0||v1>=_height) {
+                    //Out of vision field
+                    if(VERBOSE) {
+                        qDebug() << "Out of vision field u1 v1" << u1 << v1;
+                    }
+                    continue;
+                }
+
+                double u2 = b->A.at<double>(0,0)*pp2.at<double>(0,0)/pp2.at<double>(2,0)+b->A.at<double>(0,2);
+                double v2 = b->A.at<double>(1,1)*pp2.at<double>(1,0)/pp2.at<double>(2,0)+b->A.at<double>(1,2);
+
+                if(u2<0||u2>=_width||v2<0||v2>=_height) {
+                    //Out of vision field
+                    if(VERBOSE) {
+                        qDebug() << "Out of vision field u2 v2"<< u2 << v2;
+                    }
+                    continue;
+                }
+
+                qDebug() << "pp1-t1: " << matToString(pp1-t1);
+                qDebug() << "pp2-t2: " << matToString(pp2-t2);
+
+                cv::Mat Mresult1 = R1.t()*(pp1-t1);
+                cv::Mat Mresult2 = R2.t()*(pp2-t2);
+
+                cv::Mat Mresult = (Mresult1+Mresult2)/2;
+               // result.push_back(cv::Point3d(Mresult));
+
+
+                //debug
+                qDebug() << "R1.t(): " << matToString(R1.t());
+                qDebug() << "R2.t(): " << matToString(R2.t());
+                qDebug() << "Mresult1: " << matToString(Mresult1);
+                qDebug() << "Mresult2: " << matToString(Mresult2);
+                qDebug() << "Mresult: " << matToString(Mresult);
+
+                /*std::pair<double,cv::Point3d> pair;
+                qDebug() << "1";
+                pair.first = cv::norm(cv::Point3d(Mresult1.at<double>(0,0)) - cv::Point3d(Mresult2.at<double>(0,0)));
+                qDebug() << "2";
+                pair.second = cv::Point3d(Mresult);*/
+
+                qDebug() << "start pairs.push_back";
+                pairs.push_back(std::make_pair < double, cv::Point3d > (cv::norm(cv::Point3d(Mresult1)-cv::Point3d(Mresult2)),cv::Point3d(Mresult)));
+                //.at<double>(0,0)
+                //pairs.push_back(std::make_pair < double, cv::Point3d > (cv::norm(cv::Point3d(Mresult1.at<double>(0,0) - Mresult2.at<double>(0,0))),cv::Point3d(Mresult.at<double>(0,0))));
+                //pairs.push_back(std::make_pair < double, cv::Point3d > (0, cv::Point3d(Mresult.at<double>(0,0))));
+            }
+        }
+    }catch(cv::Exception &ex)
+    {
+        qDebug() << "Exception:" << ex.what();
+    }
+
+    qDebug() << "intersect: 2";
+    std::sort(pairs.begin(), pairs.end(), sort_pred());
+
+    //Find minimal number of points )))
+    int minpts = a->points.size()<b->points.size() ? a->points.size(): b->points.size();
+    int minnumber = pairs.size()<minpts?pairs.size():minpts;
+    for(int i=0;i<minnumber;i++)
+    {
+        result.push_back(pairs[i].second);
+    }
+    return result;
+
+}
+
+std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description* b)
+{
+    int _maxdepth = 1000;
+    int _width = a->cols;
+    int _height = a->rows;
+
+    std::vector<std::pair<float,cv::Point3d> > pairs;
     std::vector<cv::Point3d> result;
     try{
 
@@ -669,40 +854,42 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
         cv::Mat t = -R*t1+t2;
 
 
-        cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
-        cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
+        //cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
+        //cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
+        cv::Mat J = cv::Mat(2,3,CV_32FC1,cv::Scalar::all(0));
+        cv::Mat F = cv::Mat(2,2,CV_32FC1,cv::Scalar::all(0));
 
 
         qDebug() << "intersect: 1";
         for(unsigned int i=0;i<a->points.size();i++)
         {
             cv::Mat p1 = cv::Mat(a->points[i]);
-            F.at<double>(0,0) = cv::Mat(p1.t()*Ainv1.t()*Ainv1*p1).at<double>(0,0);
+            F.at<float>(0,0) = cv::Mat(p1.t()*Ainv1.t()*Ainv1*p1).at<float>(0,0);
             cv::Mat J1 = -p1.t()*Ainv1.t()*R.t();
 
             for(unsigned int j=0;j<b->points.size();j++)
             {
                 cv::Mat p2 = cv::Mat(b->points[j]);
-                F.at<double>(0,1) = F.at<double>(1,0) = cv::Mat(-p1.t()*Ainv1.t()*R.t()*Ainv2*p2).at<double>(0,0);
-                F.at<double>(1,1) = cv::Mat(p2.t()*Ainv2.t()*Ainv2*p2).at<double>(0,0);
+                F.at<float>(0,1) = F.at<float>(1,0) = cv::Mat(-p1.t()*Ainv1.t()*R.t()*Ainv2*p2).at<float>(0,0);
+                F.at<float>(1,1) = cv::Mat(p2.t()*Ainv2.t()*Ainv2*p2).at<float>(0,0);
 
                 cv::Mat J2 = p2.t()*Ainv2.t();
 
 
                 for(int k=0;k<3;k++)
                 {
-                    J.at<double>(0,k)=J1.at<double>(0,k);
-                    J.at<double>(1,k)=J2.at<double>(0,k);
+                    J.at<float>(0,k)=J1.at<float>(0,k);
+                    J.at<float>(1,k)=J2.at<float>(0,k);
                 }
                 cv::Mat Finv;
                 cv::invert(F,Finv);
 
                 cv::Mat Z= Finv*J*t;
 
-                cv::Mat pp1=Z.at<double>(0,0)*Ainv1*p1;
-                cv::Mat pp2=Z.at<double>(1,0)*Ainv2*p2;
+                cv::Mat pp1=Z.at<float>(0,0)*Ainv1*p1;
+                cv::Mat pp2=Z.at<float>(1,0)*Ainv2*p2;
 
-                if(pp1.at<double>(2,0)<=0||pp2.at<double>(2,0)<=0)
+                if(pp1.at<float>(2,0)<=0||pp2.at<float>(2,0)<=0)
                 {
                     //Bad intersection
                     if(VERBOSE)
@@ -713,7 +900,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
                 }
 
 
-                if(pp1.at<double>(2,0)>_maxdepth||pp2.at<double>(2,0)>_maxdepth)
+                if(pp1.at<float>(2,0)>_maxdepth||pp2.at<float>(2,0)>_maxdepth)
                 {
                     //To far
                     if(VERBOSE)
@@ -723,8 +910,8 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
                     continue;
                 }
 
-                double u1 = a->A.at<double>(0,0)*pp1.at<double>(0,0)/pp1.at<double>(2,0)+a->A.at<double>(0,2);
-                double v1 = a->A.at<double>(1,1)*pp1.at<double>(1,0)/pp1.at<double>(2,0)+a->A.at<double>(1,2);
+                float u1 = a->A.at<float>(0,0)*pp1.at<float>(0,0)/pp1.at<float>(2,0)+a->A.at<float>(0,2);
+                float v1 = a->A.at<float>(1,1)*pp1.at<float>(1,0)/pp1.at<float>(2,0)+a->A.at<float>(1,2);
 
                 if(u1<0||u1>=_width||v1<0||v1>=_height)
                 {
@@ -736,8 +923,8 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
                     continue;
                 }
 
-                double u2 = b->A.at<double>(0,0)*pp2.at<double>(0,0)/pp2.at<double>(2,0)+b->A.at<double>(0,2);
-                double v2 = b->A.at<double>(1,1)*pp2.at<double>(1,0)/pp2.at<double>(2,0)+b->A.at<double>(1,2);
+                float u2 = b->A.at<float>(0,0)*pp2.at<float>(0,0)/pp2.at<float>(2,0)+b->A.at<float>(0,2);
+                float v2 = b->A.at<float>(1,1)*pp2.at<float>(1,0)/pp2.at<float>(2,0)+b->A.at<float>(1,2);
 
                 if(u2<0||u2>=_width||v2<0||v2>=_height)
                 {
@@ -754,7 +941,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
 
                 cv::Mat Mresult = (Mresult1+Mresult2)/2;
                // result.push_back(cv::Point3d(Mresult));
-                pairs.push_back(std::make_pair<double,cv::Point3d>(cv::norm(cv::Point3d(Mresult1)-cv::Point3d(Mresult2)),cv::Point3d(Mresult)));
+                pairs.push_back(std::make_pair<float,cv::Point3d>(cv::norm(cv::Point3d(Mresult1)-cv::Point3d(Mresult2)),cv::Point3d(Mresult)));
             }
         }
     }catch(cv::Exception &ex)
@@ -788,20 +975,40 @@ StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoPara
     if (isDescription) {
         qDebug() << "Intersection";
         vector<Point3d> obj1 = intersect(descriptionLeft, descriptionRight);
-        vector<Point3d> obj2 = intersect(descriptionRight, descriptionRight);
-        vector<Point2f> imagePoints1, imagePoints2;
+        //vector<Point3d> obj2 = intersect(descriptionRight, descriptionRight);
+        vector<Point2d> imagePoints1, imagePoints2;
         qDebug() << "Projecting points";
-        cv::projectPoints(Mat(obj1), descriptionLeft->R, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
-        cv::projectPoints(Mat(obj2), descriptionRight->R, descriptionRight->t, cameraMatrix2, distCoeffs2, imagePoints2);
+
+        qDebug() << "obj1 size:" << obj1.size();
+        //qDebug() << "obj2 size:" << obj2.size();
+        for (int i = 0; i < obj1.size(); i ++) {
+            qDebug() << "obj1: x: " << obj1[i].x << " y: " << obj1[i].y << " z: " << obj1[i].z;
+        }
+        /*for (int i = 0; i < obj2.size(); i ++) {
+            qDebug() << "obj2: x: " << obj2[i].x << " y: " << obj2[i].y << " z: " << obj2[i].z;
+        }*/
+
+        //Mat r;
+        //Rodrigues(descriptionLeft->R, r);
+
+        /*vector<Point3f> obj;
+        for (int j = 0; j < n; j++) {
+            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+        }*/
+
+        cv::projectPoints(obj1, temp, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
+        //cv::projectPoints(Mat(obj2), descriptionRight->R, descriptionRight->t, cameraMatrix2, distCoeffs2, imagePoints2);
         for(unsigned int i = 0; i < imagePoints1.size(); ++i) {
             circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
-            //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
+            qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
         }
         for(unsigned int i = 0; i < imagePoints2.size(); ++i) {
-            circle(image2, Point2d(imagePoints2[i].x, imagePoints2[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
+//            circle(image2, Point2d(imagePoints2[i].x, imagePoints2[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
             //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
         }
-        return new StereoImage(image1, image2);
+        //return stereoImage;
+        //return new StereoImage(image1, image2);
+        return new StereoImage(image1, image1);
     }
 
     return stereoImage;

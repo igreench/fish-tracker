@@ -190,7 +190,7 @@ void MainWindow::createMenu() {
         }
         menuBar()->addMenu(menu);
     }
-    //Calculationsr
+    //Calculations
     QMenu *menu = new QMenu("Calculations");
     QAction *action = new QAction("Print parametres", this);
     menu->addAction(action);
@@ -503,8 +503,7 @@ void MainWindow::setStereoViewMode() {
     }
 }
 
-void MainWindow::on_pushButton_8_clicked()
-{
+void MainWindow::on_pushButton_8_clicked() {
     if (!ui->lineEdit->text().isEmpty()) {
         if (isStarted) {
             ioData->saveMat(stereoImage->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
@@ -517,8 +516,7 @@ void MainWindow::on_pushButton_8_clicked()
     }
 }
 
-void MainWindow::on_pushButton_9_clicked()
-{
+void MainWindow::on_pushButton_9_clicked() {
     if (!ui->lineEdit_2->text().isEmpty()) {
         ioData->saveStereoParametres(ui->lineEdit_2->text() + ".txt", stereoParametres);
     } else {
@@ -526,8 +524,7 @@ void MainWindow::on_pushButton_9_clicked()
     }
 }
 
-void MainWindow::on_pushButton_5_clicked()
-{
+void MainWindow::on_pushButton_5_clicked() {
     qDebug() << ui->listView_2->currentIndex().data().toString();
     ioData->loadStereoParametres(ui->listView_2->currentIndex().data().toString(), stereoParametres);
     //ioData->loadStereoParametres("data.txt", stereoParametres);
@@ -539,8 +536,7 @@ void MainWindow::on_pushButton_5_clicked()
     }
 }
 
-void MainWindow::on_pushButton_4_clicked()
-{
+void MainWindow::on_pushButton_4_clicked() {
     qDebug() << ui->listView->currentIndex().data().toString();
     QString s = ui->listView->currentIndex().data().toString();
     loadLocalStereoImage("image1" + s.toStdString() + ".jpg", "image2" + s.toStdString() + ".jpg");
@@ -551,8 +547,7 @@ void MainWindow::on_pushButton_4_clicked()
     }
 }
 
-void MainWindow::on_pushButton_3_clicked()
-{
+void MainWindow::on_pushButton_3_clicked() {
     if (!isCapture) {
         camera3d = new Camera3D();
         if (camera3d->isConnected()) {

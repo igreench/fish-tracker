@@ -17,6 +17,7 @@ struct sort_pred {
     }
 };
 
+//What is format of matrices R and t?
 struct Description {
     std::string source;//!< Source name
     cv::Mat A;//!< Intristics
@@ -49,6 +50,7 @@ public:
     void calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
 
     std::vector<cv::Point3d> intersect(Description* a,Description* b);
+    std::vector<cv::Point3d> intersect2(Description* a,Description* b);
 
 private:
     static const int BOARD_WIDTH = 9; //8
@@ -58,6 +60,8 @@ private:
     Description *descriptionRight;
 
     bool isDescription;
+
+    Mat temp;
 };
 
 }
