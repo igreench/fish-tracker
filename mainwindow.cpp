@@ -444,29 +444,31 @@ void MainWindow::setIsShowingStereoImage(bool value) {
 }
 
 void MainWindow::setCalculationMode() {
-    QAction* action = qobject_cast<QAction*>(sender());
-    if (action) {
-        switch (action->data().toString().toInt()) {
-        case 0:
-            stereoProcessing->calculateRT(stereoImage, stereoParametres);
-            break;
-        case 1:
-            stereoProcessing->calculateRT2(stereoImage, stereoParametres);
-            break;
-        case 2:
-            stereoProcessing->calculateRP(stereoImage, stereoParametres);
-            break;
-        case 3:
-            stereoProcessing->calculateRP2(stereoImage, stereoParametres);
-            break;
-        case 4:
-            stereoProcessing->calculateRMap(stereoImage, stereoParametres);
-            break;
-        case 5:
-            stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
-            break;
+    if (isStarted) {
+        QAction* action = qobject_cast<QAction*>(sender());
+        if (action) {
+            switch (action->data().toString().toInt()) {
+            case 0:
+                stereoProcessing->calculateRT(stereoImage, stereoParametres);
+                break;
+            case 1:
+                stereoProcessing->calculateRT2(stereoImage, stereoParametres);
+                break;
+            case 2:
+                stereoProcessing->calculateRP(stereoImage, stereoParametres);
+                break;
+            case 3:
+                stereoProcessing->calculateRP2(stereoImage, stereoParametres);
+                break;
+            case 4:
+                stereoProcessing->calculateRMap(stereoImage, stereoParametres);
+                break;
+            case 5:
+                stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
+                break;
+            }
+            //QCoreApplication::processEvents();
         }
-        //QCoreApplication::processEvents();
     }
 }
 
