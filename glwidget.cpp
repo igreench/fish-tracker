@@ -56,7 +56,7 @@ GLWidget::~GLWidget() {
 void GLWidget::setCubes(std::vector < cv::Point3d > objects) {
     cubes.clear();
     for (int i = 0; i < objects.size(); i++) {
-        cubes.push_back(Cube(objects[i], 0.1f));
+        cubes.push_back(Cube(cv::Point3d(objects[i].x - 5, objects[i].y - 5, objects[i].z), 0.1f));
     }
 }
 

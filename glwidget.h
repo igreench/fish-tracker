@@ -43,21 +43,8 @@ private:
     GLfloat yTra;
     GLfloat zTra;
     GLfloat nSca;
-    //cubes
-    /*struct Cube {
-        GLfloat x1;
-        GLfloat y1;
-        GLfloat x2;
-        GLfloat y2;
-        GLfloat z;
-        GLfloat h;
-        float m;
-    };
-    Cube cube1;
-    Cube cube2;*/
     void drawCube(Cube cube);
     std::vector < Cube > cubes;
-    //GLfloat heightBlock;
 
 private slots:
     void change();
