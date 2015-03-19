@@ -6,6 +6,8 @@
 #include <QDir>
 #include <QTimer>
 
+#include "glwidget.h"
+
 #include "disparitymap.h"
 #include "camera3d.h"
 #include "stereoparametres.h"
@@ -105,6 +107,8 @@ private:
 
     QStringList commands;
     QStringList calculations;
+
+    GLWidget *glwidget;
 
 };
 

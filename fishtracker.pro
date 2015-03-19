@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     iodata.cpp \
     stereoprocessing.cpp \
     stereoparametres.cpp \
-    disparitymap.cpp
+    disparitymap.cpp \
+    glwidget.cpp
 
 HEADERS  += mainwindow.h \
     pgrcamera.h \
@@ -41,6 +42,8 @@ HEADERS  += mainwindow.h \
     asmopencv.h \
     stereoprocessing.h \
     stereoparametres.h \
-    disparitymap.h
+    disparitymap.h \
+    glwidget.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    glwidget.ui

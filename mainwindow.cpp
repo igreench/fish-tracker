@@ -138,6 +138,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this->ui->spinBox_9, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP1(int)));
     connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));
     */
+
+    glwidget = new GLWidget();
+    glwidget->show();
 }
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
