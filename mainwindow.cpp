@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     calculations.append("calculateRP");
     calculations.append("calculateRP2");
     calculations.append("calculateRMap");
+    calculations.append("calculateDescription");
 
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
@@ -460,6 +461,9 @@ void MainWindow::setCalculationMode() {
             break;
         case 4:
             stereoProcessing->calculateRMap(stereoImage, stereoParametres);
+            break;
+        case 5:
+            stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
             break;
         }
         //QCoreApplication::processEvents();
