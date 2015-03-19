@@ -979,7 +979,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
     int _width = a->cols;
     int _height = a->rows;
 
-    std::vector<std::pair<float,cv::Point3d> > pairs;
+    std::vector<std::pair<double,cv::Point3d> > pairs;
     std::vector<cv::Point3d> result;
     try{
 
@@ -998,116 +998,53 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
         qDebug() << "R1:" << (R1.depth()==CV_64FC1)<< "R2:" << (R2.depth()==CV_64FC1);*/
 
         cv::Mat R = R2*R1.t();
+        qDebug() << "R: " << matToString(R);
         cv::Mat t = -R*t1+t2;
+        qDebug() << "t: " << matToString(t);
 
+        cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
+        cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
 
-        //cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
-        //cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
-        cv::Mat J = cv::Mat(2,3,CV_32FC1,cv::Scalar::all(0));
-        cv::Mat F = cv::Mat(2,2,CV_32FC1,cv::Scalar::all(0));
+        if (a->points.size() != b->points.size()) {
+            qDebug() << "Exception: different points sizes" ;
+        }
 
-
-        qDebug() << "intersect: 1";
-        for(unsigned int i=0;i<a->points.size();i++)
-        {
+        for(unsigned int i = 0; i < a->points.size(); i++) {
             cv::Mat p1 = cv::Mat(a->points[i]);
-            F.at<float>(0,0) = cv::Mat(p1.t()*Ainv1.t()*Ainv1*p1).at<float>(0,0);
+            F.at<double>(0,0) = cv::Mat(p1.t()*Ainv1.t()*Ainv1*p1).at<double>(0,0);
             cv::Mat J1 = -p1.t()*Ainv1.t()*R.t();
 
-            for(unsigned int j=0;j<b->points.size();j++)
-            {
-                cv::Mat p2 = cv::Mat(b->points[j]);
-                F.at<float>(0,1) = F.at<float>(1,0) = cv::Mat(-p1.t()*Ainv1.t()*R.t()*Ainv2*p2).at<float>(0,0);
-                F.at<float>(1,1) = cv::Mat(p2.t()*Ainv2.t()*Ainv2*p2).at<float>(0,0);
+            cv::Mat p2 = cv::Mat(b->points[i]);
+            F.at<double>(0,1) = F.at<double>(1,0) = cv::Mat(-p1.t()*Ainv1.t()*R.t()*Ainv2*p2).at<double>(0,0);
+            F.at<double>(1,1) = cv::Mat(p2.t()*Ainv2.t()*Ainv2*p2).at<double>(0,0);
 
-                cv::Mat J2 = p2.t()*Ainv2.t();
+            cv::Mat J2 = p2.t()*Ainv2.t();
 
-
-                for(int k=0;k<3;k++)
-                {
-                    J.at<float>(0,k)=J1.at<float>(0,k);
-                    J.at<float>(1,k)=J2.at<float>(0,k);
-                }
-                cv::Mat Finv;
-                cv::invert(F,Finv);
-
-                cv::Mat Z= Finv*J*t;
-
-                cv::Mat pp1=Z.at<float>(0,0)*Ainv1*p1;
-                cv::Mat pp2=Z.at<float>(1,0)*Ainv2*p2;
-
-                if(pp1.at<float>(2,0)<=0||pp2.at<float>(2,0)<=0)
-                {
-                    //Bad intersection
-                    if(VERBOSE)
-                    {
-                        qDebug() << "Bad intersection";
-                    }
-                    continue;
-                }
-
-
-                if(pp1.at<float>(2,0)>_maxdepth||pp2.at<float>(2,0)>_maxdepth)
-                {
-                    //To far
-                    if(VERBOSE)
-                    {
-                        qDebug() << "To far";
-                    }
-                    continue;
-                }
-
-                float u1 = a->A.at<float>(0,0)*pp1.at<float>(0,0)/pp1.at<float>(2,0)+a->A.at<float>(0,2);
-                float v1 = a->A.at<float>(1,1)*pp1.at<float>(1,0)/pp1.at<float>(2,0)+a->A.at<float>(1,2);
-
-                if(u1<0||u1>=_width||v1<0||v1>=_height)
-                {
-                    //Out of vision field
-                    if(VERBOSE)
-                    {
-                        qDebug() << "Out of vision field u1 v1" << u1 << v1;
-                    }
-                    continue;
-                }
-
-                float u2 = b->A.at<float>(0,0)*pp2.at<float>(0,0)/pp2.at<float>(2,0)+b->A.at<float>(0,2);
-                float v2 = b->A.at<float>(1,1)*pp2.at<float>(1,0)/pp2.at<float>(2,0)+b->A.at<float>(1,2);
-
-                if(u2<0||u2>=_width||v2<0||v2>=_height)
-                {
-                    //Out of vision field
-                    if(VERBOSE)
-                    {
-                        qDebug() << "Out of vision field u2 v2"<< u2 << v2;
-                    }
-                    continue;
-                }
-
-                cv::Mat Mresult1 = R1.t()*(pp1-t1);
-                cv::Mat Mresult2 = R2.t()*(pp2-t2);
-
-                cv::Mat Mresult = (Mresult1+Mresult2)/2;
-               // result.push_back(cv::Point3d(Mresult));
-                pairs.push_back(std::make_pair<float,cv::Point3d>(cv::norm(cv::Point3d(Mresult1)-cv::Point3d(Mresult2)),cv::Point3d(Mresult)));
+            for(int k=0;k<3;k++) {
+                J.at<double>(0,k)=J1.at<double>(0,k);
+                J.at<double>(1,k)=J2.at<double>(0,k);
             }
+
+            cv::Mat Finv;
+            cv::invert(F,Finv);
+
+            cv::Mat Z= Finv*J*t;
+
+            cv::Mat pp1=Z.at<double>(0,0)*Ainv1*p1;
+            cv::Mat pp2=Z.at<double>(1,0)*Ainv2*p2;
+
+            cv::Mat Mresult1 = R1.t()*(pp1-t1);
+            cv::Mat Mresult2 = R2.t()*(pp2-t2);
+
+            cv::Mat Mresult = (Mresult1+Mresult2)/2;
+
+            result.push_back(cv::Point3d(Mresult));
         }
     }catch(cv::Exception &ex)
     {
         qDebug() << "Exception:" << ex.what();
     }
-
-    qDebug() << "intersect: 2";
-    std::sort(pairs.begin(), pairs.end(), sort_pred());
-
-    //Find minimal number of points )))
-    int minpts = a->points.size()<b->points.size() ? a->points.size(): b->points.size();
-    int minnumber = pairs.size()<minpts?pairs.size():minpts;
-    for(int i=0;i<minnumber;i++)
-    {
-        result.push_back(pairs[i].second);
-    }
     return result;
-
 }
 
 StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation *triangulation) {
@@ -1121,7 +1058,9 @@ StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoPara
 
     if (isDescription) {
         qDebug() << "Intersection";
-        vector<Point3d> obj1 = intersect(descriptionLeft, descriptionRight);
+        //vector<Point3d> obj1 = intersect(descriptionLeft, descriptionRight);
+        vector<Point3d> obj1 = intersect2(descriptionLeft, descriptionRight);
+
         //vector<Point3d> obj2 = intersect(descriptionRight, descriptionRight);
         vector<Point2d> imagePoints1, imagePoints2;
         qDebug() << "Projecting points";

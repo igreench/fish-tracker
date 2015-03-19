@@ -277,22 +277,24 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::start() {
-    if (!isStarted && isExistStereoImage && isExistStereoParametres) {
-        if (isCapture) {
-            timer->start(30); //30
-            ui->pushButton_10->setVisible(true);
+    if (isExistStereoImage && isExistStereoParametres) {
+        if (!isStarted) {
+            if (isCapture) {
+                timer->start(30); //30
+                ui->pushButton_10->setVisible(true);
+            } else {
+                calcStereoImages();
+                resizeStereoViews();
+                showStereoImages();
+            }
+            isStarted = true;
         } else {
-            calcStereoImages();
-            resizeStereoViews();
-            showStereoImages();
-        }
-        isStarted = true;
-    } else {
-        if (!isCapture) {
-            showStereoImages();
-        } else {
-            timer->start(30);
-            ui->pushButton_10->setVisible(true);
+            if (!isCapture) {
+                showStereoImages();
+            } else {
+                timer->start(30);
+                ui->pushButton_10->setVisible(true);
+            }
         }
     }
 }
@@ -350,7 +352,7 @@ void MainWindow::calcStereoImages() {
     }
 }
 
-void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
+void MainWindow::showStereoImage(/*StereoImage *stereoImage, */int countView) {
     if (1 == countView) {
         Mat image1 = stereoImage1->getLeft();
         Mat image2 = stereoImage1->getRight();
@@ -386,13 +388,13 @@ void MainWindow::showStereoImage(StereoImage *stereoImage, int countView) {
 void MainWindow::showStereoImages() {
     if (!stereoImage->isEmpty()) {
         if (isShowingStereoImage1) {
-            showStereoImage(stereoImage1, 1);
+            showStereoImage(1);
         }
         if (isShowingStereoImage2) {
-            showStereoImage(stereoImage2, 2);
+            showStereoImage(2);
         }
         if (isShowingStereoImage3) {
-            showStereoImage(stereoImage3, 3);
+            showStereoImage(3);
         }
     }
 }
@@ -496,7 +498,7 @@ void MainWindow::setStereoViewMode() {
             ui->groupBox->setTitle("View1 - " + commands[countMode1]);
             if (isStarted) {
                 stereoImage1 = currentStereoImage(countMode1);
-                showStereoImage(stereoImage1, 1);
+                showStereoImage(1);
             }
         }
         if (1 == list[0].toInt()) {
@@ -504,7 +506,7 @@ void MainWindow::setStereoViewMode() {
             ui->groupBox_2->setTitle("View2 - " + commands[countMode2]);
             if (isStarted) {
                 stereoImage2 = currentStereoImage(countMode2);
-                showStereoImage(stereoImage2, 2);
+                showStereoImage(2);
             }
         }
         if (2 == list[0].toInt()) {
@@ -512,7 +514,7 @@ void MainWindow::setStereoViewMode() {
             ui->groupBox_3->setTitle("View3 - " + commands[countMode3]);
             if (isStarted) {
                 stereoImage3 = currentStereoImage(countMode3);
-                showStereoImage(stereoImage3, 3);
+                showStereoImage(3);
             }
         }
     }

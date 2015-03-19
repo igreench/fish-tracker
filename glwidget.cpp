@@ -10,6 +10,7 @@
 
 const GLfloat PI180 = M_PI / 180;
 const GLfloat METER = 0.1f;
+const GLfloat OFFSET = 5.0f;
 
 
 GLWidget::GLWidget(QWidget* parent/*= 0*/) : QGLWidget(parent) {
@@ -20,31 +21,11 @@ GLWidget::GLWidget(QWidget* parent/*= 0*/) : QGLWidget(parent) {
     yTra = -0.5f;
     zTra = 0;
     nSca = 1;
-    //
-    /*cube1.x1 = -0.6f;
-    cube1.y1 = 0;
-    cube1.x2 = -0.3f;
-    cube1.y2 = 0.3f;
-    cube1.z = 0;
-    cube1.h = 0.3f;
-    cube1.m = 50;
-    //
-    cube2.x1 = 0.3f;
-    cube2.y1 = 0;
-    cube2.x2 = 0.6f;
-    cube2.y2 = 0.3f;
-    cube2.z = 0.5f;
-    cube2.h = 0.3f;
-    cube2.m = 10;
-    //
-    heightBlock = 1;*/
-
-    //
 
     cubes.push_back(Cube(cv::Point3d(0.1f, 0.1f, 0.1f), 0.1f));
     cubes.push_back(Cube(cv::Point3d(0.3f, 0.1f, 0.1f), 0.1f));
     cubes.push_back(Cube(cv::Point3d(0.3f, 0.3f, 0.1f), 0.1f));
-    //
+
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(change()));
     //timer->start(30);
@@ -56,7 +37,7 @@ GLWidget::~GLWidget() {
 void GLWidget::setCubes(std::vector < cv::Point3d > objects) {
     cubes.clear();
     for (int i = 0; i < objects.size(); i++) {
-        cubes.push_back(Cube(cv::Point3d(objects[i].x - 5, objects[i].y - 5, objects[i].z), 0.1f));
+        cubes.push_back(Cube(cv::Point3d(objects[i].x - OFFSET, objects[i].y - OFFSET, objects[i].z), 0.1f));
     }
 }
 
@@ -67,6 +48,7 @@ void GLWidget::initializeGL() {
 }
 
 void GLWidget::paintGL() {
+    //init
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -75,8 +57,8 @@ void GLWidget::paintGL() {
     glRotatef(xRot, 1.0f, 0.0f, 0.0f);
     glRotatef(yRot, 0.0f, 1.0f, 0.0f);
     glRotatef(zRot, 0.0f, 0.0f, 1.0f);
-    //
-    qglColor(Qt::gray);
+    //field
+    /*qglColor(Qt::gray);
     glBegin(GL_LINES);
     for (int i = 0; i <= 20; i++) {
         glVertex3f(-1.0f + (GLfloat)i * 0.1f,-1.0f, 0.0f);
@@ -84,88 +66,12 @@ void GLWidget::paintGL() {
         glVertex3f(-1.0f,-1.0f + (GLfloat)i * 0.1f, 0.0f);
         glVertex3f( 1.0f,-1.0f + (GLfloat)i * 0.1f, 0.0f);
     }
-    glEnd();
-    /*
-    qglColor(Qt::blue);
-    glBegin(GL_LINES);
-        glVertex3f((cube1.x1 + cube1.x2) / 2, (cube1.y1 + cube1.y2) / 2, cube1.z + cube1.h);
-        glVertex3f((cube1.x1 + cube1.x2) / 2, (cube1.y1 + cube1.y2) / 2, heightBlock);
-        glVertex3f((cube2.x1 + cube2.x2) / 2, (cube2.y1 + cube2.y2) / 2, cube2.z + cube2.h);
-        glVertex3f((cube2.x1 + cube2.x2) / 2, (cube2.y1 + cube2.y2) / 2, heightBlock);
-    glEnd();
-    glBegin(GL_TRIANGLES);
-        glVertex3f((cube1.x1 + cube1.x2) / 2, (cube1.y1 + cube1.y2) / 2, heightBlock);
-        glVertex3f((cube1.x1 + cube1.x2 + cube2.x1 + cube2.x2) / 4, (cube1.y1 + cube1.y2 + cube2.y1 + cube2.y2) / 4, heightBlock + 0.2f);
-        glVertex3f((cube2.x1 + cube2.x2) / 2, (cube2.y1 + cube2.y2) / 2, heightBlock);
-    glEnd();
-    */
+    glEnd();*/
+    //objects
     qglColor(Qt::green);
     for (int i = 0; i < cubes.size(); i++) {
         drawCube(cubes[i]);
     }
-    /*glBegin(GL_QUADS);//0.1f = 1
-        glVertex3f(cube1.x1, cube1.y1, cube1.z);
-        glVertex3f(cube1.x1, cube1.y1, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y1, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y1, cube1.z);
-        //
-        glVertex3f(cube1.x1, cube1.y1, cube1.z);
-        glVertex3f(cube1.x1, cube1.y1, cube1.z + cube1.h);
-        glVertex3f(cube1.x1, cube1.y2, cube1.z + cube1.h);
-        glVertex3f(cube1.x1, cube1.y2, cube1.z);
-        //
-        glVertex3f(cube1.x2, cube1.y1, cube1.z);
-        glVertex3f(cube1.x2, cube1.y1, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y2, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y2, cube1.z);
-        //
-        glVertex3f(cube1.x1, cube1.y2, cube1.z);
-        glVertex3f(cube1.x1, cube1.y2, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y2, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y2, cube1.z);
-        //
-        glVertex3f(cube1.x1, cube1.y1, cube1.z);
-        glVertex3f(cube1.x1, cube1.y2, cube1.z);
-        glVertex3f(cube1.x2, cube1.y2, cube1.z);
-        glVertex3f(cube1.x2, cube1.y1, cube1.z);
-        //
-        glVertex3f(cube1.x1, cube1.y1, cube1.z + cube1.h);
-        glVertex3f(cube1.x1, cube1.y2, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y2, cube1.z + cube1.h);
-        glVertex3f(cube1.x2, cube1.y1, cube1.z + cube1.h);
-    glEnd();
-    qglColor(Qt::red);
-    glBegin(GL_QUADS);
-        glVertex3f(cube2.x1, cube2.y1, cube2.z);
-        glVertex3f(cube2.x1, cube2.y1, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y1, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y1, cube2.z);
-        //
-        glVertex3f(cube2.x1, cube2.y1, cube2.z);
-        glVertex3f(cube2.x1, cube2.y1, cube2.z + cube2.h);
-        glVertex3f(cube2.x1, cube2.y2, cube2.z + cube2.h);
-        glVertex3f(cube2.x1, cube2.y2, cube2.z);
-        //
-        glVertex3f(cube2.x2, cube2.y1, cube2.z);
-        glVertex3f(cube2.x2, cube2.y1, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y2, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y2, cube2.z);
-        //
-        glVertex3f(cube2.x1, cube2.y2, cube2.z);
-        glVertex3f(cube2.x1, cube2.y2, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y2, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y2, cube2.z);
-        //
-        glVertex3f(cube2.x1, cube2.y1, cube2.z);
-        glVertex3f(cube2.x1, cube2.y2, cube2.z);
-        glVertex3f(cube2.x2, cube2.y2, cube2.z);
-        glVertex3f(cube2.x2, cube2.y1, cube2.z);
-        //
-        glVertex3f(cube2.x1, cube2.y1, cube2.z + cube2.h);
-        glVertex3f(cube2.x1, cube2.y2, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y2, cube2.z + cube2.h);
-        glVertex3f(cube2.x2, cube2.y1, cube2.z + cube2.h);
-    glEnd();*/
 }
 
 void GLWidget::resizeGL(int nWidth, int nHeight) {

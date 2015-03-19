@@ -91,7 +91,7 @@ private:
     void loadLocalStereoImage(string fn1, string fn2);
     StereoImage *currentStereoImage(int countMode);
     void calcStereoImages();
-    void showStereoImage(StereoImage *stereoImage, int countView);
+    void showStereoImage(/*StereoImage *stereoImage, */int countView);
     void showStereoImages();
 
     Size sizeStereoImage(int sourceWidth, int sourseHeight, int destWidth, int destHeight);
