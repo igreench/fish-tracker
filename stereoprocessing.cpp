@@ -563,7 +563,7 @@ void StereoProcessing::calculateRMap(StereoImage* stereoImage, StereoParametres*
     initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, image2.size(), CV_32FC1, rmap2x, rmap2y);
 }
 
-Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres, DisparityMap *disparityMap) {
     //TODO
     //use undistortRectify
     return stereoImage->getLeft();
@@ -1088,7 +1088,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
 
 }
 
-StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation *triangulation) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -1109,6 +1109,8 @@ StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoPara
         for (int i = 0; i < obj1.size(); i ++) {
             qDebug() << "obj1: x: " << obj1[i].x << " y: " << obj1[i].y << " z: " << obj1[i].z;
         }
+
+        triangulation->setObjects(obj1);
         /*for (int i = 0; i < obj2.size(); i ++) {
             qDebug() << "obj2: x: " << obj2[i].x << " y: " << obj2[i].y << " z: " << obj2[i].z;
         }*/

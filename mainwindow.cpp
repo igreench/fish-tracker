@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     stereoParametres = new StereoParametres();
     stereoProcessing = new StereoProcessing();
     disparityMap = new DisparityMap();
+    triangulation = new Triangulation();
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -308,6 +309,7 @@ void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
 
 StereoImage *MainWindow::currentStereoImage(int countMode) {
     Mat image;
+    StereoImage *si;
     switch(countMode) {
         case 0:
         return stereoImage;
@@ -320,10 +322,13 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         case 3:
         return stereoProcessing->undistortRectify(stereoImage, stereoParametres);
         case 4:
-        image = stereoProcessing->disparityMap(stereoImage, stereoParametres);
+        image = stereoProcessing->disparityMap(stereoImage, stereoParametres, disparityMap);
         return new StereoImage(image, image);
         case 5:
-        return stereoProcessing->triangulate2(stereoImage, stereoParametres);
+        //return stereoProcessing->triangulate2(stereoImage, stereoParametres);
+        si = stereoProcessing->triangulate2(stereoImage, stereoParametres, triangulation);
+        glwidget->setCubes(triangulation->getObjects());
+        return si;
         case 6:
         image = stereoProcessing->circlesPattern();
         return new StereoImage(image, image);

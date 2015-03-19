@@ -9,6 +9,7 @@
 #include "glwidget.h"
 
 #include "disparitymap.h"
+#include "triangulation.h"
 #include "camera3d.h"
 #include "stereoparametres.h"
 #include "stereoprocessing.h"
@@ -76,6 +77,7 @@ private:
     StereoParametres *stereoParametres;
     StereoProcessing *stereoProcessing;
     DisparityMap *disparityMap;
+    Triangulation *triangulation;
     IOData *ioData;
 
     int countMode1;

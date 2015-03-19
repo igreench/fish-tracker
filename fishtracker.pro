@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     stereoprocessing.cpp \
     stereoparametres.cpp \
     disparitymap.cpp \
-    glwidget.cpp
+    glwidget.cpp \
+    triangulation.cpp
 
 HEADERS  += mainwindow.h \
     pgrcamera.h \
@@ -43,7 +44,8 @@ HEADERS  += mainwindow.h \
     stereoprocessing.h \
     stereoparametres.h \
     disparitymap.h \
-    glwidget.h
+    glwidget.h \
+    triangulation.h
 
 FORMS    += mainwindow.ui \
     glwidget.ui

@@ -5,6 +5,8 @@
 
 #include "stereoimage.h"
 #include "stereoparametres.h"
+#include "disparitymap.h"
+#include "triangulation.h"
 
 using namespace cv;
 using namespace std;
@@ -36,8 +38,8 @@ public:
     StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
     StereoImage* undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres);
     StereoImage* triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    StereoImage* triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    StereoImage* triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
+    Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres, DisparityMap *disparityMap);
     Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat projectUndistortPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat circlesPattern();
