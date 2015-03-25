@@ -580,7 +580,8 @@ void MainWindow::on_pushButton_3_clicked() {
 void MainWindow::update() {
     camera3d->update();
     //Pointers? Really???
-    stereoImage->setImages(*camera3d->getStereoImage()); // ???
+    //stereoImage->setImages(*camera3d->getStereoImage()); // ???
+    stereoImage->setImages(camera3d->getStereoImage());
     calcStereoImages();
     if (!isResized) {
         resizeStereoViews();

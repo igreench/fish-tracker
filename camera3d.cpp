@@ -15,8 +15,8 @@ Camera3D::Camera3D() {
     }
 }
 
-StereoImage *Camera3D::getStereoImage() {
-    return stereoImage;
+StereoImage Camera3D::getStereoImage() {
+    return *stereoImage;
 }
 
 bool Camera3D::isConnected() {

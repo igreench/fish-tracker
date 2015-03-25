@@ -20,7 +20,7 @@ public:
 
     bool isConnected();
 
-    StereoImage *getStereoImage();
+    StereoImage getStereoImage();
 
 public slots:
     void update();
