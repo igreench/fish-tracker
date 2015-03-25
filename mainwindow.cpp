@@ -329,8 +329,10 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         return new StereoImage(image, image);
         case 5:
         //return stereoProcessing->triangulate2(stereoImage, stereoParametres);
+        stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
         si = stereoProcessing->triangulate2(stereoImage, stereoParametres, triangulation);
         glwidget->setCubes(triangulation->getObjects());
+        glwidget->updateGL();
         return si;
         case 6:
         image = stereoProcessing->circlesPattern();
