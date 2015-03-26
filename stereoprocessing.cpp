@@ -510,11 +510,17 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
         }
         objectPoints.push_back(obj);
 
-        vector<Mat> rvecs1, tvecs1;
-        vector<Mat> rvecs2, tvecs2;
+        Mat rvecs1, tvecs1;
+        Mat rvecs2, tvecs2;
+        //cv::Mat rvec(3,1,cv::DataType<double>::type);
+        //cv::Mat tvec(3,1,cv::DataType<double>::type);
+        //solvePnP(Mat(obj), Mat(corners1), cameraMatrix1, distCoeffs1, rvec, tvec);
+        solvePnP(Mat(obj), Mat(corners1), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        solvePnP(Mat(obj), Mat(corners2), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
 
-        calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
-        calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
+
+        //calibrateCamera(objectPoints, imagePoints1, image1.size(), cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
+        //calibrateCamera(objectPoints, imagePoints2, image2.size(), cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
 
         //solvePnP(objectPoints, imagePoints1, cameraMatrix1, distCoeffs1, rvecs1, tvecs1);
         //solvePnP(objectPoints, imagePoints2, cameraMatrix2, distCoeffs2, rvecs2, tvecs2);
@@ -560,12 +566,15 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
         descriptionLeft->source = "left";
         descriptionLeft->A = cameraMatrix1;
         descriptionLeft->d = distCoeffs1;
-        temp = rvecs1[0];
+        //temp = rvecs1[0];
+        temp = rvecs1;
         qDebug() << "temp: " << matToString(temp);
-        Rodrigues(rvecs1[0], rr1);
+        //Rodrigues(rvecs1[0], rr1);
+        Rodrigues(rvecs1, rr1);
         //descriptionLeft->R = rvecs1[0];
         descriptionLeft->R = rr1;
-        descriptionLeft->t = tvecs1[0];
+        //descriptionLeft->t = tvecs1[0];
+        descriptionLeft->t = tvecs1;
         descriptionLeft->points = points1;
         descriptionLeft->cols = image1.cols;
         descriptionLeft->rows = image1.rows;
@@ -573,10 +582,12 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
         descriptionRight->source = "right";
         descriptionRight->A = cameraMatrix2;
         descriptionRight->d = distCoeffs2;
-        Rodrigues(rvecs2[0], rr2);
+        //Rodrigues(rvecs2[0], rr2);
+        Rodrigues(rvecs2, rr2);
         //descriptionRight->R = rvecs2[0];
         descriptionRight->R = rr2;
-        descriptionRight->t = tvecs2[0];
+        //descriptionRight->t = tvecs2[0];
+        descriptionRight->t = tvecs2;
         descriptionRight->points = points2;
         descriptionRight->cols = image2.cols;
         descriptionRight->rows = image2.rows;
