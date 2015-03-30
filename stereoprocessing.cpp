@@ -17,10 +17,21 @@ using namespace stereo;
 using namespace std;
 using namespace cv;
 
+static const bool DEBUG = true; //false
+
 StereoProcessing::StereoProcessing() {
     descriptionLeft = new Description();
     descriptionRight = new Description();
-    _isDescription = false;
+
+    if (DEBUG) {
+        descriptionLeft->R = (Mat_<double>(3,1) << 0.0230825,-0.0426114,0.0252379);
+        descriptionLeft->t = (Mat_<double>(3,1) << -2.98774,-3.4401,16.802);
+        descriptionRight->R = (Mat_<double>(3,1) << 0.0282036,-0.0532867,0.0247706);
+        descriptionRight->t = (Mat_<double>(3,1) << -5.81993,-3.54337,16.7473);
+        _isDescription = true;
+    } else {
+        _isDescription = false;
+    }
 }
 
 StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
@@ -580,6 +591,11 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
         descriptionRight->cols = image2.cols;
         descriptionRight->rows = image2.rows;
 
+        qDebug() << "descriptionLeft->R: " << matToString(descriptionLeft->R);
+        qDebug() << "descriptionLeft->t: " << matToString(descriptionLeft->t);
+        qDebug() << "descriptionRight->R: " << matToString(descriptionRight->R);
+        qDebug() << "descriptionRight->t: " << matToString(descriptionRight->t);
+
         _isDescription = true;
     }
 }
@@ -1126,55 +1142,20 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
 
 StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation *triangulation) {
     Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
-    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
-    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
     if (_isDescription) {
-        qDebug() << "Intersection";
-        //vector<Point3d> obj1 = intersect(descriptionLeft, descriptionRight);
         vector<Point3d> obj1 = intersect2(descriptionLeft, descriptionRight);
-
-        //vector<Point3d> obj2 = intersect(descriptionRight, descriptionRight);
-        vector<Point2d> imagePoints1, imagePoints2;
-        qDebug() << "Projecting points";
-
-        qDebug() << "obj1 size:" << obj1.size();
-        //qDebug() << "obj2 size:" << obj2.size();
-        for (int i = 0; i < obj1.size(); i ++) {
-            qDebug() << "obj1: x: " << obj1[i].x << " y: " << obj1[i].y << " z: " << obj1[i].z;
-        }
-
+        vector<Point2d> imagePoints1;
         triangulation->setObjects(obj1);
-        /*for (int i = 0; i < obj2.size(); i ++) {
-            qDebug() << "obj2: x: " << obj2[i].x << " y: " << obj2[i].y << " z: " << obj2[i].z;
-        }*/
-
-        //Mat r;
-        //Rodrigues(descriptionLeft->R, r);
-
-        /*vector<Point3f> obj;
-        for (int j = 0; j < n; j++) {
-            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
-        }*/
-
         cv::projectPoints(obj1, descriptionLeft->R, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
-        //cv::projectPoints(Mat(obj2), descriptionRight->R, descriptionRight->t, cameraMatrix2, distCoeffs2, imagePoints2);
         for(unsigned int i = 0; i < imagePoints1.size(); ++i) {
             circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
-            qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
+            //qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
         }
-        for(unsigned int i = 0; i < imagePoints2.size(); ++i) {
-//            circle(image2, Point2d(imagePoints2[i].x, imagePoints2[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
-            //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
-        }
-        //return stereoImage;
-        //return new StereoImage(image1, image2);
         return new StereoImage(image1, image1);
     }
-
     return stereoImage;
 }
