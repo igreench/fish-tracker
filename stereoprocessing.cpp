@@ -562,18 +562,10 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
             points2.push_back(Point3d(corners2[i].x, corners2[i].y, 1));
         }
 
-        Mat rr1, rr2;
         descriptionLeft->source = "left";
         descriptionLeft->A = cameraMatrix1;
         descriptionLeft->d = distCoeffs1;
-        //temp = rvecs1[0];
-        temp = rvecs1;
-        qDebug() << "temp: " << matToString(temp);
-        //Rodrigues(rvecs1[0], rr1);
-        Rodrigues(rvecs1, rr1);
-        //descriptionLeft->R = rvecs1[0];
-        descriptionLeft->R = rr1;
-        //descriptionLeft->t = tvecs1[0];
+        descriptionLeft->R = rvecs1;
         descriptionLeft->t = tvecs1;
         descriptionLeft->points = points1;
         descriptionLeft->cols = image1.cols;
@@ -582,11 +574,7 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
         descriptionRight->source = "right";
         descriptionRight->A = cameraMatrix2;
         descriptionRight->d = distCoeffs2;
-        //Rodrigues(rvecs2[0], rr2);
-        Rodrigues(rvecs2, rr2);
-        //descriptionRight->R = rvecs2[0];
-        descriptionRight->R = rr2;
-        //descriptionRight->t = tvecs2[0];
+        descriptionRight->R = rvecs2;
         descriptionRight->t = tvecs2;
         descriptionRight->points = points2;
         descriptionRight->cols = image2.cols;
@@ -925,8 +913,10 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
         cv::invert(b->A,Ainv2);
 
         //Переходим к системе координат камеры а
-        cv::Mat R1 = a->R;
-        cv::Mat R2 = b->R;
+        cv::Mat R1;
+        cv::Mat R2;
+        Rodrigues(a->R, R1);
+        Rodrigues(b->R, R2);
         cv::Mat t1 = a->t;
         cv::Mat t2 = b->t;
 
@@ -1071,8 +1061,12 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
         cv::invert(b->A,Ainv2);
 
         //Переходим к системе координат камеры а
-        cv::Mat R1 = a->R;
-        cv::Mat R2 = b->R;
+        //cv::Mat R1 = a->R;
+        //cv::Mat R2 = b->R;
+        cv::Mat R1;
+        cv::Mat R2;
+        Rodrigues(a->R, R1);
+        Rodrigues(b->R, R2);
         cv::Mat t1 = a->t;
         cv::Mat t2 = b->t;
 
@@ -1167,7 +1161,7 @@ StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoPara
             obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
         }*/
 
-        cv::projectPoints(obj1, temp, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
+        cv::projectPoints(obj1, descriptionLeft->R, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
         //cv::projectPoints(Mat(obj2), descriptionRight->R, descriptionRight->t, cameraMatrix2, distCoeffs2, imagePoints2);
         for(unsigned int i = 0; i < imagePoints1.size(); ++i) {
             circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);

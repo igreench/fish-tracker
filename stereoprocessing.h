@@ -67,8 +67,6 @@ private:
     Description *descriptionRight;
 
     bool _isDescription;
-
-    Mat temp;
 };
 
 }
