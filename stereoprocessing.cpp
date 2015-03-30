@@ -493,7 +493,7 @@ void StereoProcessing::calculateRMap(StereoImage* stereoImage, StereoParametres*
     initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, image2.size(), CV_32FC1, rmap2x, rmap2y);
 }
 
-void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+void StereoProcessing::calculateDeskDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -600,7 +600,7 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
     }
 }
 
-void StereoProcessing::calculateDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+void StereoProcessing::calculateDeskDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -664,6 +664,204 @@ void StereoProcessing::calculateDecsription2(StereoImage* stereoImage, StereoPar
         descriptionRight->rows = image2.rows;
 
         //isDescription = true;
+    }
+}
+
+void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+
+    Mat imageSmall = Mat(image1.rows / 4, image1.cols / 4, CV_8UC3);
+    Size imageSizeSmall = imageSmall.size(); //400x300
+
+    /*Mat cameraMatrix1 = (Mat_<double>(3,3) << 1806.53,0,815.786,0,1595.14,590.314,0,0,1);
+    Mat distCoeffs1 = (Mat_<double>(1,5) << -0.267514,0.213748,0.00136627,0.000194796,0);
+    Mat cameraMatrix2 = (Mat_<double>(3,3) << 1739.3,0,808.929,0,1542.11,581.767,0,0,1);
+    Mat distCoeffs2 = (Mat_<double>(1,5) << -0.247249,0.161344,-0.00280154,0.000444185,0);*/
+
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    //Start
+
+    bool isShowImages = false;
+    bool isShowUImages = false;
+    bool isShowTImages = true;
+    bool isShowDImages = true;
+    bool isShowCImages = true;
+
+    Mat rimage1, rimage2;
+
+    if (isShowImages) {
+        cv::resize(image1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        cv::resize(image2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("image1", rimage1);
+        imshow("image2", rimage2);
+    }
+
+    //Calibration
+
+    Mat uimage1, uimage2;
+
+    undistort(image1, uimage1, cameraMatrix1, distCoeffs1);
+    undistort(image2, uimage2, cameraMatrix2, distCoeffs2);
+
+    if (isShowUImages) {
+        resize(uimage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        resize(uimage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("uimage1", rimage1);
+        imshow("uimage2", rimage2);
+    }
+
+    //Binarization
+    Mat g1, g2;
+
+    cvtColor(uimage1, g1, CV_BGR2GRAY);
+    cvtColor(uimage2, g2, CV_BGR2GRAY);
+
+    Mat timage1, timage2;
+
+    blur(g1, g1, Size(20, 20));
+    blur(g2, g2, Size(20, 20));
+
+    //It would be cool combinate threshold and adaptiveThreshold
+
+    threshold(g1, timage1, 50, 80, CV_THRESH_BINARY_INV); //50 250
+    threshold(g2, timage2, 50, 80, CV_THRESH_BINARY_INV);
+
+    if (isShowTImages) {
+        resize(timage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        resize(timage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("timage1", rimage1);
+        imshow("timage2", rimage2);
+    }
+
+    //Finding contours
+
+    vector<vector<Point> > contours1, contours2;
+    vector<Vec4i> hierarchy1, hierarchy2;
+    RNG rng(12345);
+
+    //findContours( timage1, contours1, hierarchy1, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( timage1, contours1, hierarchy1, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, Point(0, 0) );
+    Mat drawing1 = Mat::zeros( timage1.size(), CV_8UC3 );
+    for( int i = 0; i < contours1.size(); i++ ) {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing1, contours1, i, color, 2, 8, hierarchy1, 0, Point() );
+    }
+
+    findContours( timage2, contours2, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    Mat drawing2 = Mat::zeros( timage2.size(), CV_8UC3 );
+    for( int i = 0; i < contours2.size(); i++ ) {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
+    }
+
+    if (isShowDImages) {
+        resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("drawing1", rimage1);
+        resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("drawing2", rimage2);
+    }
+
+    //Getting moments and mass centers
+    vector<Moments> mu1(contours1.size());
+    vector<Point2f> mc1(contours1.size());
+    vector<Moments> mu2(contours2.size());
+    vector<Point2f> mc2(contours2.size());
+    for(int i = 0; i < contours1.size(); i++) {
+        mu1[i] = moments(contours1[i], false);
+        mc1[i] = Point2f(mu1[i].m10/mu1[i].m00 , mu1[i].m01/mu1[i].m00);
+        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        circle(drawing1, mc1[i], 4, color, -1, 8, 0);
+    }
+    for(int i = 0; i < contours2.size(); i++) {
+        mu2[i] = moments(contours2[i], false);
+        mc2[i] = Point2f(mu2[i].m10/mu2[i].m00 , mu2[i].m01/mu2[i].m00);
+        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+        circle(drawing2, mc2[i], 4, color, -1, 8, 0);
+    }
+
+    if (isShowCImages) {
+        resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("cdrawing1", rimage1);
+        resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
+        imshow("cdrawing2", rimage2);
+    }
+
+    //return new StereoImage(drawing1, drawing2); //?
+
+    undistortPoints(mc1, mc1, cameraMatrix1, distCoeffs1);
+    undistortPoints(mc2, mc2, cameraMatrix2, distCoeffs2);
+
+    //Triangulation
+    /*Mat R = (Mat_<double>(3,3) << 0.991532,-0.0276931,-0.126874,0.0602062,0.963683,0.260173,0.115061,-0.265608,0.95719);
+    Mat T = (Mat_<double>(3,1) << 8.33789,-17.5109,83.1614);
+    Mat R = stereoParametres->getR();
+    Mat T = stereoParametres->getT();
+    Mat points4D;
+    Mat RT;
+    hconcat(R, T, RT);
+    Mat cam1 = cameraMatrix1 * RT;
+    Mat cam2 = cameraMatrix2 * RT;
+    triangulatePoints(cam1, cam2, mc1, mc2, points4D);
+    qDebug() << "points4D" << matToString(points4D);
+
+    double w = points4D.at<double>(3,0);
+    double x = points4D.at<double>(0,0)/w;
+    double y = points4D.at<double>(1,0)/w;
+    double z = points4D.at<double>(2,0)/w;
+    qDebug() << x << ", " << y << ", " << z;*/
+
+    if (_isDescription) {
+        /*double fx = cameraMatrix1.at<double>(0,0);
+        double fy = cameraMatrix1.at<double>(1,1);
+        double cx = cameraMatrix1.at<double>(0,2);
+        double cy = cameraMatrix1.at<double>(1,2);
+
+        for (int i = 0; i < corners1.size(); ++i) {
+            corners1[i].x = corners1[i].x * fx + cx;
+            corners1[i].y = corners1[i].y * fy + cy;
+        }
+
+        fx = cameraMatrix2.at<double>(0,0);
+        fy = cameraMatrix2.at<double>(1,1);
+        cx = cameraMatrix2.at<double>(0,2);
+        cy = cameraMatrix2.at<double>(1,2);
+
+        for (int i = 0; i < corners2.size(); ++i) {
+            corners2[i].x = corners2[i].x * fx + cx;
+            corners2[i].y = corners2[i].y * fy + cy;
+        }*/
+
+        qDebug() << "mc1 size:" << mc1.size();
+        qDebug() << "mc2 size:" << mc2.size();
+
+        std::vector<cv::Point3d> points1;
+        for (int i = 0; i < mc1.size(); i++) {
+            points1.push_back(Point3d(mc1[i].x, mc1[i].y, 1));
+        }
+
+        std::vector<cv::Point3d> points2;
+        for (int i = 0; i < mc2.size(); i++) {
+            points2.push_back(Point3d(mc2[i].x, mc2[i].y, 1));
+        }
+
+        descriptionLeft->source = "left";
+        descriptionLeft->A = cameraMatrix1;
+        descriptionLeft->d = distCoeffs1;
+        descriptionLeft->points = points1;
+        descriptionLeft->cols = image1.cols;
+        descriptionLeft->rows = image1.rows;
+
+        descriptionRight->source = "right";
+        descriptionRight->A = cameraMatrix2;
+        descriptionRight->d = distCoeffs2;
+        descriptionRight->points = points2;
+        descriptionRight->cols = image2.cols;
+        descriptionRight->rows = image2.rows;
     }
 }
 

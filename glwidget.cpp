@@ -58,7 +58,7 @@ void GLWidget::paintGL() {
     glRotatef(yRot, 0.0f, 1.0f, 0.0f);
     glRotatef(zRot, 0.0f, 0.0f, 1.0f);
     //field
-    /*qglColor(Qt::gray);
+    qglColor(Qt::gray);
     glBegin(GL_LINES);
     for (int i = 0; i <= 20; i++) {
         glVertex3f(-1.0f + (GLfloat)i * 0.1f,-1.0f, 0.0f);
@@ -66,7 +66,7 @@ void GLWidget::paintGL() {
         glVertex3f(-1.0f,-1.0f + (GLfloat)i * 0.1f, 0.0f);
         glVertex3f( 1.0f,-1.0f + (GLfloat)i * 0.1f, 0.0f);
     }
-    glEnd();*/
+    glEnd();
     //objects
     qglColor(Qt::green);
     for (int i = 0; i < cubes.size(); i++) {

@@ -51,8 +51,9 @@ public:
     void calculateRP(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateRP2(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void calculateDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void calculateDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateDeskDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateDeskDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateFishDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres);
 
     std::vector<cv::Point3d> intersect(Description* a,Description* b);
     std::vector<cv::Point3d> intersect2(Description* a,Description* b);

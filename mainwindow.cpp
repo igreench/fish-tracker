@@ -28,8 +28,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     calculations.append("calculateRP");
     calculations.append("calculateRP2");
     calculations.append("calculateRMap");
-    calculations.append("calculateDescription");
-    calculations.append("calculateDescription2");
+    calculations.append("calculateDeskDescription");
+    calculations.append("calculateDeskDescription2");
+    calculations.append("calculateFishDescription");
 
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
@@ -331,9 +332,9 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         case 5:
         //return stereoProcessing->triangulate2(stereoImage, stereoParametres);
         if (stereoProcessing->isDescription()) {
-            stereoProcessing->calculateDecsription2(stereoImage, stereoParametres);
+            stereoProcessing->calculateDeskDecsription2(stereoImage, stereoParametres);
         } else {
-            stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
+            stereoProcessing->calculateDeskDecsription(stereoImage, stereoParametres);
         }
         si = stereoProcessing->triangulate2(stereoImage, stereoParametres, triangulation);
         glwidget->setCubes(triangulation->getObjects());
@@ -473,10 +474,13 @@ void MainWindow::setCalculationMode() {
                 stereoProcessing->calculateRMap(stereoImage, stereoParametres);
                 break;
             case 5:
-                stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
+                stereoProcessing->calculateDeskDecsription(stereoImage, stereoParametres);
                 break;
             case 6:
-                stereoProcessing->calculateDecsription2(stereoImage, stereoParametres);
+                stereoProcessing->calculateDeskDecsription2(stereoImage, stereoParametres);
+                break;
+            case 7:
+                stereoProcessing->calculateFishDecsription(stereoImage, stereoParametres);
                 break;
             }
             //QCoreApplication::processEvents();
