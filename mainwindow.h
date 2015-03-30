@@ -63,6 +63,8 @@ private slots:
     void on_pushButton_10_clicked();
     void update();
 
+    void on_pushButton_11_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -96,6 +98,7 @@ private:
 
     Size sizeStereoImage(int sourceWidth, int sourseHeight, int destWidth, int destHeight);
     void updateDisparityMap();
+    void updateTriangulation();
 
     bool isShowingStereoImage1;
     bool isShowingStereoImage2;

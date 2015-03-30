@@ -2,7 +2,12 @@
 
 Triangulation::Triangulation()
 {
+    blurWidth = 20;
+    blurHeight = 20;
+    thresh = 50;
+    threshMaxval = 80;
 
+    mode = 2;
 }
 
 Triangulation::~Triangulation()

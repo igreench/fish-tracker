@@ -20,7 +20,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     commands.append("ProjectPoints");
     commands.append("UndistortRectify");
     commands.append("DisparityMap");
-    commands.append("Triangulate");
+    commands.append("TriangulateDesk");
+    commands.append("TriangulateFish");
     commands.append("CirclesPattern");
 
     calculations.append("calculateRT");
@@ -97,6 +98,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->groupBox_3->setTitle("View3 - " + commands[countMode3]);
     ui->groupBox_3->setVisible(false);
 
+    //init disparityMap
+
     ui->label->setText("SADWindowSize");
     ui->label_2->setText("numberOfDisparities");
     ui->label_3->setText("preFilterCap");
@@ -143,8 +146,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this->ui->spinBox_10, SIGNAL(valueChanged(int)), this, SLOT(setSgbmP2(int)));
     */
 
-    glwidget = new GLWidget();
-    glwidget->show();
+    //init triangulation
+
+    ui->comboBox->addItem("Image");
+    ui->comboBox->addItem("UImage");
+    ui->comboBox->addItem("TImage");
+    ui->comboBox->addItem("Drawing");
+    ui->comboBox->addItem("CDrawing");
+
+    ui->comboBox->setCurrentIndex(triangulation->mode);
+
+    ui->label_27->setText("blur width");
+    ui->label_28->setText("blur height");
+    ui->label_29->setText("threshold thresh");
+    ui->label_30->setText("threshold maxval");
+
+    ui->spinBox_21->setRange(0, 100);
+    ui->spinBox_22->setRange(0, 100);
+    ui->spinBox_23->setRange(0, 255);
+    ui->spinBox_24->setRange(0, 255);
+
+    ui->spinBox_21->setValue(triangulation->blurWidth);
+    ui->spinBox_22->setValue(triangulation->blurHeight);
+    ui->spinBox_23->setValue(triangulation->thresh);
+    ui->spinBox_24->setValue(triangulation->threshMaxval);
+
+    //init gl
+
+    glwidget = new GLWidget();    
 }
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -332,15 +361,21 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         case 5:
         //return stereoProcessing->triangulate2(stereoImage, stereoParametres);
         if (stereoProcessing->isDescription()) {
-            stereoProcessing->calculateDeskDecsription2(stereoImage, stereoParametres);
+            stereoProcessing->calculateDeskDescription2(stereoImage, stereoParametres);
         } else {
-            stereoProcessing->calculateDeskDecsription(stereoImage, stereoParametres);
+            stereoProcessing->calculateDeskDescription(stereoImage, stereoParametres);
         }
-        si = stereoProcessing->triangulate2(stereoImage, stereoParametres, triangulation);
+        si = stereoProcessing->triangulateDesk(stereoImage, stereoParametres, triangulation);
+        if (!glwidget->isVisible()) {
+            glwidget->show();
+        }
         glwidget->setCubes(triangulation->getObjects());
         glwidget->updateGL();
         return si;
         case 6:
+        si = stereoProcessing->triangulateFish(stereoImage, stereoParametres, triangulation);
+        return si;
+        case 7:
         image = stereoProcessing->circlesPattern();
         return new StereoImage(image, image);
     }
@@ -474,13 +509,13 @@ void MainWindow::setCalculationMode() {
                 stereoProcessing->calculateRMap(stereoImage, stereoParametres);
                 break;
             case 5:
-                stereoProcessing->calculateDeskDecsription(stereoImage, stereoParametres);
+                stereoProcessing->calculateDeskDescription(stereoImage, stereoParametres);
                 break;
             case 6:
-                stereoProcessing->calculateDeskDecsription2(stereoImage, stereoParametres);
+                stereoProcessing->calculateDeskDescription2(stereoImage, stereoParametres);
                 break;
             case 7:
-                stereoProcessing->calculateFishDecsription(stereoImage, stereoParametres);
+                stereoProcessing->calculateFishDescription(stereoImage, stereoParametres, triangulation);
                 break;
             }
             //QCoreApplication::processEvents();
@@ -499,6 +534,14 @@ void MainWindow::updateDisparityMap() {
     disparityMap->sgbm.disp12MaxDiff = ui->spinBox_8->value();
     disparityMap->sgbm.P1 = ui->spinBox_9->value();
     disparityMap->sgbm.P2 = ui->spinBox_10->value();
+}
+
+void MainWindow::updateTriangulation() {
+    triangulation->mode = ui->comboBox->currentIndex();
+    triangulation->blurHeight = ui->spinBox_21->value();
+    triangulation->blurWidth = ui->spinBox_22->value();
+    triangulation->thresh = ui->spinBox_23->value();
+    triangulation->threshMaxval = ui->spinBox_24->value();
 }
 
 void MainWindow::setStereoViewMode() {
@@ -610,4 +653,11 @@ void MainWindow::on_pushButton_10_clicked() {
     isResized = false;
     isCapture = false;
     ui->pushButton_10->setVisible(false);
+}
+
+void MainWindow::on_pushButton_11_clicked()
+{
+    updateTriangulation();
+    calcStereoImages();
+    showStereoImages();
 }

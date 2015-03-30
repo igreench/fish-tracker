@@ -493,7 +493,7 @@ void StereoProcessing::calculateRMap(StereoImage* stereoImage, StereoParametres*
     initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, image2.size(), CV_32FC1, rmap2x, rmap2y);
 }
 
-void StereoProcessing::calculateDeskDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+void StereoProcessing::calculateDeskDescription(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -600,7 +600,7 @@ void StereoProcessing::calculateDeskDecsription(StereoImage* stereoImage, Stereo
     }
 }
 
-void StereoProcessing::calculateDeskDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+void StereoProcessing::calculateDeskDescription2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -667,7 +667,7 @@ void StereoProcessing::calculateDeskDecsription2(StereoImage* stereoImage, Stere
     }
 }
 
-void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+void StereoProcessing::calculateFishDescription(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -686,15 +686,15 @@ void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, Stereo
 
     //Start
 
-    bool isShowImages = false;
+    /*bool isShowImages = false;
     bool isShowUImages = false;
     bool isShowTImages = true;
     bool isShowDImages = true;
-    bool isShowCImages = true;
+    bool isShowCImages = true;*/
 
     Mat rimage1, rimage2;
 
-    if (isShowImages) {
+    if (0 == triangulation->mode) {
         cv::resize(image1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         cv::resize(image2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         imshow("image1", rimage1);
@@ -708,7 +708,7 @@ void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, Stereo
     undistort(image1, uimage1, cameraMatrix1, distCoeffs1);
     undistort(image2, uimage2, cameraMatrix2, distCoeffs2);
 
-    if (isShowUImages) {
+    if (1 == triangulation->mode) {
         resize(uimage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         resize(uimage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         imshow("uimage1", rimage1);
@@ -723,15 +723,15 @@ void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, Stereo
 
     Mat timage1, timage2;
 
-    blur(g1, g1, Size(20, 20));
-    blur(g2, g2, Size(20, 20));
+    blur(g1, g1, Size(triangulation->blurWidth, triangulation->blurHeight));
+    blur(g2, g2, Size(triangulation->blurWidth, triangulation->blurHeight));
 
     //It would be cool combinate threshold and adaptiveThreshold
 
-    threshold(g1, timage1, 50, 80, CV_THRESH_BINARY_INV); //50 250
-    threshold(g2, timage2, 50, 80, CV_THRESH_BINARY_INV);
+    threshold(g1, timage1, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV); //50 250
+    threshold(g2, timage2, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV);
 
-    if (isShowTImages) {
+    if (2 == triangulation->mode) {
         resize(timage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         resize(timage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         imshow("timage1", rimage1);
@@ -759,7 +759,7 @@ void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, Stereo
         drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
     }
 
-    if (isShowDImages) {
+    if (3 == triangulation->mode) {
         resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         imshow("drawing1", rimage1);
         resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
@@ -784,7 +784,7 @@ void StereoProcessing::calculateFishDecsription(StereoImage* stereoImage, Stereo
         circle(drawing2, mc2[i], 4, color, -1, 8, 0);
     }
 
-    if (isShowCImages) {
+    if (4 == triangulation->mode) {
         resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
         imshow("cdrawing1", rimage1);
         resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
@@ -876,7 +876,7 @@ Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* s
     return stereoImage->getLeft();
 }
 
-StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation) {
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
 
@@ -893,21 +893,13 @@ StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParam
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
+    StereoImage* si = new StereoImage();
+
     //Start
 
-    bool isShowImages = false;
-    bool isShowUImages = false;
-    bool isShowTImages = false;
-    bool isShowDImages = false;
-    bool isShowCImages = false;
-
-    Mat rimage1, rimage2;
-
-    if (isShowImages) {
-        cv::resize(image1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        cv::resize(image2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("image1", rimage1);
-        imshow("image2", rimage2);
+    if (0 == triangulation->mode) {
+        si->setImages(image1, image2);
+        return si;
     }
 
     //Calibration
@@ -917,11 +909,9 @@ StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParam
     undistort(image1, uimage1, cameraMatrix1, distCoeffs1);
     undistort(image2, uimage2, cameraMatrix2, distCoeffs2);
 
-    if (isShowUImages) {
-        resize(uimage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        resize(uimage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("uimage1", rimage1);
-        imshow("uimage2", rimage2);
+    if (1 == triangulation->mode) {
+        si->setImages(uimage1, uimage2);
+        return si;
     }
 
     //Binarization
@@ -932,19 +922,17 @@ StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParam
 
     Mat timage1, timage2;
 
-    blur(g1, g1, Size(20, 20));
-    blur(g2, g2, Size(20, 20));
+    blur(g1, g1, Size(triangulation->blurWidth, triangulation->blurHeight));
+    blur(g2, g2, Size(triangulation->blurWidth, triangulation->blurHeight));
 
     //It would be cool combinate threshold and adaptiveThreshold
 
-    threshold(g1, timage1, 50, 80, CV_THRESH_BINARY_INV); //50 250
-    threshold(g2, timage2, 50, 80, CV_THRESH_BINARY_INV);
+    threshold(g1, timage1, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV); //50 250
+    threshold(g2, timage2, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV);
 
-    if (isShowTImages) {
-        resize(timage1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        resize(timage2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("timage1", rimage1);
-        imshow("timage2", rimage2);
+    if (2 == triangulation->mode) {
+        si->setImages(timage1, timage2);
+        return si;
     }
 
     //Finding contours
@@ -968,11 +956,9 @@ StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParam
         drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
     }
 
-    if (isShowDImages) {
-        resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("drawing1", rimage1);
-        resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("drawing2", rimage2);
+    if (3 == triangulation->mode) {
+        si->setImages(drawing1, drawing2);
+        return si;
     }
 
     //Getting moments and mass centers
@@ -993,36 +979,8 @@ StereoImage* StereoProcessing::triangulate(StereoImage* stereoImage, StereoParam
         circle(drawing2, mc2[i], 4, color, -1, 8, 0);
     }
 
-    if (isShowCImages) {
-        resize(drawing1, rimage1, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("cdrawing1", rimage1);
-        resize(drawing2, rimage2, imageSizeSmall, 0, 0, CV_INTER_LINEAR);
-        imshow("cdrawing2", rimage2);
-    }
-
-    return new StereoImage(drawing1, drawing2); //?
-
-    undistortPoints(mc1, mc1, cameraMatrix1, distCoeffs1);
-    undistortPoints(mc2, mc2, cameraMatrix2, distCoeffs2);
-
-    //Triangulation
-    /*Mat R = (Mat_<double>(3,3) << 0.991532,-0.0276931,-0.126874,0.0602062,0.963683,0.260173,0.115061,-0.265608,0.95719);
-    Mat T = (Mat_<double>(3,1) << 8.33789,-17.5109,83.1614);*/
-    Mat R = stereoParametres->getR();
-    Mat T = stereoParametres->getT();
-    Mat points4D;
-    Mat RT;
-    hconcat(R, T, RT);
-    Mat cam1 = cameraMatrix1 * RT;
-    Mat cam2 = cameraMatrix2 * RT;
-    triangulatePoints(cam1, cam2, mc1, mc2, points4D);
-    qDebug() << "points4D" << matToString(points4D);
-
-    double w = points4D.at<double>(3,0);
-    double x = points4D.at<double>(0,0)/w;
-    double y = points4D.at<double>(1,0)/w;
-    double z = points4D.at<double>(2,0)/w;
-    qDebug() << x << ", " << y << ", " << z;
+    si->setImages(drawing1, drawing2);
+    return si;
 }
 
 Mat StereoProcessing::circlesPattern() {
@@ -1338,7 +1296,7 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
     return result;
 }
 
-StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation *triangulation) {
+StereoImage* StereoProcessing::triangulateDesk(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation *triangulation) {
     Mat image1 = stereoImage->getLeft().clone();
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();

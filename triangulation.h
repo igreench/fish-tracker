@@ -11,6 +11,14 @@ public:
 
     void setObjects(std::vector < cv::Point3d > objects);
     std::vector < cv::Point3d > getObjects();
+
+    int blurWidth;
+    int blurHeight;
+    int thresh;
+    int threshMaxval;
+
+    int mode;
+
 private:
     std::vector < cv::Point3d > objects;
 };

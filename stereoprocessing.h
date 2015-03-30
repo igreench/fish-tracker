@@ -37,8 +37,8 @@ public:
     StereoProcessing();
     StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
     StereoImage* undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    StereoImage* triangulate(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    StereoImage* triangulate2(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
+    StereoImage* triangulateDesk(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
+    StereoImage* triangulateFish(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
     Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres, DisparityMap *disparityMap);
     Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
     Mat projectUndistortPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
@@ -51,9 +51,9 @@ public:
     void calculateRP(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateRP2(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void calculateDeskDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void calculateDeskDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void calculateFishDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateDeskDescription(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateDeskDescription2(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateFishDescription(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
 
     std::vector<cv::Point3d> intersect(Description* a,Description* b);
     std::vector<cv::Point3d> intersect2(Description* a,Description* b);
