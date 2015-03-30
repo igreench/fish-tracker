@@ -52,9 +52,12 @@ public:
     void calculateRP2(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateDecsription(StereoImage* stereoImage, StereoParametres* stereoParametres);
+    void calculateDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres);
 
     std::vector<cv::Point3d> intersect(Description* a,Description* b);
     std::vector<cv::Point3d> intersect2(Description* a,Description* b);
+
+    bool isDescription();
 
 private:
     static const int BOARD_WIDTH = 9; //8
@@ -63,7 +66,7 @@ private:
     Description *descriptionLeft;
     Description *descriptionRight;
 
-    bool isDescription;
+    bool _isDescription;
 
     Mat temp;
 };

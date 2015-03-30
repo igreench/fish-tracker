@@ -20,7 +20,7 @@ using namespace cv;
 StereoProcessing::StereoProcessing() {
     descriptionLeft = new Description();
     descriptionRight = new Description();
-    isDescription = false;
+    _isDescription = false;
 }
 
 StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
@@ -592,9 +592,81 @@ void StereoProcessing::calculateDecsription(StereoImage* stereoImage, StereoPara
         descriptionRight->cols = image2.cols;
         descriptionRight->rows = image2.rows;
 
-        isDescription = true;
+        _isDescription = true;
     }
 }
+
+void StereoProcessing::calculateDecsription2(StereoImage* stereoImage, StereoParametres* stereoParametres) {
+    Mat image1 = stereoImage->getLeft().clone();
+    Mat image2 = stereoImage->getRight().clone();
+
+    Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
+    Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
+    Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
+    Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
+
+    vector<Point2f> corners1, corners2;
+    Mat scres;
+
+    if (addImage(image1, &corners1, scres) && addImage(image2, &corners2, scres) && _isDescription) {
+        undistortPoints(corners1, corners1, cameraMatrix1, distCoeffs1);
+        undistortPoints(corners2, corners2, cameraMatrix2, distCoeffs2);
+
+        double fx = cameraMatrix1.at<double>(0,0);
+        double fy = cameraMatrix1.at<double>(1,1);
+        double cx = cameraMatrix1.at<double>(0,2);
+        double cy = cameraMatrix1.at<double>(1,2);
+
+        for (int i = 0; i < corners1.size(); ++i) {
+            corners1[i].x = corners1[i].x * fx + cx;
+            corners1[i].y = corners1[i].y * fy + cy;
+        }
+
+        fx = cameraMatrix2.at<double>(0,0);
+        fy = cameraMatrix2.at<double>(1,1);
+        cx = cameraMatrix2.at<double>(0,2);
+        cy = cameraMatrix2.at<double>(1,2);
+
+        for (int i = 0; i < corners2.size(); ++i) {
+            corners2[i].x = corners2[i].x * fx + cx;
+            corners2[i].y = corners2[i].y * fy + cy;
+        }
+
+        qDebug() << "corners1 size:" << corners1.size();
+        qDebug() << "corners2 size:" << corners2.size();
+
+        std::vector<cv::Point3d> points1;
+        for (int i = 0; i < corners1.size(); i++) {
+            points1.push_back(Point3d(corners1[i].x, corners1[i].y, 1));
+        }
+
+        std::vector<cv::Point3d> points2;
+        for (int i = 0; i < corners2.size(); i++) {
+            points2.push_back(Point3d(corners2[i].x, corners2[i].y, 1));
+        }
+
+        descriptionLeft->source = "left";
+        descriptionLeft->A = cameraMatrix1;
+        descriptionLeft->d = distCoeffs1;
+        descriptionLeft->points = points1;
+        descriptionLeft->cols = image1.cols;
+        descriptionLeft->rows = image1.rows;
+
+        descriptionRight->source = "right";
+        descriptionRight->A = cameraMatrix2;
+        descriptionRight->d = distCoeffs2;
+        descriptionRight->points = points2;
+        descriptionRight->cols = image2.cols;
+        descriptionRight->rows = image2.rows;
+
+        //isDescription = true;
+    }
+}
+
+bool StereoProcessing::isDescription() {
+    return _isDescription;
+}
+
 
 Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres, DisparityMap *disparityMap) {
     //TODO
@@ -1067,7 +1139,7 @@ StereoImage* StereoProcessing::triangulate2(StereoImage* stereoImage, StereoPara
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
-    if (isDescription) {
+    if (_isDescription) {
         qDebug() << "Intersection";
         //vector<Point3d> obj1 = intersect(descriptionLeft, descriptionRight);
         vector<Point3d> obj1 = intersect2(descriptionLeft, descriptionRight);

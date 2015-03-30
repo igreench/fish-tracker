@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     calculations.append("calculateRP2");
     calculations.append("calculateRMap");
     calculations.append("calculateDescription");
+    calculations.append("calculateDescription2");
 
     stereoImage = new StereoImage();
     stereoImage1 = new StereoImage();
@@ -329,7 +330,11 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         return new StereoImage(image, image);
         case 5:
         //return stereoProcessing->triangulate2(stereoImage, stereoParametres);
-        stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
+        if (stereoProcessing->isDescription()) {
+            stereoProcessing->calculateDecsription2(stereoImage, stereoParametres);
+        } else {
+            stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
+        }
         si = stereoProcessing->triangulate2(stereoImage, stereoParametres, triangulation);
         glwidget->setCubes(triangulation->getObjects());
         glwidget->updateGL();
@@ -469,6 +474,9 @@ void MainWindow::setCalculationMode() {
                 break;
             case 5:
                 stereoProcessing->calculateDecsription(stereoImage, stereoParametres);
+                break;
+            case 6:
+                stereoProcessing->calculateDecsription2(stereoImage, stereoParametres);
                 break;
             }
             //QCoreApplication::processEvents();
