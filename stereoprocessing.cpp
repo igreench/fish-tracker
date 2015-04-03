@@ -926,20 +926,22 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     Mat bg1(h, w, CV_8UC1);
     Mat bg2(h, w, CV_8UC1);
 
-    for (int i = 0; i < w; i++) {
-        for (int j = 0; j < h; j++) {
+    for (int i = 0; i < h; i++) { //rows
+        for (int j = 0; j < w; j++) { //cols
             int s1 = 0;
             int s2 = 0;
             for (int k = 0; k < pics1.size(); k++) {
                 s1 += pics1[k].at<uchar>(i, j);
                 s2 += pics2[k].at<uchar>(i, j);
             }
-            qDebug() << "s1 / pics1.size(): " << s1 / pics1.size();
-            qDebug() << "s2 / pics2.size(): " << s2 / pics2.size();
-            //bg1.at<uchar>(i, j) = s1 / pics1.size();
-            //bg2.at<uchar>(i, j) = s2 / pics2.size();
-            bg1.at<uchar>(i, j) = 0; //s1 / pics1.size();
-            bg2.at<uchar>(i, j) = 0; //s2 / pics2.size();
+            //qDebug() << "s1 / pics1.size(): " << s1 / pics1.size();
+            //qDebug() << "s2 / pics2.size(): " << s2 / pics2.size();
+
+            bg1.at<uchar>(i, j) = s1 / pics1.size();
+            bg2.at<uchar>(i, j) = s2 / pics2.size();
+
+            //bg1.at<uchar>(i, j) = 0; //s1 / pics1.size();
+            //bg2.at<uchar>(i, j) = 0; //s2 / pics2.size();
         }
     }
 
