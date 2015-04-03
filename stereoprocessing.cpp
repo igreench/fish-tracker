@@ -692,6 +692,7 @@ void StereoProcessing::calculateFishDescription(StereoImage* stereoImage, Stereo
     bool isShowDImages = true;
     bool isShowCImages = true;*/
 
+
     Mat rimage1, rimage2;
 
     if (0 == triangulation->mode) {
@@ -894,6 +895,78 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
     StereoImage* si = new StereoImage();
+
+    //Calculation and testing background
+
+    qDebug() << "start calc bg";
+
+    vector < Mat > pics1;
+    vector < Mat > pics2;
+
+    pics1.push_back(imread("image1150330fish1.jpg"));
+    pics1.push_back(imread("image1150330fish2.jpg"));
+    pics1.push_back(imread("image1150330fish3.jpg"));
+    pics1.push_back(imread("image1150330fish4.jpg"));
+
+    pics2.push_back(imread("image2150330fish1.jpg"));
+    pics2.push_back(imread("image2150330fish2.jpg"));
+    pics2.push_back(imread("image2150330fish3.jpg"));
+    pics2.push_back(imread("image2150330fish4.jpg"));
+
+    qDebug() << "added imgs";
+
+    //vector < vector < vector < int > > > bgs1;
+    //vector < vector < vector < int > > > bgs2;
+
+    Q_ASSERT(pics1.size() == pics2.size());
+
+    int w = 1600;
+    int h = 1200;
+
+    Mat bg1(h, w, CV_8UC1);
+    Mat bg2(h, w, CV_8UC1);
+
+    for (int i = 0; i < w; i++) {
+        for (int j = 0; j < h; j++) {
+            int s1 = 0;
+            int s2 = 0;
+            for (int k = 0; k < pics1.size(); k++) {
+                s1 += pics1[k].at<uchar>(i, j);
+                s2 += pics2[k].at<uchar>(i, j);
+            }
+            qDebug() << "s1 / pics1.size(): " << s1 / pics1.size();
+            qDebug() << "s2 / pics2.size(): " << s2 / pics2.size();
+            //bg1.at<uchar>(i, j) = s1 / pics1.size();
+            //bg2.at<uchar>(i, j) = s2 / pics2.size();
+            bg1.at<uchar>(i, j) = 0; //s1 / pics1.size();
+            bg2.at<uchar>(i, j) = 0; //s2 / pics2.size();
+        }
+    }
+
+    qDebug() << "calced";
+
+    si->setImages(bg1, bg2);
+    //si->setImages(pics1[0], pics2[0]);
+    return si;
+
+    /*for (int k = 0; k < pics1.size(); k++) {
+        if (!pics1[k].data || !pics2[k].data) {
+            qDebug() <<  "Could not open or find the image";
+        } else {
+            //vector < int >  bg1;
+            //vector < int >  bg2;
+
+            for (int i = 0; i < pics1[k].cols; i++) {
+                for (int j = 0; j < pics1[k].rows; j++) {
+                    bgs1[i][j].push_back(pics1.at(Size(i, j)));
+                    bgs2[i][j].push_back(pics2.at(Size(i, j)));
+                }
+            }
+        }
+    }*/
+
+
+    //
 
     //Start
 
