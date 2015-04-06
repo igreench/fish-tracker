@@ -9,6 +9,8 @@
 
 #include "opencv2/contrib/contrib.hpp"
 
+#include <QtCore/qmath.h>
+
 #include <QDebug>
 
 #define VERBOSE true
@@ -903,7 +905,7 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     vector < Mat > pics1;
     vector < Mat > pics2;
 
-    pics1.push_back(imread("image1150330fish1.jpg"));
+    /*pics1.push_back(imread("image1150330fish1.jpg"));
     pics1.push_back(imread("image1150330fish2.jpg"));
     pics1.push_back(imread("image1150330fish3.jpg"));
     pics1.push_back(imread("image1150330fish4.jpg"));
@@ -911,7 +913,18 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     pics2.push_back(imread("image2150330fish1.jpg"));
     pics2.push_back(imread("image2150330fish2.jpg"));
     pics2.push_back(imread("image2150330fish3.jpg"));
-    pics2.push_back(imread("image2150330fish4.jpg"));
+    pics2.push_back(imread("image2150330fish4.jpg"));*/
+
+    for (int i = 1; i <= 4; i++) {
+        Mat grey1, grey2;
+        string s = QString::number(i).toUtf8().constData();
+        Mat img1 = imread("image1150330fish" + s + ".jpg");
+        Mat img2 = imread("image2150330fish" + s + ".jpg");
+        cvtColor(img1, grey1, CV_BGR2GRAY);
+        cvtColor(img2, grey2, CV_BGR2GRAY);
+        pics1.push_back(grey1);
+        pics2.push_back(grey2);
+    }
 
     qDebug() << "added imgs";
 
@@ -926,19 +939,65 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     Mat bg1(h, w, CV_8UC1);
     Mat bg2(h, w, CV_8UC1);
 
+    qDebug() << "bg1.cols: " << bg1.cols;
+    qDebug() << "bg1.rows: " << bg1.rows;
+    qDebug() << "pics1[0].cols: " << pics1[0].cols;
+    qDebug() << "pics1[0].rows: " << pics1[0].rows;
+
+    /*if (1 != im.channels()) {
+        cvtColor(im, grey, CV_BGR2GRAY);
+        result = im.clone();
+    } else {
+        grey = im.clone();
+        cvtColor(grey, result, CV_GRAY2BGR);
+    }*/
+
     for (int i = 0; i < h; i++) { //rows
         for (int j = 0; j < w; j++) { //cols
-            int s1 = 0;
-            int s2 = 0;
+            long long int s1 = 1; //0
+            long long int s2 = 1; //0
+
+            QVector < int > m1;
+            QVector < int > m2;
             for (int k = 0; k < pics1.size(); k++) {
-                s1 += pics1[k].at<uchar>(i, j);
-                s2 += pics2[k].at<uchar>(i, j);
+
+                /*s1 += pics1[k].at<uchar>(i, j);
+                s2 += pics2[k].at<uchar>(i, j);*/
+
+                s1 *= pics1[k].at<uchar>(i, j);
+                s2 *= pics2[k].at<uchar>(i, j);
+
+                m1.push_back(pics1[k].at<uchar>(i, j));
+                m2.push_back(pics2[k].at<uchar>(i, j));
+
+                //qDebug() << "pics1[k].at<uchar>(i, j): " << pics1[k].at<uchar>(i, j);
             }
+
+            qSort(m1);
+            qSort(m2);
+
+            //qDebug() << "s1: " << s1;
+
             //qDebug() << "s1 / pics1.size(): " << s1 / pics1.size();
             //qDebug() << "s2 / pics2.size(): " << s2 / pics2.size();
 
-            bg1.at<uchar>(i, j) = s1 / pics1.size();
-            bg2.at<uchar>(i, j) = s2 / pics2.size();
+            //bg1.at<uchar>(i, j) = s1 / pics1.size();
+            //bg2.at<uchar>(i, j) = s2 / pics2.size();
+
+
+            //bg1.at<uchar>(i, j) = qPow(s1, (double)1 / (double)pics1.size());
+            //bg2.at<uchar>(i, j) = qPow(s2, (double)1 / (double)pics2.size());
+            ///bg1.at<uchar>(i, j) = pics1[pics1.size() / 2].at<uchar>(i, j);
+            ///bg2.at<uchar>(i, j) = pics2[pics2.size() / 2].at<uchar>(i, j);
+            bg1.at<uchar>(i, j) = m1[m1.size() / 2];
+            bg2.at<uchar>(i, j) = m2[m2.size() / 2];
+            //bg1.at<uchar>(i, j) = pics1[0].at<uchar>(i, j);
+            //bg2.at<uchar>(i, j) = pics2[0].at<uchar>(i, j);
+
+            //long long int t = qPow(s1, (double)1 / (double)pics1.size());
+
+            //qDebug() << "qPow(s1, 1 / pics1.size()): " << qPow(s1, (double)1 / (double)pics1.size());
+            //qDebug() << "t: " << t;
 
             //bg1.at<uchar>(i, j) = 0; //s1 / pics1.size();
             //bg2.at<uchar>(i, j) = 0; //s2 / pics2.size();
@@ -947,33 +1006,21 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
 
     qDebug() << "calced";
 
-    si->setImages(bg1, bg2);
-    //si->setImages(pics1[0], pics2[0]);
-    return si;
+    Mat img1, img2;
 
-    /*for (int k = 0; k < pics1.size(); k++) {
-        if (!pics1[k].data || !pics2[k].data) {
-            qDebug() <<  "Could not open or find the image";
-        } else {
-            //vector < int >  bg1;
-            //vector < int >  bg2;
+    Mat g1, g2;
+    cvtColor(image1, g1, CV_BGR2GRAY);
+    cvtColor(image2, g2, CV_BGR2GRAY);
 
-            for (int i = 0; i < pics1[k].cols; i++) {
-                for (int j = 0; j < pics1[k].rows; j++) {
-                    bgs1[i][j].push_back(pics1.at(Size(i, j)));
-                    bgs2[i][j].push_back(pics2.at(Size(i, j)));
-                }
-            }
-        }
-    }*/
+    absdiff(g1, bg1, img1);
+    absdiff(g2, bg2, img2);
 
-
-    //
+    si->setImages(img1, img2);
 
     //Start
 
     if (0 == triangulation->mode) {
-        si->setImages(image1, image2);
+        //si->setImages(image1, image2);
         return si;
     }
 
@@ -981,8 +1028,8 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
 
     Mat uimage1, uimage2;
 
-    undistort(image1, uimage1, cameraMatrix1, distCoeffs1);
-    undistort(image2, uimage2, cameraMatrix2, distCoeffs2);
+    undistort(img1, uimage1, cameraMatrix1, distCoeffs1);
+    undistort(img2, uimage2, cameraMatrix2, distCoeffs2);
 
     if (1 == triangulation->mode) {
         si->setImages(uimage1, uimage2);
@@ -990,20 +1037,22 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     }
 
     //Binarization
-    Mat g1, g2;
+    //Mat g1, g2;
 
-    cvtColor(uimage1, g1, CV_BGR2GRAY);
-    cvtColor(uimage2, g2, CV_BGR2GRAY);
+    //cvtColor(uimage1, g1, CV_BGR2GRAY);
+    //cvtColor(uimage2, g2, CV_BGR2GRAY);
 
-    Mat timage1, timage2;
 
-    blur(g1, g1, Size(triangulation->blurWidth, triangulation->blurHeight));
-    blur(g2, g2, Size(triangulation->blurWidth, triangulation->blurHeight));
+
+    //g1, g2
+    blur(uimage1, uimage1, Size(triangulation->blurWidth, triangulation->blurHeight));
+    blur(uimage2, uimage2, Size(triangulation->blurWidth, triangulation->blurHeight));
 
     //It would be cool combinate threshold and adaptiveThreshold
 
-    threshold(g1, timage1, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV); //50 250
-    threshold(g2, timage2, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV);
+    Mat timage1, timage2;
+    threshold(uimage1, timage1, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV); //50 250
+    threshold(uimage2, timage2, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV);
 
     if (2 == triangulation->mode) {
         si->setImages(timage1, timage2);
