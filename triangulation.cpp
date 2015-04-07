@@ -8,6 +8,10 @@ Triangulation::Triangulation() {
 
     background = new StereoImage();
     isBackgroundCalculated = false;
+    indexCurrentSavedStereoImage = 0;
+    indexCurrentStereoImage = 0;
+    indexMaxSavedStereoImage = 5;
+    indexMaxStereoImage = 100;
 
     mode = 2;
 }
@@ -27,7 +31,7 @@ void Triangulation::setBackground(StereoImage *si) {
     this->background->setImages(si->getLeft().clone(), si->getRight().clone()); //?
 }
 
-bool Triangulation::getBackground() {
+StereoImage *Triangulation::getBackground() {
     return background;
 }
 
@@ -37,4 +41,28 @@ void Triangulation::setIsBackgroundCalculated(bool flag) {
 
 bool Triangulation::getIsBackgroundCalculated() {
     return isBackgroundCalculated;
+}
+
+void Triangulation::setIndexCurrentSavedStereoImage(int value) {
+    this->indexCurrentSavedStereoImage = value;
+}
+
+int Triangulation::getIndexCurrentSavedStereoImage() {
+    return indexCurrentSavedStereoImage;
+}
+
+void Triangulation::setIndexCurrentStereoImage(int value) {
+    this->indexCurrentStereoImage = value;
+}
+
+int Triangulation::getIndexCurrentStereoImage() {
+    return indexCurrentStereoImage;
+}
+
+int Triangulation::getIndexMaxSavedStereoImage() {
+    return indexMaxSavedStereoImage;
+}
+
+int Triangulation::getIndexMaxStereoImage() {
+    return indexMaxStereoImage;
 }

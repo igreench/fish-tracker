@@ -23,15 +23,25 @@ public:
     int mode;
 
     void setBackground(StereoImage *si);
-    bool getBackground();
-
+    StereoImage *getBackground();
     void setIsBackgroundCalculated(bool flag);
     bool getIsBackgroundCalculated();
+    void setIndexCurrentSavedStereoImage(int value);
+    int getIndexCurrentSavedStereoImage();
+    void setIndexCurrentStereoImage(int value);
+    int getIndexCurrentStereoImage();
+    int getIndexMaxSavedStereoImage();
+    int getIndexMaxStereoImage();
 
 private:
     std::vector < cv::Point3d > objects;
-    bool isBackgroundCalculated;
+
     StereoImage *background;
+    bool isBackgroundCalculated;
+    int indexCurrentSavedStereoImage;
+    int indexCurrentStereoImage;
+    int indexMaxSavedStereoImage;
+    int indexMaxStereoImage;
 };
 
 #endif // TRIANGULATION_H
