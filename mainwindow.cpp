@@ -374,6 +374,11 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         return si;
         case 6:
         si = stereoProcessing->triangulateFish(stereoImage, stereoParametres, triangulation);
+        if (!glwidget->isVisible()) {
+            glwidget->show();
+        }
+        glwidget->setCubes(triangulation->getObjects());
+        glwidget->updateGL();
         return si;
         case 7:
         image = stereoProcessing->circlesPattern();

@@ -1103,6 +1103,50 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
         circle(drawing2, mc2[i], 4, color, -1, 8, 0);
     }
 
+    undistortPoints(mc1, mc1, cameraMatrix1, distCoeffs1);
+    undistortPoints(mc2, mc2, cameraMatrix2, distCoeffs2);
+
+    if (_isDescription) {
+
+        qDebug() << "mc1 size:" << mc1.size();
+        qDebug() << "mc2 size:" << mc2.size();
+
+        std::vector<cv::Point3d> points1;
+        qDebug() << "mc1";
+        for (int i = 0; i < mc1.size(); i++) {
+            points1.push_back(Point3d(mc1[i].x, mc1[i].y, 1));
+            qDebug() << "x: " << mc1[i].x << " y: " << mc1[i].y;
+        }
+
+        std::vector<cv::Point3d> points2;
+        qDebug() << "mc2";
+        for (int i = 0; i < mc2.size(); i++) {
+            points2.push_back(Point3d(mc2[i].x, mc2[i].y, 1));
+            qDebug() << "x: " << mc2[i].x << " y: " << mc2[i].y;
+        }
+
+        descriptionLeft->source = "left";
+        descriptionLeft->A = cameraMatrix1;
+        descriptionLeft->d = distCoeffs1;
+        descriptionLeft->points = points1;
+        descriptionLeft->cols = image1.cols;
+        descriptionLeft->rows = image1.rows;
+
+        descriptionRight->source = "right";
+        descriptionRight->A = cameraMatrix2;
+        descriptionRight->d = distCoeffs2;
+        descriptionRight->points = points2;
+        descriptionRight->cols = image2.cols;
+        descriptionRight->rows = image2.rows;
+
+        vector<Point3d> obj = intersect2(descriptionLeft, descriptionRight);
+        qDebug() << "obj";
+        for (int i = 0; i < obj.size(); i++) {
+            qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
+        }
+        triangulation->setObjects(obj);
+    }
+
     si->setImages(drawing1, drawing2);
     return si;
 }

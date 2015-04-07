@@ -37,7 +37,7 @@ GLWidget::~GLWidget() {
 void GLWidget::setCubes(std::vector < cv::Point3d > objects) {
     cubes.clear();
     for (int i = 0; i < objects.size(); i++) {
-        cubes.push_back(Cube(cv::Point3d(objects[i].x - OFFSET, objects[i].y - OFFSET, objects[i].z), 0.1f));
+        cubes.push_back(Cube(cv::Point3d((objects[i].x - OFFSET - 40) / 10, (objects[i].y - OFFSET - 30) / 10, (objects[i].z + 100) / 10), 0.1f));
     }
 }
 
