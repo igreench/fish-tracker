@@ -34,6 +34,9 @@ StereoProcessing::StereoProcessing() {
     } else {
         _isDescription = false;
     }
+
+    indexCurrentStereoImage = 0;
+    indexMaxStereoImage = 10;
 }
 
 StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
@@ -880,8 +883,31 @@ Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* s
 }
 
 StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation) {
+    StereoImage* si = new StereoImage();
+
     Mat image1 = stereoImage->getLeft().clone();
     Mat image2 = stereoImage->getRight().clone();
+
+    if (!triangulation->getIsBackgroundCalculated()) {
+        si->setImages(image1, image2);
+
+        if (indexCurrentStereoImage < indexMaxStereoImage) {
+            indexCurrentStereoImage++;
+        } else {
+            qDebug() << triangulation->getIndexCurrentStereoImage();
+            indexCurrentStereoImage = 0;
+            triangulation->addStereoImage(si);
+            if (triangulation->getIndexCurrentStereoImage() < triangulation->getIndexMaxStereoImage()) {
+                triangulation->setIndexCurrentStereoImage(triangulation->getIndexCurrentStereoImage() + 1);
+            } else {
+                triangulation->setIndexCurrentStereoImage(0);
+                triangulation->calculateBackground();
+                triangulation->setIsBackgroundCalculated(true);
+            }
+        }
+
+        return si;
+    }
 
     Mat imageSmall = Mat(image1.rows / 4, image1.cols / 4, CV_8UC3);
     Size imageSizeSmall = imageSmall.size(); //400x300
@@ -896,24 +922,14 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
-    StereoImage* si = new StereoImage();
 
+    /* // local calc BG
     //Calculation and testing background
 
     qDebug() << "start calc bg";
 
     vector < Mat > pics1;
     vector < Mat > pics2;
-
-    /*pics1.push_back(imread("image1150330fish1.jpg"));
-    pics1.push_back(imread("image1150330fish2.jpg"));
-    pics1.push_back(imread("image1150330fish3.jpg"));
-    pics1.push_back(imread("image1150330fish4.jpg"));
-
-    pics2.push_back(imread("image2150330fish1.jpg"));
-    pics2.push_back(imread("image2150330fish2.jpg"));
-    pics2.push_back(imread("image2150330fish3.jpg"));
-    pics2.push_back(imread("image2150330fish4.jpg"));*/
 
     for (int i = 1; i <= 4; i++) {
         Mat grey1, grey2;
@@ -928,9 +944,6 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
 
     qDebug() << "added imgs";
 
-    //vector < vector < vector < int > > > bgs1;
-    //vector < vector < vector < int > > > bgs2;
-
     Q_ASSERT(pics1.size() == pics2.size());
 
     int w = 1600;
@@ -944,14 +957,6 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     qDebug() << "pics1[0].cols: " << pics1[0].cols;
     qDebug() << "pics1[0].rows: " << pics1[0].rows;
 
-    /*if (1 != im.channels()) {
-        cvtColor(im, grey, CV_BGR2GRAY);
-        result = im.clone();
-    } else {
-        grey = im.clone();
-        cvtColor(grey, result, CV_GRAY2BGR);
-    }*/
-
     for (int i = 0; i < h; i++) { //rows
         for (int j = 0; j < w; j++) { //cols
             long long int s1 = 1; //0
@@ -960,51 +965,25 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
             QVector < int > m1;
             QVector < int > m2;
             for (int k = 0; k < pics1.size(); k++) {
-
-                /*s1 += pics1[k].at<uchar>(i, j);
-                s2 += pics2[k].at<uchar>(i, j);*/
-
                 s1 *= pics1[k].at<uchar>(i, j);
                 s2 *= pics2[k].at<uchar>(i, j);
 
                 m1.push_back(pics1[k].at<uchar>(i, j));
                 m2.push_back(pics2[k].at<uchar>(i, j));
-
                 //qDebug() << "pics1[k].at<uchar>(i, j): " << pics1[k].at<uchar>(i, j);
             }
 
             qSort(m1);
             qSort(m2);
 
-            //qDebug() << "s1: " << s1;
-
-            //qDebug() << "s1 / pics1.size(): " << s1 / pics1.size();
-            //qDebug() << "s2 / pics2.size(): " << s2 / pics2.size();
-
-            //bg1.at<uchar>(i, j) = s1 / pics1.size();
-            //bg2.at<uchar>(i, j) = s2 / pics2.size();
-
-
-            //bg1.at<uchar>(i, j) = qPow(s1, (double)1 / (double)pics1.size());
-            //bg2.at<uchar>(i, j) = qPow(s2, (double)1 / (double)pics2.size());
-            ///bg1.at<uchar>(i, j) = pics1[pics1.size() / 2].at<uchar>(i, j);
-            ///bg2.at<uchar>(i, j) = pics2[pics2.size() / 2].at<uchar>(i, j);
             bg1.at<uchar>(i, j) = m1[m1.size() / 2];
             bg2.at<uchar>(i, j) = m2[m2.size() / 2];
-            //bg1.at<uchar>(i, j) = pics1[0].at<uchar>(i, j);
-            //bg2.at<uchar>(i, j) = pics2[0].at<uchar>(i, j);
-
-            //long long int t = qPow(s1, (double)1 / (double)pics1.size());
-
-            //qDebug() << "qPow(s1, 1 / pics1.size()): " << qPow(s1, (double)1 / (double)pics1.size());
-            //qDebug() << "t: " << t;
-
-            //bg1.at<uchar>(i, j) = 0; //s1 / pics1.size();
-            //bg2.at<uchar>(i, j) = 0; //s2 / pics2.size();
         }
     }
 
     qDebug() << "calced";
+
+    */
 
     Mat img1, img2;
 
@@ -1012,10 +991,12 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     cvtColor(image1, g1, CV_BGR2GRAY);
     cvtColor(image2, g2, CV_BGR2GRAY);
 
-    absdiff(g1, bg1, img1);
-    absdiff(g2, bg2, img2);
+    absdiff(g1, triangulation->getBackground()->getLeft(), img1);
+    absdiff(g2, triangulation->getBackground()->getRight(), img2);
 
     si->setImages(img1, img2);
+
+    //return si;
 
     //Start
 

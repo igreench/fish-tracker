@@ -5,6 +5,8 @@
 #include "stereoimage.h"
 
 using namespace stereo;
+using namespace std;
+using namespace cv;
 
 class Triangulation
 {
@@ -22,26 +24,25 @@ public:
 
     int mode;
 
+    //Does translate it to class StereoBackground? =)
     void setBackground(StereoImage *si);
     StereoImage *getBackground();
     void setIsBackgroundCalculated(bool flag);
     bool getIsBackgroundCalculated();
-    void setIndexCurrentSavedStereoImage(int value);
-    int getIndexCurrentSavedStereoImage();
     void setIndexCurrentStereoImage(int value);
     int getIndexCurrentStereoImage();
-    int getIndexMaxSavedStereoImage();
     int getIndexMaxStereoImage();
+    void addStereoImage(StereoImage *si);
+    void calculateBackground();
 
 private:
     std::vector < cv::Point3d > objects;
 
     StereoImage *background;
     bool isBackgroundCalculated;
-    int indexCurrentSavedStereoImage;
     int indexCurrentStereoImage;
-    int indexMaxSavedStereoImage;
     int indexMaxStereoImage;
+    vector <StereoImage *> stereoImages;
 };
 
 #endif // TRIANGULATION_H

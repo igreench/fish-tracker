@@ -53,7 +53,7 @@ public:
     void calculateRMap(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateDeskDescription(StereoImage* stereoImage, StereoParametres* stereoParametres);
     void calculateDeskDescription2(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    void calculateFishDescription(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
+    void calculateFishDescription(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);    
 
     std::vector<cv::Point3d> intersect(Description* a,Description* b);
     std::vector<cv::Point3d> intersect2(Description* a,Description* b);
@@ -68,6 +68,9 @@ private:
     Description *descriptionRight;
 
     bool _isDescription;
+
+    int indexCurrentStereoImage;
+    int indexMaxStereoImage;
 };
 
 }
