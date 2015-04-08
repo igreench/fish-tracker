@@ -643,20 +643,21 @@ void MainWindow::on_pushButton_3_clicked() {
 
 void MainWindow::update() {
     qDebug() << "MainWindow::update() begin";
-    //camera3d->update();
+    camera3d->update();
 
     //Pointers? Really???
     //stereoImage->setImages(*camera3d->getStereoImage()); // ???
 
     //cv::imshow("image1", camera3d->camera1->getFrame());
 
-    /*stereoImage->setImages(camera3d->getStereoImage());
+    //stereoImage->release();
+    stereoImage->setImages(camera3d->getStereoImage());
     calcStereoImages();
     if (!isResized) {
         resizeStereoViews();
         isResized = true;
     }
-    showStereoImages();*/
+    showStereoImages();
 
 
     qDebug() << "MainWindow::update() end";

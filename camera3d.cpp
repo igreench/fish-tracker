@@ -36,6 +36,7 @@ void Camera3D::stopCapture() {
 
 void Camera3D::update() {
     qDebug() << "Camera3D::update() begin";
+    //stereoImage->release();
     stereoImage->setLeft(camera1->getFrame());
     stereoImage->setRight(camera2->getFrame());
     qDebug() << "Camera3D::update() end";

@@ -16,13 +16,15 @@ public:
     void setLeft(Mat image);
     void setRight(Mat image);
     void setImages(Mat left, Mat right);
-    void setImages(StereoImage *stereImage);
+    void setImages(StereoImage *stereoImage);
 
     bool isEmpty();
     void clear();
 
     Mat getLeft();
     Mat getRight();
+
+    void release();
 
 private:
     Mat left;

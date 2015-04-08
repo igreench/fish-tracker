@@ -23,6 +23,7 @@ private:
     Error error;
     Camera camera;
     bool isConnect;
+    Mat image;
 };
 
 #endif // PGRCAMERA_H
