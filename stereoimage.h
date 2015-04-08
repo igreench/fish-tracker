@@ -16,7 +16,7 @@ public:
     void setLeft(Mat image);
     void setRight(Mat image);
     void setImages(Mat left, Mat right);
-    void setImages(StereoImage stereImage);
+    void setImages(StereoImage *stereImage);
 
     bool isEmpty();
     void clear();

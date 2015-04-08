@@ -23,9 +23,9 @@ void StereoImage::setImages(Mat left, Mat right) {
     this->right = right;
 }
 
-void StereoImage::setImages(StereoImage stereImage) {
-    this->left = stereImage.getLeft();
-    this->right = stereImage.getRight();
+void StereoImage::setImages(StereoImage *stereImage) {
+    this->left = stereImage->getLeft();
+    this->right = stereImage->getRight();
 }
 
 Mat StereoImage::getLeft() {

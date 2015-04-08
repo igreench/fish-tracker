@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <opencv2/highgui/highgui.hpp> //
+
 #include "asmopencv.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -640,16 +642,24 @@ void MainWindow::on_pushButton_3_clicked() {
 }
 
 void MainWindow::update() {
-    camera3d->update();
+    qDebug() << "MainWindow::update() begin";
+    //camera3d->update();
+
     //Pointers? Really???
     //stereoImage->setImages(*camera3d->getStereoImage()); // ???
-    stereoImage->setImages(camera3d->getStereoImage());
+
+    //cv::imshow("image1", camera3d->camera1->getFrame());
+
+    /*stereoImage->setImages(camera3d->getStereoImage());
     calcStereoImages();
     if (!isResized) {
         resizeStereoViews();
         isResized = true;
     }
-    showStereoImages();
+    showStereoImages();*/
+
+
+    qDebug() << "MainWindow::update() end";
 }
 
 void MainWindow::on_pushButton_10_clicked() {

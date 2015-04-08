@@ -15,8 +15,8 @@ Camera3D::Camera3D() {
     }
 }
 
-StereoImage Camera3D::getStereoImage() {
-    return *stereoImage;
+StereoImage *Camera3D::getStereoImage() {
+    return stereoImage;
 }
 
 bool Camera3D::isConnected() {
@@ -35,7 +35,8 @@ void Camera3D::stopCapture() {
 }
 
 void Camera3D::update() {
-    //qDebug() << "Camera3D::update()";
+    qDebug() << "Camera3D::update() begin";
     stereoImage->setLeft(camera1->getFrame());
     stereoImage->setRight(camera2->getFrame());
+    qDebug() << "Camera3D::update() end";
 }

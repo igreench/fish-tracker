@@ -20,14 +20,16 @@ public:
 
     bool isConnected();
 
-    StereoImage getStereoImage();
+    StereoImage *getStereoImage();
+
+    PGRCamera *camera1;
+    PGRCamera *camera2;
 
 public slots:
     void update();
 
 private:
-    PGRCamera *camera1;
-    PGRCamera *camera2;
+
     StereoImage *stereoImage;
 
     bool isConnect;

@@ -72,7 +72,11 @@ Mat PGRCamera::getFrame() {
     Image rgbImage;
     rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage);
     unsigned int rowBytes = (double)rgbImage.GetReceivedDataSize() / (double)rgbImage.GetRows();
-    Mat image = Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);    
 
-    return image.clone();
+    //Mat image = Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);
+
+    //return image.clone();
+
+    qDebug() << "PGRCamera::getFrame()";
+    return Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);
 }
