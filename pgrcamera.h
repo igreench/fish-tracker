@@ -5,6 +5,8 @@
 
 #include <opencv2/core/core.hpp>
 
+#include "imagedata.h"
+
 using namespace FlyCapture2;
 using namespace cv;
 
@@ -14,7 +16,7 @@ public:
     PGRCamera(int id);
 
     void startCapture();
-    Mat getFrame();
+    ImageData *getFrame();
     void stopCapture();
     bool isConnected();
 
@@ -24,6 +26,8 @@ private:
     Camera camera;
     bool isConnect;
     Mat image;
+    Image rawImage;
+    Image rgbImage;
 };
 
 #endif // PGRCAMERA_H

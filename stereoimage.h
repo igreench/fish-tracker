@@ -7,6 +7,10 @@ using namespace cv;
 
 namespace stereo {
 
+struct DataImage {
+
+};
+
 class StereoImage
 {
 public:

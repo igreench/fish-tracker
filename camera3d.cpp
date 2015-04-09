@@ -1,5 +1,9 @@
 #include "camera3d.h"
 
+#include "imagedata.h"
+
+#include <opencv2/highgui/highgui.hpp> //
+
 #include <QDebug>
 
 Camera3D::Camera3D() {
@@ -35,9 +39,9 @@ void Camera3D::stopCapture() {
 }
 
 void Camera3D::update() {
-    qDebug() << "Camera3D::update() begin";
-    //stereoImage->release();
-    stereoImage->setLeft(camera1->getFrame());
-    stereoImage->setRight(camera2->getFrame());
-    qDebug() << "Camera3D::update() end";
+    ImageData *left = camera1->getFrame();
+    ImageData *right = camera2->getFrame();
+
+    stereoImage->setLeft(Mat(left->getRows(), left->getCols(), left->getType(), left->getData(), left->getStep()));
+    stereoImage->setRight(Mat(right->getRows(), right->getCols(), right->getType(), right->getData(), right->getStep()));
 }

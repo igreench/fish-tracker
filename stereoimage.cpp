@@ -13,20 +13,20 @@ StereoImage::StereoImage(Mat left, Mat right) {
 }
 
 void StereoImage::setLeft(Mat image) {
-    if (left.data) {
+    /*if (left.data) {
         left.release();
     } else {
         qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!1";
-    }
+    }*/
     this->left = image;
 }
 
 void StereoImage::setRight(Mat image) {
-    if (right.data) {
+    /*if (right.data) {
         right.release();
     } else {
         qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!2";
-    }
+    }*/
     this->right = image;
 }
 

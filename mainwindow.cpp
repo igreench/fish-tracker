@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "imagedata.h"
+
 #include <opencv2/highgui/highgui.hpp> //
 
 #include "asmopencv.h"
@@ -645,13 +647,10 @@ void MainWindow::update() {
     qDebug() << "MainWindow::update() begin";
     camera3d->update();
 
-    //Pointers? Really???
-    //stereoImage->setImages(*camera3d->getStereoImage()); // ???
-
-    //cv::imshow("image1", camera3d->camera1->getFrame());
-
-    //stereoImage->release();
     stereoImage->setImages(camera3d->getStereoImage());
+    //cv::imshow("image1", camera3d->getStereoImage()->getLeft());
+    //cv::imshow("image1", stereoImage->getLeft());
+
     calcStereoImages();
     if (!isResized) {
         resizeStereoViews();
