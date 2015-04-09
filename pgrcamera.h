@@ -3,12 +3,9 @@
 
 #include "FlyCapture2.h"
 
-#include <opencv2/core/core.hpp>
-
 #include "imagedata.h"
 
 using namespace FlyCapture2;
-using namespace cv;
 
 class PGRCamera
 {
@@ -25,7 +22,6 @@ private:
     Error error;
     Camera camera;
     bool isConnect;
-    Mat image;
     Image rawImage;
     Image rgbImage;
 };

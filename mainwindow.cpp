@@ -644,22 +644,14 @@ void MainWindow::on_pushButton_3_clicked() {
 }
 
 void MainWindow::update() {
-    qDebug() << "MainWindow::update() begin";
     camera3d->update();
-
     stereoImage->setImages(camera3d->getStereoImage());
-    //cv::imshow("image1", camera3d->getStereoImage()->getLeft());
-    //cv::imshow("image1", stereoImage->getLeft());
-
     calcStereoImages();
     if (!isResized) {
         resizeStereoViews();
         isResized = true;
     }
     showStereoImages();
-
-
-    qDebug() << "MainWindow::update() end";
 }
 
 void MainWindow::on_pushButton_10_clicked() {
@@ -670,8 +662,7 @@ void MainWindow::on_pushButton_10_clicked() {
     ui->pushButton_10->setVisible(false);
 }
 
-void MainWindow::on_pushButton_11_clicked()
-{
+void MainWindow::on_pushButton_11_clicked() {
     updateTriangulation();
     calcStereoImages();
     showStereoImages();

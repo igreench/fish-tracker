@@ -1,7 +1,5 @@
 #include "pgrcamera.h"
 
-#include <opencv2/highgui/highgui.hpp> //
-
 #include <QDebug>
 
 PGRCamera::PGRCamera(int id) {
@@ -64,22 +62,13 @@ void PGRCamera::stopCapture() {
 }
 
 ImageData *PGRCamera::getFrame() {
-
     Error error = camera.RetrieveBuffer(&rawImage);
     if (error != PGRERROR_OK) {
         qDebug() << "Capture error";
-        //return Mat();
         //continue;
     }
 
     rawImage.Convert(FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage);
     unsigned int rowBytes = (double)rgbImage.GetReceivedDataSize() / (double)rgbImage.GetRows();
-    ImageData *data = new ImageData(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);
-
-    //Mat image(data->getRows(), data->getCols(), data->getType(), data->getData(), data->getStep());
-    //cv::imshow("image1", image);
-
-    return data;
-    //
-    //return Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes).clone();
+    return new ImageData(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(), rowBytes);
 }

@@ -4,14 +4,12 @@
 #include <QObject>
 
 #include "FlyCapture2.h"
-#include <opencv2/core/core.hpp>
 
 #include "pgrcamera.h"
 #include "stereoimage.h"
 
 using namespace stereo;
 using namespace FlyCapture2;
-using namespace cv;
 
 class Camera3D : public QObject
 {
