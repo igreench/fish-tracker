@@ -36,7 +36,7 @@ StereoProcessing::StereoProcessing() {
     }
 
     indexCurrentStereoImage = 0;
-    indexMaxStereoImage = 10;
+    indexMaxStereoImage = 30;
 }
 
 void StereoProcessing::undistortStereoImage(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
@@ -908,6 +908,8 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
                 triangulation->calculateBackground();
                 triangulation->setIsBackgroundCalculated(true);
             }
+            //string s = QString::number(indexCurrentStereoImage).toUtf8().constData();
+            //imshow("image" + s, dst->getLeft());
         }
 
         return;
