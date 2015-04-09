@@ -35,14 +35,14 @@ class StereoProcessing {
 public:
     //Is it utility class?
     StereoProcessing();
-    StereoImage* undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    StereoImage* undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    StereoImage* triangulateDesk(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
-    StereoImage* triangulateFish(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation);
-    Mat disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres, DisparityMap *disparityMap);
-    Mat projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    Mat projectUndistortPoints(StereoImage* stereoImage, StereoParametres* stereoParametres);
-    Mat circlesPattern();
+    void undistortStereoImage(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres);
+    void undistortRectify(StereoImage* src, StereoImage *dst, StereoParametres* stereoParametres);
+    void triangulateDesk(StereoImage* src, StereoImage *dst, StereoParametres* stereoParametres, Triangulation* triangulation);
+    void triangulateFish(StereoImage* src, StereoImage *dst, StereoParametres* stereoParametres, Triangulation* triangulation);
+    void disparityMap(StereoImage* src, StereoImage *dst, StereoParametres* stereoParametres, DisparityMap *disparityMap);
+    void projectPoints(StereoImage* src, StereoImage *dst, StereoParametres* stereoParametres);
+    void projectUndistortPoints(StereoImage* src, StereoImage *dst, StereoParametres* stereoParametres);
+    void circlesPattern(StereoImage *dst);
 
     bool addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result);
 

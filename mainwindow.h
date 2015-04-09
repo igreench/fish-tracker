@@ -75,6 +75,7 @@ private:
     StereoImage *stereoImage1;
     StereoImage *stereoImage2;
     StereoImage *stereoImage3;
+    StereoImage *tempStereoImage;
 
     StereoParametres *stereoParametres;
     StereoProcessing *stereoProcessing;

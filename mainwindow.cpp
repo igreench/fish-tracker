@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     stereoImage1 = new StereoImage();
     stereoImage2 = new StereoImage();
     stereoImage3 = new StereoImage();
+    tempStereoImage = new StereoImage();
     stereoParametres = new StereoParametres();
     stereoProcessing = new StereoProcessing();
     disparityMap = new DisparityMap();
@@ -346,22 +347,24 @@ void MainWindow::loadLocalStereoImage(string fn1, string fn2) {
 }
 
 StereoImage *MainWindow::currentStereoImage(int countMode) {
-    Mat image;
-    StereoImage *si;
+    //Mat image;
+    //StereoImage *si;// = new StereoImage();
     switch(countMode) {
         case 0:
         return stereoImage;
         case 1:
-        return stereoProcessing->undistortStereoImage(stereoImage, stereoParametres);
+        stereoProcessing->undistortStereoImage(stereoImage, tempStereoImage, stereoParametres);
+        return tempStereoImage;
         case 2:
-        image = stereoProcessing->projectPoints(stereoImage, stereoParametres);
+        stereoProcessing->projectPoints(stereoImage, tempStereoImage, stereoParametres);
         //image = stereoProcessing->projectUndistortPoints(stereoImage, stereoParametres);
-        return new StereoImage(image, image);
+        return tempStereoImage;
         case 3:
-        return stereoProcessing->undistortRectify(stereoImage, stereoParametres);
+        stereoProcessing->undistortRectify(stereoImage, tempStereoImage, stereoParametres);
+        return tempStereoImage;
         case 4:
-        image = stereoProcessing->disparityMap(stereoImage, stereoParametres, disparityMap);
-        return new StereoImage(image, image);
+        stereoProcessing->disparityMap(stereoImage, tempStereoImage, stereoParametres, disparityMap);
+        return tempStereoImage;
         case 5:
         //return stereoProcessing->triangulate2(stereoImage, stereoParametres);
         if (stereoProcessing->isDescription()) {
@@ -369,24 +372,24 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         } else {
             stereoProcessing->calculateDeskDescription(stereoImage, stereoParametres);
         }
-        si = stereoProcessing->triangulateDesk(stereoImage, stereoParametres, triangulation);
+        stereoProcessing->triangulateDesk(stereoImage, tempStereoImage, stereoParametres, triangulation);
         if (!glwidget->isVisible()) {
             glwidget->show();
         }
         glwidget->setCubes(triangulation->getObjects());
         glwidget->updateGL();
-        return si;
+        return tempStereoImage;
         case 6:
-        si = stereoProcessing->triangulateFish(stereoImage, stereoParametres, triangulation);
+        stereoProcessing->triangulateFish(stereoImage, tempStereoImage, stereoParametres, triangulation);
         if (!glwidget->isVisible()) {
             glwidget->show();
         }
         glwidget->setCubes(triangulation->getObjects());
         glwidget->updateGL();
-        return si;
+        return tempStereoImage;
         case 7:
-        image = stereoProcessing->circlesPattern();
-        return new StereoImage(image, image);
+        stereoProcessing->circlesPattern(tempStereoImage);
+        return tempStereoImage;
     }
     return stereoImage;
 }

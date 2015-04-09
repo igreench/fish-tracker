@@ -39,24 +39,18 @@ StereoProcessing::StereoProcessing() {
     indexMaxStereoImage = 10;
 }
 
-StereoImage* StereoProcessing::undistortStereoImage(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
-    StereoImage* undistortStereoImage = new StereoImage();
+void StereoProcessing::undistortStereoImage(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
+    Mat image1 = src->getLeft().clone();
+    Mat image2 = src->getRight().clone();
     Mat left, right;
-    //qDebug() << "start undistort";
-    //stereoParametres->print();
     undistort(image1, left, stereoParametres->getCameraMatrix1(), stereoParametres->getDistCoeffs1());
     undistort(image2, right, stereoParametres->getCameraMatrix2(), stereoParametres->getDistCoeffs2());
-    undistortStereoImage->setImages(left, right);
-    //qDebug() << "end undistort";
-    //undistortStereoImage->setImages(stereoImage->getLeft(), stereoImage->getRight());
-    return undistortStereoImage;
+    dst->setImages(left, right);
 }
 
-Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();    
+void StereoProcessing::projectPoints(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
+    Mat image1 = src->getLeft().clone();
+    Mat image2 = src->getRight().clone();
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
@@ -111,16 +105,22 @@ Mat StereoProcessing::projectPoints(StereoImage* stereoImage, StereoParametres* 
             circle(image1, Point2d(imagePoints[i].x, imagePoints[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
             //qDebug() << "x:" << imagePoints[i].x << "y:" << imagePoints[i].y;
         }
-        return image1;
+        dst->setImages(image1, image1);
+        return;
+        //return image1;
     }
     qDebug() << "StereoProcessing::projectPoints: didn't find calibration desks";
-    return stereoImage->getLeft();
+    //return stereoImage->getLeft();
+    dst->setImages(src);
 }
 
-Mat StereoProcessing::projectUndistortPoints(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
-    Mat image = undistortStereoImage(stereoImage, stereoParametres)->getLeft();
+void StereoProcessing::projectUndistortPoints(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
+    Mat image1 = src->getLeft().clone();
+    Mat image2 = src->getRight().clone();
+    //Mat image = undistortStereoImage(stereoImage, stereoParametres)->getLeft();
+    //StereoImage* si;
+    undistortStereoImage(src, dst, stereoParametres);
+    Mat image = dst->getLeft();
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
@@ -197,16 +197,18 @@ Mat StereoProcessing::projectUndistortPoints(StereoImage* stereoImage, StereoPar
             circle(image, Point2d(corners1[i].x, corners1[i].y), 10, Scalar( 0, 0, 255 ), CV_FILLED, 8, 0);
             qDebug() << "x:" << corners1[i].x << "y:" << corners1[i].y;
         }
-        return image;
+        //return image;
+        dst->setImages(image, image);
     }
     qDebug() << "StereoProcessing::projectPoints: didn't find calibration desks";
-    return stereoImage->getLeft();
+    //return stereoImage->getLeft();
+    dst->setImages(src);
 }
 
 
-StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, StereoParametres* stereoParametres) {
-    Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
+void StereoProcessing::undistortRectify(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
+    Mat image1 = src->getLeft().clone();
+    Mat image2 = src->getRight().clone();
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
@@ -221,13 +223,14 @@ StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, Stereo
     Mat rmap1y = stereoParametres->getRMap1y();
     Mat rmap2x = stereoParametres->getRMap2x();
     Mat rmap2y = stereoParametres->getRMap2y();
-    StereoImage* undistortRectifyStereoImage = new StereoImage();
-    undistortRectifyStereoImage->setImages(image1, image2);
+    //StereoImage* undistortRectifyStereoImage = new StereoImage();
+    dst->setImages(image1, image2);
 
     //BUG! If stereoParametres have RP but haven't RT then programm will throw error. It corrects with bool.
     if (stereoParametres->isEmptyRT()) {
         qDebug() << "Error: isEmptyRT";
-        return undistortRectifyStereoImage;
+        return;
+        //return undistortRectifyStereoImage;
     }
 
     if (stereoParametres->isEmptyRP()) {
@@ -251,8 +254,8 @@ StereoImage* StereoProcessing::undistortRectify(StereoImage* stereoImage, Stereo
     remap(image1, image1, rmap1x, rmap1y, CV_INTER_LINEAR);
     remap(image2, image2, rmap2x, rmap2y, CV_INTER_LINEAR);
 
-    undistortRectifyStereoImage->setImages(image1, image2);
-    return undistortRectifyStereoImage;
+    dst->setImages(image1, image2);
+    //return undistortRectifyStereoImage;
 }
 
 void StereoProcessing::calculateRT(StereoImage* stereoImage, StereoParametres* stereoParametres) {
@@ -876,27 +879,28 @@ bool StereoProcessing::isDescription() {
 }
 
 
-Mat StereoProcessing::disparityMap(StereoImage* stereoImage, StereoParametres* stereoParametres, DisparityMap *disparityMap) {
+void StereoProcessing::disparityMap(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres, DisparityMap *disparityMap) {
     //TODO
     //use undistortRectify
-    return stereoImage->getLeft();
+    dst->setImages(src);
+    //return stereoImage->getLeft();
 }
 
-StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation* triangulation) {
-    StereoImage* si = new StereoImage();
+void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres, Triangulation* triangulation) {
+    //StereoImage* si = new StereoImage();
 
-    Mat image1 = stereoImage->getLeft().clone();
-    Mat image2 = stereoImage->getRight().clone();
+    Mat image1 = src->getLeft().clone();
+    Mat image2 = src->getRight().clone();
 
     if (!triangulation->getIsBackgroundCalculated()) {
-        si->setImages(image1, image2);
+        dst->setImages(image1, image2);
 
         if (indexCurrentStereoImage < indexMaxStereoImage) {
             indexCurrentStereoImage++;
         } else {
             qDebug() << triangulation->getIndexCurrentStereoImage();
             indexCurrentStereoImage = 0;
-            triangulation->addStereoImage(si);
+            triangulation->addStereoImage(dst);
             if (triangulation->getIndexCurrentStereoImage() < triangulation->getIndexMaxStereoImage()) {
                 triangulation->setIndexCurrentStereoImage(triangulation->getIndexCurrentStereoImage() + 1);
             } else {
@@ -906,7 +910,8 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
             }
         }
 
-        return si;
+        return;
+        //return si;
     }
 
     Mat imageSmall = Mat(image1.rows / 4, image1.cols / 4, CV_8UC3);
@@ -994,7 +999,7 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     absdiff(g1, triangulation->getBackground()->getLeft(), img1);
     absdiff(g2, triangulation->getBackground()->getRight(), img2);
 
-    si->setImages(img1, img2);
+    dst->setImages(img1, img2);
 
     //return si;
 
@@ -1002,7 +1007,7 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
 
     if (0 == triangulation->mode) {
         //si->setImages(image1, image2);
-        return si;
+        return;// si;
     }
 
     //Calibration
@@ -1013,8 +1018,8 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     undistort(img2, uimage2, cameraMatrix2, distCoeffs2);
 
     if (1 == triangulation->mode) {
-        si->setImages(uimage1, uimage2);
-        return si;
+        dst->setImages(uimage1, uimage2);
+        return;// si;
     }
 
     //Binarization
@@ -1036,8 +1041,8 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     threshold(uimage2, timage2, triangulation->thresh, triangulation->threshMaxval, CV_THRESH_BINARY_INV);
 
     if (2 == triangulation->mode) {
-        si->setImages(timage1, timage2);
-        return si;
+        dst->setImages(timage1, timage2);
+        return;// si;
     }
 
     //Finding contours
@@ -1062,8 +1067,8 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
     }
 
     if (3 == triangulation->mode) {
-        si->setImages(drawing1, drawing2);
-        return si;
+        dst->setImages(drawing1, drawing2);
+        return;// si;
     }
 
     //Getting moments and mass centers
@@ -1128,11 +1133,11 @@ StereoImage* StereoProcessing::triangulateFish(StereoImage* stereoImage, StereoP
         triangulation->setObjects(obj);
     }
 
-    si->setImages(drawing1, drawing2);
-    return si;
+    dst->setImages(drawing1, drawing2);
+    //return si;
 }
 
-Mat StereoProcessing::circlesPattern() {
+void StereoProcessing::circlesPattern(StereoImage *dst) {
     Mat image(1792, 1600, CV_8UC3);
     image.setTo(Scalar(255, 255, 255));
     int n = BOARD_WIDTH; //9
@@ -1141,7 +1146,8 @@ Mat StereoProcessing::circlesPattern() {
     for (int i = 0; i < (n + 1) * m; i++) {
         circle(image, Point((i % m) * (3 * r) + 2 * r, (i / n) * (3 * r) + 2 * r), r, Scalar(0, 0, 0), -1);
     }
-    return image;
+    dst->setImages(image, image);
+    //return image;
 }
 
 bool StereoProcessing::addImage(const Mat im, vector<Point2f> *imageCorners, Mat &result) {
@@ -1445,8 +1451,8 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
     return result;
 }
 
-StereoImage* StereoProcessing::triangulateDesk(StereoImage* stereoImage, StereoParametres* stereoParametres, Triangulation *triangulation) {
-    Mat image1 = stereoImage->getLeft().clone();
+void StereoProcessing::triangulateDesk(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres, Triangulation *triangulation) {
+    Mat image1 = src->getLeft().clone();
 
     Mat cameraMatrix1 = stereoParametres->getCameraMatrix1();
     Mat distCoeffs1 = stereoParametres->getDistCoeffs1();
@@ -1460,7 +1466,7 @@ StereoImage* StereoProcessing::triangulateDesk(StereoImage* stereoImage, StereoP
             circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
             //qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
         }
-        return new StereoImage(image1, image1);
+        dst->setImages(image1, image1);
     }
-    return stereoImage;
+    dst->setImages(src);
 }
