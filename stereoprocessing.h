@@ -13,6 +13,12 @@ using namespace std;
 
 namespace stereo {
 
+struct sort_points {
+    bool operator()(const cv::Point3d &left, const cv::Point3d &right) {
+        return left.x < right.x;
+    }
+};
+
 struct sort_pred {
     bool operator()(const std::pair<double,cv::Point3d> &left, const std::pair<double,cv::Point3d> &right) {
         return left.first < right.first;
@@ -57,6 +63,7 @@ public:
 
     std::vector<cv::Point3d> intersect(Description* a,Description* b);
     std::vector<cv::Point3d> intersect2(Description* a,Description* b);
+    std::vector<cv::Point3d> intersect3(Description* a,Description* b);
 
     bool isDescription();
 

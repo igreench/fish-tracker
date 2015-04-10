@@ -175,7 +175,7 @@ void StereoProcessing::projectUndistortPoints(StereoImage *src, StereoImage *dst
         double cx = cameraMatrix1.at<double>(0,2);
         double cy = cameraMatrix1.at<double>(1,2);
 
-        for (int i = 0; i < corners1.size(); ++i) {
+        for (unsigned int i = 0; i < corners1.size(); ++i) {
             // perform transformation.
             // In fact this is equivalent to multiplication to camera matrix
             corners1[i].x = corners1[i].x * fx + cx;
@@ -559,7 +559,7 @@ void StereoProcessing::calculateDeskDescription(StereoImage* stereoImage, Stereo
         double cx = cameraMatrix1.at<double>(0,2);
         double cy = cameraMatrix1.at<double>(1,2);
 
-        for (int i = 0; i < corners1.size(); ++i) {
+        for (unsigned int i = 0; i < corners1.size(); ++i) {
             corners1[i].x = corners1[i].x * fx + cx;
             corners1[i].y = corners1[i].y * fy + cy;
         }
@@ -569,7 +569,7 @@ void StereoProcessing::calculateDeskDescription(StereoImage* stereoImage, Stereo
         cx = cameraMatrix2.at<double>(0,2);
         cy = cameraMatrix2.at<double>(1,2);
 
-        for (int i = 0; i < corners2.size(); ++i) {
+        for (unsigned int i = 0; i < corners2.size(); ++i) {
             corners2[i].x = corners2[i].x * fx + cx;
             corners2[i].y = corners2[i].y * fy + cy;
         }
@@ -578,12 +578,12 @@ void StereoProcessing::calculateDeskDescription(StereoImage* stereoImage, Stereo
         qDebug() << "corners2 size:" << corners2.size();
 
         std::vector<cv::Point3d> points1;
-        for (int i = 0; i < corners1.size(); i++) {
+        for (unsigned int i = 0; i < corners1.size(); i++) {
             points1.push_back(Point3d(corners1[i].x, corners1[i].y, 1));
         }
 
         std::vector<cv::Point3d> points2;
-        for (int i = 0; i < corners2.size(); i++) {
+        for (unsigned int i = 0; i < corners2.size(); i++) {
             points2.push_back(Point3d(corners2[i].x, corners2[i].y, 1));
         }
 
@@ -635,7 +635,7 @@ void StereoProcessing::calculateDeskDescription2(StereoImage* stereoImage, Stere
         double cx = cameraMatrix1.at<double>(0,2);
         double cy = cameraMatrix1.at<double>(1,2);
 
-        for (int i = 0; i < corners1.size(); ++i) {
+        for (unsigned int i = 0; i < corners1.size(); ++i) {
             corners1[i].x = corners1[i].x * fx + cx;
             corners1[i].y = corners1[i].y * fy + cy;
         }
@@ -645,7 +645,7 @@ void StereoProcessing::calculateDeskDescription2(StereoImage* stereoImage, Stere
         cx = cameraMatrix2.at<double>(0,2);
         cy = cameraMatrix2.at<double>(1,2);
 
-        for (int i = 0; i < corners2.size(); ++i) {
+        for (unsigned int i = 0; i < corners2.size(); ++i) {
             corners2[i].x = corners2[i].x * fx + cx;
             corners2[i].y = corners2[i].y * fy + cy;
         }
@@ -654,12 +654,12 @@ void StereoProcessing::calculateDeskDescription2(StereoImage* stereoImage, Stere
         qDebug() << "corners2 size:" << corners2.size();
 
         std::vector<cv::Point3d> points1;
-        for (int i = 0; i < corners1.size(); i++) {
+        for (unsigned int i = 0; i < corners1.size(); i++) {
             points1.push_back(Point3d(corners1[i].x, corners1[i].y, 1));
         }
 
         std::vector<cv::Point3d> points2;
-        for (int i = 0; i < corners2.size(); i++) {
+        for (unsigned int i = 0; i < corners2.size(); i++) {
             points2.push_back(Point3d(corners2[i].x, corners2[i].y, 1));
         }
 
@@ -762,14 +762,14 @@ void StereoProcessing::calculateFishDescription(StereoImage* stereoImage, Stereo
     //findContours( timage1, contours1, hierarchy1, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
     findContours( timage1, contours1, hierarchy1, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, Point(0, 0) );
     Mat drawing1 = Mat::zeros( timage1.size(), CV_8UC3 );
-    for( int i = 0; i < contours1.size(); i++ ) {
+    for(unsigned int i = 0; i < contours1.size(); i++ ) {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing1, contours1, i, color, 2, 8, hierarchy1, 0, Point() );
     }
 
     findContours( timage2, contours2, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
     Mat drawing2 = Mat::zeros( timage2.size(), CV_8UC3 );
-    for( int i = 0; i < contours2.size(); i++ ) {
+    for(unsigned int i = 0; i < contours2.size(); i++ ) {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
     }
@@ -786,13 +786,13 @@ void StereoProcessing::calculateFishDescription(StereoImage* stereoImage, Stereo
     vector<Point2f> mc1(contours1.size());
     vector<Moments> mu2(contours2.size());
     vector<Point2f> mc2(contours2.size());
-    for(int i = 0; i < contours1.size(); i++) {
+    for(unsigned int i = 0; i < contours1.size(); i++) {
         mu1[i] = moments(contours1[i], false);
         mc1[i] = Point2f(mu1[i].m10/mu1[i].m00 , mu1[i].m01/mu1[i].m00);
         Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
         circle(drawing1, mc1[i], 4, color, -1, 8, 0);
     }
-    for(int i = 0; i < contours2.size(); i++) {
+    for(unsigned int i = 0; i < contours2.size(); i++) {
         mu2[i] = moments(contours2[i], false);
         mc2[i] = Point2f(mu2[i].m10/mu2[i].m00 , mu2[i].m01/mu2[i].m00);
         Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
@@ -855,12 +855,12 @@ void StereoProcessing::calculateFishDescription(StereoImage* stereoImage, Stereo
         qDebug() << "mc2 size:" << mc2.size();
 
         std::vector<cv::Point3d> points1;
-        for (int i = 0; i < mc1.size(); i++) {
+        for (unsigned int i = 0; i < mc1.size(); i++) {
             points1.push_back(Point3d(mc1[i].x, mc1[i].y, 1));
         }
 
         std::vector<cv::Point3d> points2;
-        for (int i = 0; i < mc2.size(); i++) {
+        for (unsigned int i = 0; i < mc2.size(); i++) {
             points2.push_back(Point3d(mc2[i].x, mc2[i].y, 1));
         }
 
@@ -1068,7 +1068,7 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     //findContours( timage1, contours1, hierarchy1, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
     findContours( timage1, contours1, hierarchy1, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, Point(0, 0) );
     Mat drawing1 = Mat::zeros( timage1.size(), CV_8UC3 );
-    for( int i = 0; i < contours1.size(); i++ ) {
+    for(unsigned int i = 0; i < contours1.size(); i++ ) {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing1, contours1, i, color, 2, 8, hierarchy1, 0, Point() );
         //qDebug() << "contourArea(contours1[i]): " << contourArea(contours1[i]);
@@ -1079,7 +1079,7 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
 
     findContours( timage2, contours2, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
     Mat drawing2 = Mat::zeros( timage2.size(), CV_8UC3 );
-    for( int i = 0; i < contours2.size(); i++ ) {
+    for(unsigned int i = 0; i < contours2.size(); i++ ) {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
         //qDebug() << "contourArea(contours2[i]): " << contourArea(contours2[i]);
@@ -1098,13 +1098,13 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     vector<Point2f> mc1(goodcontours1.size());
     vector<Moments> mu2(goodcontours2.size());
     vector<Point2f> mc2(goodcontours2.size());
-    for(int i = 0; i < goodcontours1.size(); i++) {
+    for(unsigned int i = 0; i < goodcontours1.size(); i++) {
         mu1[i] = moments(goodcontours1[i], false);
         mc1[i] = Point2f(mu1[i].m10 / mu1[i].m00 , mu1[i].m01 / mu1[i].m00);
         Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
         circle(drawing1, mc1[i], 4, color, -1, 8, 0);
     }
-    for(int i = 0; i < goodcontours2.size(); i++) {
+    for(unsigned int i = 0; i < goodcontours2.size(); i++) {
         mu2[i] = moments(goodcontours2[i], false);
         mc2[i] = Point2f(mu2[i].m10 / mu2[i].m00 , mu2[i].m01 / mu2[i].m00);
         Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
@@ -1125,14 +1125,14 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
 
         std::vector<cv::Point3d> points1;
         //qDebug() << "mc1";
-        for (int i = 0; i < mc1.size(); i++) {
+        for (unsigned int i = 0; i < mc1.size(); i++) {
             points1.push_back(Point3d(mc1[i].x, mc1[i].y, 1));
             //qDebug() << "x: " << mc1[i].x << " y: " << mc1[i].y;
         }
 
         std::vector<cv::Point3d> points2;
         //qDebug() << "mc2";
-        for (int i = 0; i < mc2.size(); i++) {
+        for (unsigned int i = 0; i < mc2.size(); i++) {
             points2.push_back(Point3d(mc2[i].x, mc2[i].y, 1));
             //qDebug() << "x: " << mc2[i].x << " y: " << mc2[i].y;
         }
@@ -1152,9 +1152,9 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
             descriptionRight->cols = image2.cols;
             descriptionRight->rows = image2.rows;
 
-            vector<Point3d> obj = intersect2(descriptionLeft, descriptionRight);
+            vector<Point3d> obj = intersect3(descriptionLeft, descriptionRight);
             //qDebug() << "obj";
-            for (int i = 0; i < obj.size(); i++) {
+            for (unsigned int i = 0; i < obj.size(); i++) {
                 //qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
             }
             triangulation->setObjects(obj);
@@ -1395,10 +1395,9 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
     std::sort(pairs.begin(), pairs.end(), sort_pred());
 
     //Find minimal number of points )))
-    int minpts = a->points.size()<b->points.size() ? a->points.size(): b->points.size();
-    int minnumber = pairs.size()<minpts?pairs.size():minpts;
-    for(int i=0;i<minnumber;i++)
-    {
+    int minpts = a->points.size() < b->points.size() ? a->points.size() : b->points.size();
+    int minnumber = pairs.size() < minpts ? pairs.size() : minpts;
+    for(unsigned int i = 0; i < minnumber; i++) {
         result.push_back(pairs[i].second);
     }
     return result;
@@ -1407,11 +1406,11 @@ std::vector<cv::Point3d> StereoProcessing::intersect(Description* a,Description*
 
 std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description* b)
 {
-    int _maxdepth = 1000;
-    int _width = a->cols;
-    int _height = a->rows;
+    //int _maxdepth = 1000;
+    //int _width = a->cols;
+    //int _height = a->rows;
 
-    std::vector<std::pair<double,cv::Point3d> > pairs;
+    //std::vector<std::pair<double,cv::Point3d> > pairs;
     std::vector<cv::Point3d> result;
     try{
 
@@ -1444,6 +1443,90 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
         /*if (a->points.size() != b->points.size()) {
             qDebug() << "Exception: different points sizes" ;
         }*/
+
+        for(unsigned int i = 0; i < a->points.size(); i++) {
+            cv::Mat p1 = cv::Mat(a->points[i]);
+            F.at<double>(0,0) = cv::Mat(p1.t()*Ainv1.t()*Ainv1*p1).at<double>(0,0);
+            cv::Mat J1 = -p1.t()*Ainv1.t()*R.t();
+
+            cv::Mat p2 = cv::Mat(b->points[i]);
+            F.at<double>(0,1) = F.at<double>(1,0) = cv::Mat(-p1.t()*Ainv1.t()*R.t()*Ainv2*p2).at<double>(0,0);
+            F.at<double>(1,1) = cv::Mat(p2.t()*Ainv2.t()*Ainv2*p2).at<double>(0,0);
+
+            cv::Mat J2 = p2.t()*Ainv2.t();
+
+            for(int k=0;k<3;k++) {
+                J.at<double>(0,k)=J1.at<double>(0,k);
+                J.at<double>(1,k)=J2.at<double>(0,k);
+            }
+
+            cv::Mat Finv;
+            cv::invert(F,Finv);
+
+            cv::Mat Z= Finv*J*t;
+
+            cv::Mat pp1=Z.at<double>(0,0)*Ainv1*p1;
+            cv::Mat pp2=Z.at<double>(1,0)*Ainv2*p2;
+
+            cv::Mat Mresult1 = R1.t()*(pp1-t1);
+            cv::Mat Mresult2 = R2.t()*(pp2-t2);
+
+            cv::Mat Mresult = (Mresult1+Mresult2)/2;
+
+            result.push_back(cv::Point3d(Mresult));
+        }
+    }catch(cv::Exception &ex)
+    {
+        qDebug() << "Exception:" << ex.what();
+    }
+    return result;
+}
+
+std::vector<cv::Point3d> StereoProcessing::intersect3(Description* a,Description* b)
+{
+    //int _maxdepth = 1000;
+    //int _width = a->cols;
+    //int _height = a->rows;
+
+    //std::vector<cv::Point3d> points1;
+    //std::vector<cv::Point3d> points2;
+
+    //std::vector<std::pair<double,cv::Point3d> > pairs;
+    std::vector<cv::Point3d> result;
+    try{
+
+        cv::Mat Ainv1,Ainv2;
+        cv::invert(a->A,Ainv1);
+        cv::invert(b->A,Ainv2);
+
+        //Переходим к системе координат камеры а
+        //cv::Mat R1 = a->R;
+        //cv::Mat R2 = b->R;
+        cv::Mat R1;
+        cv::Mat R2;
+        Rodrigues(a->R, R1);
+        Rodrigues(b->R, R2);
+        cv::Mat t1 = a->t;
+        cv::Mat t2 = b->t;
+
+      /*qDebug() << "A1:" << (Ainv1.depth()==CV_64FC1)<< "A2:" << (Ainv2.depth()==CV_64FC1);
+        qDebug() << "t1:" << (t1.depth()==CV_64FC1)<< "t2:" << (t2.depth()==CV_64FC1);
+        qDebug() << "R1:" << (R1.depth()==CV_64FC1)<< "R2:" << (R2.depth()==CV_64FC1);*/
+
+        cv::Mat R = R2*R1.t();
+        //qDebug() << "R: " << matToString(R);
+        cv::Mat t = -R*t1+t2;
+        //qDebug() << "t: " << matToString(t);
+
+        cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
+        cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
+
+        /*if (a->points.size() != b->points.size()) {
+            qDebug() << "Exception: different points sizes" ;
+        }*/
+
+        std::sort(a->points.begin(), a->points.end(), sort_points());
+        std::sort(b->points.begin(), b->points.end(), sort_points());
 
         for(unsigned int i = 0; i < a->points.size(); i++) {
             cv::Mat p1 = cv::Mat(a->points[i]);
