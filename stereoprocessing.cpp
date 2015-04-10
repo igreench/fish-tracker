@@ -909,17 +909,17 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
                 indexCurrentStereoImage = 0;
                 triangulation->addStereoImage(new StereoImage(src->getLeft().clone(), src->getRight().clone()));
                 triangulation->setIndexCurrentStereoImage(triangulation->getIndexCurrentStereoImage() + 1);
-                Mat i = dst->getLeft().clone();
+                /*Mat i = dst->getLeft().clone();
                 resize(i, i, Size(400, 300), 0, 0, CV_INTER_LINEAR);
                 string s = QString::number(triangulation->getIndexCurrentStereoImage()).toUtf8().constData();
-                imshow("image" + s, i);
+                imshow("image" + s, i);*/
             } else {
                 triangulation->setIndexCurrentStereoImage(0);
                 triangulation->calculateBackground();
                 triangulation->setIsBackgroundCalculated(true);
-                Mat i = triangulation->getBackground()->getLeft().clone();
+                /*Mat i = triangulation->getBackground()->getLeft().clone();
                 resize(i, i, Size(400, 300), 0, 0, CV_INTER_LINEAR);
-                imshow("bg", i);
+                imshow("bg", i);*/
             }            
         }
 
@@ -1061,6 +1061,7 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     //Finding contours
 
     vector<vector<Point> > contours1, contours2;
+    vector<vector<Point> > goodcontours1, goodcontours2;
     vector<Vec4i> hierarchy1, hierarchy2;
     RNG rng(12345);
 
@@ -1070,6 +1071,10 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     for( int i = 0; i < contours1.size(); i++ ) {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing1, contours1, i, color, 2, 8, hierarchy1, 0, Point() );
+        //qDebug() << "contourArea(contours1[i]): " << contourArea(contours1[i]);
+        if (contourArea(contours1[i]) > 1000 && contourArea(contours1[i]) < 10000) {
+            goodcontours1.push_back(contours1[i]);
+        }
     }
 
     findContours( timage2, contours2, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
@@ -1077,6 +1082,10 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     for( int i = 0; i < contours2.size(); i++ ) {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing2, contours2, i, color, 2, 8, hierarchy2, 0, Point() );
+        //qDebug() << "contourArea(contours2[i]): " << contourArea(contours2[i]);
+        if (contourArea(contours2[i]) > 1000 && contourArea(contours2[i]) < 10000) {
+            goodcontours2.push_back(contours2[i]);
+        }
     }
 
     if (3 == triangulation->mode) {
@@ -1085,21 +1094,25 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     }
 
     //Getting moments and mass centers
-    vector<Moments> mu1(contours1.size());
-    vector<Point2f> mc1(contours1.size());
-    vector<Moments> mu2(contours2.size());
-    vector<Point2f> mc2(contours2.size());
-    for(int i = 0; i < contours1.size(); i++) {
-        mu1[i] = moments(contours1[i], false);
-        mc1[i] = Point2f(mu1[i].m10/mu1[i].m00 , mu1[i].m01/mu1[i].m00);
+    vector<Moments> mu1(goodcontours1.size());
+    vector<Point2f> mc1(goodcontours1.size());
+    vector<Moments> mu2(goodcontours2.size());
+    vector<Point2f> mc2(goodcontours2.size());
+    for(int i = 0; i < goodcontours1.size(); i++) {
+        mu1[i] = moments(goodcontours1[i], false);
+        mc1[i] = Point2f(mu1[i].m10 / mu1[i].m00 , mu1[i].m01 / mu1[i].m00);
         Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
         circle(drawing1, mc1[i], 4, color, -1, 8, 0);
     }
-    for(int i = 0; i < contours2.size(); i++) {
-        mu2[i] = moments(contours2[i], false);
-        mc2[i] = Point2f(mu2[i].m10/mu2[i].m00 , mu2[i].m01/mu2[i].m00);
+    for(int i = 0; i < goodcontours2.size(); i++) {
+        mu2[i] = moments(goodcontours2[i], false);
+        mc2[i] = Point2f(mu2[i].m10 / mu2[i].m00 , mu2[i].m01 / mu2[i].m00);
         Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
         circle(drawing2, mc2[i], 4, color, -1, 8, 0);
+    }
+
+    if (mc1.size() <= 0 || mc2.size() <= 0) {
+        return;
     }
 
     undistortPoints(mc1, mc1, cameraMatrix1, distCoeffs1);
