@@ -69,6 +69,10 @@ void Triangulation::calculateBackground() {
 
     //Calculation and testing background
 
+    if (stereoImages.size() <= 0) {
+        return;
+    }
+
     qDebug() << "start calc bg";
 
     vector < Mat > pics1;
@@ -88,8 +92,8 @@ void Triangulation::calculateBackground() {
 
     Q_ASSERT(pics1.size() == pics2.size());
 
-    int w = 1600;
-    int h = 1200;
+    int w = pics1[0].cols;
+    int h = pics1[0].rows;
 
     Mat bg1(h, w, CV_8UC1);
     Mat bg2(h, w, CV_8UC1);

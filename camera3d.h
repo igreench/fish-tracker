@@ -36,6 +36,9 @@ private:
     StereoImage *stereoImage;
 
     bool isConnect;
+
+    int SIZE_W;
+    int SIZE_H;
 };
 
 #endif // CAMERA3D_H

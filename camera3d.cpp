@@ -1,6 +1,8 @@
 #include "camera3d.h"
 #include "imagedata.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include <QDebug>
 
 Camera3D::Camera3D() {
@@ -14,6 +16,9 @@ Camera3D::Camera3D() {
     if (camera1->isConnected() && camera2->isConnected()) {
         isConnect = true;
     }
+
+    SIZE_W = 400;
+    SIZE_H = 300;
 }
 
 StereoImage *Camera3D::getStereoImage() {
@@ -36,8 +41,13 @@ void Camera3D::stopCapture() {
 }
 
 void Camera3D::update() {
-    ImageData *left = camera1->getFrame();
-    ImageData *right = camera2->getFrame();
-    stereoImage->setLeft(Mat(left->getRows(), left->getCols(), left->getType(), left->getData(), left->getStep()));
-    stereoImage->setRight(Mat(right->getRows(), right->getCols(), right->getType(), right->getData(), right->getStep()));
+    ImageData *leftData = camera1->getFrame();
+    ImageData *rightData = camera2->getFrame();
+    Mat left, right;
+    resize(Mat(leftData->getRows(), leftData->getCols(), leftData->getType(), leftData->getData(), leftData->getStep()),
+           left, Size(SIZE_W, SIZE_H), 0, 0, CV_INTER_LINEAR);
+    resize(Mat(rightData->getRows(), rightData->getCols(), rightData->getType(), rightData->getData(), rightData->getStep()),
+           right, Size(SIZE_W, SIZE_H), 0, 0, CV_INTER_LINEAR);
+    stereoImage->setLeft(left);
+    stereoImage->setRight(right);
 }
