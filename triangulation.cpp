@@ -29,6 +29,10 @@ std::vector < cv::Point3d > Triangulation::getObjects() {
     return objects;
 }
 
+void Triangulation::clear() {
+    objects.clear();
+}
+
 void Triangulation::setBackground(StereoImage *si) {
     this->background->setImages(si->getLeft().clone(), si->getRight().clone()); //?
 }
@@ -76,6 +80,8 @@ void Triangulation::calculateBackground() {
         cvtColor(stereoImages[i]->getRight(), grey2, CV_BGR2GRAY);
         pics1.push_back(grey1);
         pics2.push_back(grey2);
+
+        qDebug() << i;
     }
 
     qDebug() << "added imgs";

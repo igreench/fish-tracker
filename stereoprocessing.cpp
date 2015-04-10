@@ -36,7 +36,9 @@ StereoProcessing::StereoProcessing() {
     }
 
     indexCurrentStereoImage = 0;
-    indexMaxStereoImage = 30;
+    indexMaxStereoImage = 10;
+
+    BOARD_FIELD_SIZE = 1.0; //metres
 }
 
 void StereoProcessing::undistortStereoImage(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
@@ -73,7 +75,8 @@ void StereoProcessing::projectPoints(StereoImage *src, StereoImage *dst, StereoP
         int n = BOARD_WIDTH * BOARD_HEIGHT;
         vector<Point3f> obj;
         for (int j = 0; j < n; j++) {
-            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            //obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            obj.push_back(Point3f((j % BOARD_WIDTH) * BOARD_FIELD_SIZE, (j / BOARD_WIDTH) * BOARD_FIELD_SIZE, 0.0f));
         }
         objectPoints.push_back(obj);
 
@@ -143,7 +146,8 @@ void StereoProcessing::projectUndistortPoints(StereoImage *src, StereoImage *dst
         int n = BOARD_WIDTH * BOARD_HEIGHT;
         vector<Point3f> obj;
         for (int j = 0; j < n; j++) {
-            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            //obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            obj.push_back(Point3f((j % BOARD_WIDTH) * BOARD_FIELD_SIZE, (j / BOARD_WIDTH) * BOARD_FIELD_SIZE, 0.0f));
         }
         objectPoints.push_back(obj);
 
@@ -287,7 +291,7 @@ void StereoProcessing::calculateRT(StereoImage* stereoImage, StereoParametres* s
         int n = BOARD_WIDTH * BOARD_HEIGHT;
         vector<Point3f> obj;
         for (int j = 0; j < n; j++) {
-            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            obj.push_back(Point3f((j % BOARD_WIDTH) * BOARD_FIELD_SIZE, (j / BOARD_WIDTH) * BOARD_FIELD_SIZE, 0.0f));
         }
         objectPoints.push_back(obj);
 
@@ -354,7 +358,8 @@ void StereoProcessing::calculateRT2(StereoImage* stereoImage, StereoParametres* 
         int n = BOARD_WIDTH * BOARD_HEIGHT;
         vector<Point3f> obj;
         for (int j = 0; j < n; j++) {
-            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            //obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            obj.push_back(Point3f((j % BOARD_WIDTH) * BOARD_FIELD_SIZE, (j / BOARD_WIDTH) * BOARD_FIELD_SIZE, 0.0f));
         }
         objectPoints.push_back(obj);
 
@@ -525,7 +530,8 @@ void StereoProcessing::calculateDeskDescription(StereoImage* stereoImage, Stereo
         int n = BOARD_WIDTH * BOARD_HEIGHT;
         vector<Point3f> obj;
         for (int j = 0; j < n; j++) {
-            obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            //obj.push_back(Point3f(j % BOARD_WIDTH, j / BOARD_WIDTH, 0.0f));
+            obj.push_back(Point3f((j % BOARD_WIDTH) * BOARD_FIELD_SIZE, (j / BOARD_WIDTH) * BOARD_FIELD_SIZE, 0.0f));
         }
         objectPoints.push_back(obj);
 
@@ -897,19 +903,24 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
 
         if (indexCurrentStereoImage < indexMaxStereoImage) {
             indexCurrentStereoImage++;
-        } else {
-            qDebug() << triangulation->getIndexCurrentStereoImage();
-            indexCurrentStereoImage = 0;
-            triangulation->addStereoImage(dst);
+        } else {            
             if (triangulation->getIndexCurrentStereoImage() < triangulation->getIndexMaxStereoImage()) {
+                qDebug() << triangulation->getIndexCurrentStereoImage();
+                indexCurrentStereoImage = 0;
+                triangulation->addStereoImage(new StereoImage(src->getLeft().clone(), src->getRight().clone()));
                 triangulation->setIndexCurrentStereoImage(triangulation->getIndexCurrentStereoImage() + 1);
+                Mat i = dst->getLeft().clone();
+                resize(i, i, Size(400, 300), 0, 0, CV_INTER_LINEAR);
+                string s = QString::number(triangulation->getIndexCurrentStereoImage()).toUtf8().constData();
+                imshow("image" + s, i);
             } else {
                 triangulation->setIndexCurrentStereoImage(0);
                 triangulation->calculateBackground();
                 triangulation->setIsBackgroundCalculated(true);
-            }
-            //string s = QString::number(indexCurrentStereoImage).toUtf8().constData();
-            //imshow("image" + s, dst->getLeft());
+                Mat i = triangulation->getBackground()->getLeft().clone();
+                resize(i, i, Size(400, 300), 0, 0, CV_INTER_LINEAR);
+                imshow("bg", i);
+            }            
         }
 
         return;
@@ -1096,47 +1107,53 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
 
     if (_isDescription) {
 
-        qDebug() << "mc1 size:" << mc1.size();
-        qDebug() << "mc2 size:" << mc2.size();
+        //qDebug() << "mc1 size:" << mc1.size();
+        //qDebug() << "mc2 size:" << mc2.size();
 
         std::vector<cv::Point3d> points1;
-        qDebug() << "mc1";
+        //qDebug() << "mc1";
         for (int i = 0; i < mc1.size(); i++) {
             points1.push_back(Point3d(mc1[i].x, mc1[i].y, 1));
-            qDebug() << "x: " << mc1[i].x << " y: " << mc1[i].y;
+            //qDebug() << "x: " << mc1[i].x << " y: " << mc1[i].y;
         }
 
         std::vector<cv::Point3d> points2;
-        qDebug() << "mc2";
+        //qDebug() << "mc2";
         for (int i = 0; i < mc2.size(); i++) {
             points2.push_back(Point3d(mc2[i].x, mc2[i].y, 1));
-            qDebug() << "x: " << mc2[i].x << " y: " << mc2[i].y;
+            //qDebug() << "x: " << mc2[i].x << " y: " << mc2[i].y;
         }
 
-        descriptionLeft->source = "left";
-        descriptionLeft->A = cameraMatrix1;
-        descriptionLeft->d = distCoeffs1;
-        descriptionLeft->points = points1;
-        descriptionLeft->cols = image1.cols;
-        descriptionLeft->rows = image1.rows;
+        if (points1.size() == points2.size()) {
+            descriptionLeft->source = "left";
+            descriptionLeft->A = cameraMatrix1;
+            descriptionLeft->d = distCoeffs1;
+            descriptionLeft->points = points1;
+            descriptionLeft->cols = image1.cols;
+            descriptionLeft->rows = image1.rows;
 
-        descriptionRight->source = "right";
-        descriptionRight->A = cameraMatrix2;
-        descriptionRight->d = distCoeffs2;
-        descriptionRight->points = points2;
-        descriptionRight->cols = image2.cols;
-        descriptionRight->rows = image2.rows;
+            descriptionRight->source = "right";
+            descriptionRight->A = cameraMatrix2;
+            descriptionRight->d = distCoeffs2;
+            descriptionRight->points = points2;
+            descriptionRight->cols = image2.cols;
+            descriptionRight->rows = image2.rows;
 
-        vector<Point3d> obj = intersect2(descriptionLeft, descriptionRight);
-        qDebug() << "obj";
-        for (int i = 0; i < obj.size(); i++) {
-            qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
+            vector<Point3d> obj = intersect2(descriptionLeft, descriptionRight);
+            //qDebug() << "obj";
+            for (int i = 0; i < obj.size(); i++) {
+                //qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
+            }
+            triangulation->setObjects(obj);
+        } else {
+            //qDebug() << "Exception: different points sizes" ;
         }
-        triangulation->setObjects(obj);
     }
 
-    dst->setImages(drawing1, drawing2);
-    //return si;
+    if (4 == triangulation->mode) {
+        dst->setImages(drawing1, drawing2);
+        //return si;
+    }
 }
 
 void StereoProcessing::circlesPattern(StereoImage *dst) {
@@ -1404,16 +1421,16 @@ std::vector<cv::Point3d> StereoProcessing::intersect2(Description* a,Description
         qDebug() << "R1:" << (R1.depth()==CV_64FC1)<< "R2:" << (R2.depth()==CV_64FC1);*/
 
         cv::Mat R = R2*R1.t();
-        qDebug() << "R: " << matToString(R);
+        //qDebug() << "R: " << matToString(R);
         cv::Mat t = -R*t1+t2;
-        qDebug() << "t: " << matToString(t);
+        //qDebug() << "t: " << matToString(t);
 
         cv::Mat J = cv::Mat(2,3,CV_64FC1,cv::Scalar::all(0));
         cv::Mat F = cv::Mat(2,2,CV_64FC1,cv::Scalar::all(0));
 
-        if (a->points.size() != b->points.size()) {
+        /*if (a->points.size() != b->points.size()) {
             qDebug() << "Exception: different points sizes" ;
-        }
+        }*/
 
         for(unsigned int i = 0; i < a->points.size(); i++) {
             cv::Mat p1 = cv::Mat(a->points[i]);

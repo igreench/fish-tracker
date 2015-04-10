@@ -16,6 +16,7 @@ public:
 
     void setObjects(std::vector < cv::Point3d > objects);
     std::vector < cv::Point3d > getObjects();
+    void clear();
 
     int blurWidth;
     int blurHeight;
@@ -42,7 +43,7 @@ private:
     bool isBackgroundCalculated;
     int indexCurrentStereoImage;
     int indexMaxStereoImage;
-    vector <StereoImage *> stereoImages;
+    vector < StereoImage * > stereoImages;
 };
 
 #endif // TRIANGULATION_H

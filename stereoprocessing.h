@@ -63,6 +63,7 @@ public:
 private:
     static const int BOARD_WIDTH = 9; //8
     static const int BOARD_HEIGHT = 8; //9
+    double BOARD_FIELD_SIZE; //metres
 
     Description *descriptionLeft;
     Description *descriptionRight;
