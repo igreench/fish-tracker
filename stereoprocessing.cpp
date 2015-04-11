@@ -31,9 +31,9 @@ StereoProcessing::StereoProcessing() {
         descriptionRight->R = (Mat_<double>(3,1) << 0.0282036,-0.0532867,0.0247706);
         descriptionRight->t = (Mat_<double>(3,1) << -5.81993,-3.54337,16.7473);*/
         descriptionLeft->R = (Mat_<double>(3,1) << -0.153748,-0.00502919,0.0182404);
-        descriptionLeft->t = (Mat_<double>(3,1) << -1.68144,-2.78834,15.6818);
+        descriptionLeft->t = (Mat_<double>(3,1) << -0.0403545,-0.0669201,0.376363);
         descriptionRight->R = (Mat_<double>(3,1) << -0.136436,-0.00790892,0.0267914);
-        descriptionRight->t = (Mat_<double>(3,1) << -4.49046,-2.89731,15.6206);
+        descriptionRight->t = (Mat_<double>(3,1) << -0.107771,-0.0695354,0.374894);
         _isDescription = true;
     } else {
         _isDescription = false;
@@ -42,7 +42,7 @@ StereoProcessing::StereoProcessing() {
     indexCurrentStereoImage = 0;
     indexMaxStereoImage = 10;
 
-    BOARD_FIELD_SIZE = 1.0; //metres
+    BOARD_FIELD_SIZE = 0.024; //metres
 }
 
 void StereoProcessing::undistortStereoImage(StereoImage *src, StereoImage *dst, StereoParametres* stereoParametres) {
