@@ -9,7 +9,7 @@
 #endif
 
 const GLfloat PI180 = M_PI / 180;
-const GLfloat METER = 1.0f; //0.1f;
+const GLfloat METER = 1.0f; //0.1f 1.0f
 const GLfloat OFFSET = 5.0f;
 
 
@@ -40,6 +40,7 @@ void GLWidget::setCubes(std::vector < cv::Point3d > objects) {
         //cubes.push_back(Cube(cv::Point3d((objects[i].x - OFFSET - 40) / 10, (objects[i].y - OFFSET - 30) / 10, (objects[i].z + 100) / 10), 0.1f));
         //cubes.push_back(Cube(cv::Point3d((objects[i].x * 10 + 238) * METER, (objects[i].y * 10 + 236) * METER, ( - objects[i].z * 10 + 388) * METER), 0.1f));
         cubes.push_back(Cube(cv::Point3d(objects[i].x * METER, objects[i].y  * METER, objects[i].z * METER), 0.1f));
+        //cubes.push_back(Cube(cv::Point3d(objects[i].x * 10, objects[i].y  * 10, objects[i].z * 10), 0.1f));
     }
 }
 
