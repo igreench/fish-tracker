@@ -17,8 +17,8 @@ Camera3D::Camera3D() {
         isConnect = true;
     }
 
-    SIZE_W = 400;
-    SIZE_H = 300;
+    SIZE_W = 1600; //1600 400
+    SIZE_H = 1200; //1200 300
 }
 
 StereoImage *Camera3D::getStereoImage() {

@@ -26,10 +26,14 @@ StereoProcessing::StereoProcessing() {
     descriptionRight = new Description();
 
     if (DEBUG) {
-        descriptionLeft->R = (Mat_<double>(3,1) << 0.0230825,-0.0426114,0.0252379);
+        /*descriptionLeft->R = (Mat_<double>(3,1) << 0.0230825,-0.0426114,0.0252379);
         descriptionLeft->t = (Mat_<double>(3,1) << -2.98774,-3.4401,16.802);
         descriptionRight->R = (Mat_<double>(3,1) << 0.0282036,-0.0532867,0.0247706);
-        descriptionRight->t = (Mat_<double>(3,1) << -5.81993,-3.54337,16.7473);
+        descriptionRight->t = (Mat_<double>(3,1) << -5.81993,-3.54337,16.7473);*/
+        descriptionLeft->R = (Mat_<double>(3,1) << -0.153748,-0.00502919,0.0182404);
+        descriptionLeft->t = (Mat_<double>(3,1) << -1.68144,-2.78834,15.6818);
+        descriptionRight->R = (Mat_<double>(3,1) << -0.136436,-0.00790892,0.0267914);
+        descriptionRight->t = (Mat_<double>(3,1) << -4.49046,-2.89731,15.6206);
         _isDescription = true;
     } else {
         _isDescription = false;
@@ -1155,7 +1159,7 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
             vector<Point3d> obj = intersect3(descriptionLeft, descriptionRight);
             //qDebug() << "obj";
             for (unsigned int i = 0; i < obj.size(); i++) {
-                //qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
+                qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
             }
             triangulation->setObjects(obj);
         } else {
@@ -1579,9 +1583,10 @@ void StereoProcessing::triangulateDesk(StereoImage *src, StereoImage *dst, Stere
         cv::projectPoints(obj1, descriptionLeft->R, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
         for(unsigned int i = 0; i < imagePoints1.size(); ++i) {
             circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
-            //qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
+            qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
         }
         dst->setImages(image1, image1);
+    } else {
+        dst->setImages(src);
     }
-    dst->setImages(src);
 }
