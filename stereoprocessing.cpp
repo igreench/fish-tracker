@@ -944,69 +944,6 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
     Mat cameraMatrix2 = stereoParametres->getCameraMatrix2();
     Mat distCoeffs2 = stereoParametres->getDistCoeffs2();
 
-
-    /* // local calc BG
-    //Calculation and testing background
-
-    qDebug() << "start calc bg";
-
-    vector < Mat > pics1;
-    vector < Mat > pics2;
-
-    for (int i = 1; i <= 4; i++) {
-        Mat grey1, grey2;
-        string s = QString::number(i).toUtf8().constData();
-        Mat img1 = imread("image1150330fish" + s + ".jpg");
-        Mat img2 = imread("image2150330fish" + s + ".jpg");
-        cvtColor(img1, grey1, CV_BGR2GRAY);
-        cvtColor(img2, grey2, CV_BGR2GRAY);
-        pics1.push_back(grey1);
-        pics2.push_back(grey2);
-    }
-
-    qDebug() << "added imgs";
-
-    Q_ASSERT(pics1.size() == pics2.size());
-
-    int w = 1600;
-    int h = 1200;
-
-    Mat bg1(h, w, CV_8UC1);
-    Mat bg2(h, w, CV_8UC1);
-
-    qDebug() << "bg1.cols: " << bg1.cols;
-    qDebug() << "bg1.rows: " << bg1.rows;
-    qDebug() << "pics1[0].cols: " << pics1[0].cols;
-    qDebug() << "pics1[0].rows: " << pics1[0].rows;
-
-    for (int i = 0; i < h; i++) { //rows
-        for (int j = 0; j < w; j++) { //cols
-            long long int s1 = 1; //0
-            long long int s2 = 1; //0
-
-            QVector < int > m1;
-            QVector < int > m2;
-            for (int k = 0; k < pics1.size(); k++) {
-                s1 *= pics1[k].at<uchar>(i, j);
-                s2 *= pics2[k].at<uchar>(i, j);
-
-                m1.push_back(pics1[k].at<uchar>(i, j));
-                m2.push_back(pics2[k].at<uchar>(i, j));
-                //qDebug() << "pics1[k].at<uchar>(i, j): " << pics1[k].at<uchar>(i, j);
-            }
-
-            qSort(m1);
-            qSort(m2);
-
-            bg1.at<uchar>(i, j) = m1[m1.size() / 2];
-            bg2.at<uchar>(i, j) = m2[m2.size() / 2];
-        }
-    }
-
-    qDebug() << "calced";
-
-    */
-
     Mat img1, img2;
 
     Mat g1, g2;
@@ -1158,9 +1095,9 @@ void StereoProcessing::triangulateFish(StereoImage *src, StereoImage *dst, Stere
 
             vector<Point3d> obj = intersect3(descriptionLeft, descriptionRight);
             //qDebug() << "obj";
-            for (unsigned int i = 0; i < obj.size(); i++) {
+            /*for (unsigned int i = 0; i < obj.size(); i++) {
                 qDebug() << "x: " << obj[i].x << " y: " << obj[i].y << " z: " << obj[i].z;
-            }
+            }*/
             triangulation->setObjects(obj);
         } else {
             //qDebug() << "Exception: different points sizes" ;
@@ -1583,7 +1520,7 @@ void StereoProcessing::triangulateDesk(StereoImage *src, StereoImage *dst, Stere
         cv::projectPoints(obj1, descriptionLeft->R, descriptionLeft->t, cameraMatrix1, distCoeffs1, imagePoints1);
         for(unsigned int i = 0; i < imagePoints1.size(); ++i) {
             circle(image1, Point2d(imagePoints1[i].x, imagePoints1[i].y), 20, Scalar( 255, 0, 0 ), CV_FILLED, 8, 0);
-            qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
+            //qDebug() << "x:" << imagePoints1[i].x << "y:" << imagePoints1[i].y;
         }
         dst->setImages(image1, image1);
     } else {

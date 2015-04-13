@@ -380,6 +380,9 @@ StereoImage *MainWindow::currentStereoImage(int countMode) {
         glwidget->updateGL();
         return tempStereoImage;
         case 6:
+        if (!isCapture && !triangulation->getIsBackgroundCalculated()) {
+            triangulation->calculateLocalBackground();
+        }
         stereoProcessing->triangulateFish(stereoImage, tempStereoImage, stereoParametres, triangulation);
         if (!glwidget->isVisible()) {
             glwidget->show();

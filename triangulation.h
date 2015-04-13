@@ -35,6 +35,7 @@ public:
     int getIndexMaxStereoImage();
     void addStereoImage(StereoImage *si);
     void calculateBackground();
+    void calculateLocalBackground();
 
 private:
     std::vector < cv::Point3d > objects;
