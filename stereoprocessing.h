@@ -67,6 +67,8 @@ public:
 
     bool isDescription();
 
+    void print(StereoParametres* stereoParametres);
+
 private:
     static const int BOARD_WIDTH = 9; //8
     static const int BOARD_HEIGHT = 8; //9

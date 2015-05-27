@@ -10,6 +10,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);    
 
+    tempValue = 0;
+
     countMode1 = 0;
     countMode2 = 1;
     countMode3 = 0;
@@ -179,6 +181,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //init gl
 
     glwidget = new GLWidget();    
+
+    glwidget->show();//
 }
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -595,8 +599,22 @@ void MainWindow::setStereoViewMode() {
 void MainWindow::on_pushButton_8_clicked() {
     if (!ui->lineEdit->text().isEmpty()) {
         if (isStarted) {
-            ioData->saveMat(stereoImage->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
-            ioData->saveMat(stereoImage->getRight(), "image2" + ui->lineEdit->text().toStdString() + ".jpg");
+            if (ui->radioButton->isChecked()) {
+                ioData->saveMat(stereoImage->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
+                ioData->saveMat(stereoImage->getRight(), "image2" + ui->lineEdit->text().toStdString() + ".jpg");
+            }
+            if (ui->radioButton_2->isChecked()) {
+                ioData->saveMat(stereoImage1->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
+                ioData->saveMat(stereoImage1->getRight(), "image2" + ui->lineEdit->text().toStdString() + ".jpg");
+            }
+            if (ui->radioButton_3->isChecked()) {
+                ioData->saveMat(stereoImage2->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
+                ioData->saveMat(stereoImage2->getRight(), "image2" + ui->lineEdit->text().toStdString() + ".jpg");
+            }
+            if (ui->radioButton_4->isChecked()) {
+                ioData->saveMat(stereoImage3->getLeft(), "image1" + ui->lineEdit->text().toStdString() + ".jpg");
+                ioData->saveMat(stereoImage3->getRight(), "image2" + ui->lineEdit->text().toStdString() + ".jpg");
+            }
         } else {
             qDebug() << "!isStarted";
         }
@@ -651,13 +669,19 @@ void MainWindow::on_pushButton_3_clicked() {
 
 void MainWindow::update() {
     camera3d->update();
-    stereoImage->setImages(camera3d->getStereoImage());
-    calcStereoImages();
-    if (!isResized) {
-        resizeStereoViews();
-        isResized = true;
+    if (tempValue < 20) {
+        ioData->saveMat(camera3d->getStereoImage()->getLeft(), "left" + QString::number(tempValue).toStdString() + ".jpg");
+        ioData->saveMat(camera3d->getStereoImage()->getRight(), "right" + QString::number(tempValue).toStdString() + ".jpg");
+        tempValue++;
+    } else {
+        stereoImage->setImages(camera3d->getStereoImage());
+        calcStereoImages();
+        if (!isResized) {
+            resizeStereoViews();
+            isResized = true;
+        }
+        showStereoImages();
     }
-    showStereoImages();
 }
 
 void MainWindow::on_pushButton_10_clicked() {
@@ -672,4 +696,9 @@ void MainWindow::on_pushButton_11_clicked() {
     updateTriangulation();
     calcStereoImages();
     showStereoImages();
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    stereoProcessing->print(stereoParametres);
 }

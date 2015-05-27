@@ -22,9 +22,13 @@ GLWidget::GLWidget(QWidget* parent/*= 0*/) : QGLWidget(parent) {
     zTra = 0;
     nSca = 1;
 
-    cubes.push_back(Cube(cv::Point3d(0.1f, 0.1f, 0.1f), 0.1f));
+    /*cubes.push_back(Cube(cv::Point3d(0.1f, 0.1f, 0.1f), 0.1f));
     cubes.push_back(Cube(cv::Point3d(0.3f, 0.1f, 0.1f), 0.1f));
-    cubes.push_back(Cube(cv::Point3d(0.3f, 0.3f, 0.1f), 0.1f));
+    cubes.push_back(Cube(cv::Point3d(0.3f, 0.3f, 0.1f), 0.1f));*/
+
+    cubes.push_back(Cube(cv::Point3d(0.36f, -0.44f, 0.3f), 0.04f));
+    cubes.push_back(Cube(cv::Point3d(0.26f, -0.46f, 0.33f), 0.04f));
+    cubes.push_back(Cube(cv::Point3d(-0.43f, -0.4f, 0.31f), 0.04f));
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(change()));
@@ -62,6 +66,7 @@ void GLWidget::paintGL() {
     glRotatef(yRot, 0.0f, 1.0f, 0.0f);
     glRotatef(zRot, 0.0f, 0.0f, 1.0f);
     //field
+    glLineWidth(1);
     qglColor(Qt::gray);
     glBegin(GL_LINES);
     for (int i = 0; i <= 20; i++) {
@@ -70,6 +75,29 @@ void GLWidget::paintGL() {
         glVertex3f(-1.0f,-1.0f + (GLfloat)i * 0.1f, 0.0f);
         glVertex3f( 1.0f,-1.0f + (GLfloat)i * 0.1f, 0.0f);
     }
+    glEnd();
+    //field
+    qglColor(Qt::gray);
+    glBegin(GL_LINES);
+    for (int i = 0; i <= 10; i++) {
+        glVertex3f(1.0f, 1.0f, 0.0f + (GLfloat)i * 0.1f);
+        glVertex3f(1.0f, -1.0f, 0.0f + (GLfloat)i * 0.1f);
+
+        glVertex3f(1.0f, 1.0f, 0.0f + (GLfloat)i * 0.1f);
+        glVertex3f(-1.0f, 1.0f, 0.0f + (GLfloat)i * 0.1f);
+    }
+    glEnd();
+    glLineWidth(4);
+    glBegin(GL_LINES);
+    qglColor(Qt::red);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+    qglColor(Qt::green);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    qglColor(Qt::blue);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
     glEnd();
     //objects
     qglColor(Qt::green);

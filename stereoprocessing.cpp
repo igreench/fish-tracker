@@ -1527,3 +1527,16 @@ void StereoProcessing::triangulateDesk(StereoImage *src, StereoImage *dst, Stere
         dst->setImages(src);
     }
 }
+
+void StereoProcessing::print(StereoParametres* stereoParametres) {
+    qDebug() << "A1: " << matToString(stereoParametres->getCameraMatrix1());
+    qDebug() << "K1: " << matToString(stereoParametres->getDistCoeffs1());
+    qDebug() << "A2: " << matToString(stereoParametres->getCameraMatrix2());
+    qDebug() << "K2: " << matToString(stereoParametres->getDistCoeffs2());
+    if (_isDescription) {
+        qDebug() << "R1: " << matToString(descriptionLeft->R);
+        qDebug() << "t1: " << matToString(descriptionLeft->t);
+        qDebug() << "R2: " << matToString(descriptionRight->R);
+        qDebug() << "t2: " << matToString(descriptionRight->t);
+    }
+}
