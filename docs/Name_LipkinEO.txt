@@ -1,0 +1,31 @@
+Название работы: Разработка системы автоматического отслеживания перемещения группы лабораторных рыб
+
+ФИО студента: Липкин Евгений Олегович
+
+ФИО и сведения о научном руководителе: Куликов Виктор Александрович, к.т.н., н.с. ИАиЭ СО РАН
+
+Сведения о месте выполнения работы: Лаборатория цифровых методов обработки изображений ИАиЭ СО РАН
+
+Аннотация:
+
+	Тема работы: Разработка системы автоматического отслеживания перемещения группы лабораторных рыб. 
+	Работа состоит из 37 страниц. Работа изложена в пяти главах. В первой главе описан анализ задачи и требования к системе. Во второй главе описана аппаратная часть системы. В третьей главе описаны алгоритмы, использованные при разработке программной части системы. В четвертой главе описана реализация программной части системы. В пятой главе описаны результаты работы. В текст включено 19 изображений и 12 ссылок на внешние источники. 
+	Ключевые слова: методы цифровой обработки изображений, компьютерное зрение, автоматизация этологических экспериментов, автоматизация исследований поведения животных, стереоскопическая система, стереопара.
+	В лаборатории цифровых методов обработки изображений ИАиЭ СО РАН разработана зарекомендовавшая себя на рынке система автоматизации этологических тестов EthoStudio, которая представляет собой аппаратно-программный комплекс, включающий в себя многофункциональную установку для тестирования животных и компьютер с программным обеспечением. Однако, в этой системе отсутствует инструментарий, позволяющий автоматизировать наблюдение за лабораторными рыбами.	У ЛИН СО РАН существует задача автоматического отслеживания перемещения группы лабораторных рыб для изучения акустической чувствительности. Эта задача сводится к определению трехмерных координат отдельных особей во время эксперимента. 
+	На данный момент большинство систем, автоматизирующие этологические эксперименты на лабораторных рыбах, построены на использовании одной единственной камеры. Задача получения трехмерных координат рыб решена только в виде системы, способной автоматизировать наблюдение лишь за одной лабораторной рыбой.
+	Цель дипломной работы состоит в разработке инструментария получения трехмерных координат лабораторных рыб.
+	Разработана система, позволяющая получать трехмерные координаты трех аквариумных рыб с точностью до 0.5 миллиметров и визуализирующая их в трехмерном пространстве. Частота работы алгоритма составляет 25 кадров в секунду на компьютере со следующими техническими характеристиками: операционная система Windows 7, процессор AMD Phenom II x6 1055T 2.8 ГГц, 8 ГБ ОЗУ, видеокарта NVIDIA GeForce GTS 450 c 4 ГБ памяти и 100 МБ свободного места на жестком диске.
+	В работе был реализован программный модуль, вычисляющий методом триангуляции трехмерные координаты аквариумных рыб по их двухмерным координатам на кадрах с видеокамер. Этот программный модуль позволяет системе EthoStudio автоматизировать этологические исследования с лабораторными рыбами.
+	В дальнейшем планируется оттестировать и отладить алгоритмы, внедрить систему в ЛИН СО РАН. Также, планируется реализовать разделение особей при их пересечении на кадрах с видеокамер. 
+
+Annotation:
+
+	R & D: Development of a system to automatically track moving group of laboratory fish.
+The work consists of 37 pages. The work is presented in five chapters. The first chapter describes the analysis of problems and system requirements. In the second chapter describes the hardware of the system. The third chapter describes the algorithms used in the software development of the system. The fourth chapter describes the software implementation of the system. The fifth chapter describes the results of the work. The text includes 19 images and 12 external links.
+Key words: methods of digital image processing, computer vision, automation ethological experiments, automation research of animal behavior, stereoscopic system, a stereo pair.
+	In the laboratory of digital image processing techniques IAE developed proven automation system on the market ethological tests EthoStudio, which is a hardware and software package, which includes multi-function unit for the testing of animals and computer software. However, this system does not have the tools to automate the monitoring of laboratory fish. We LIN SO RAN exists task automatically track the movement of fish lab group to study the acoustic sensitivity. This problem is reduced to determining the three-dimensional coordinates of the individuals during the experiment.
+	At the moment, most of the systems that automate ethological experiments on laboratory fish, built on the use of a single camera. The problem of obtaining three-dimensional coordinates of fish solved only in a system that can automate the monitoring for only one laboratory fish.
+	The aim of the thesis is to develop tools obtain three-dimensional coordinates of laboratory fish.
+	A system that allows to obtain three-dimensional coordinates of three aquarium fish up to 0.5 millimeters and visualize them in three dimensions. The frequency of the algorithm is 25 fps on a computer with the following specifications: Windows 7 operating system, the processor AMD Phenom II x6 1055T 2.8 GHz, 8 GB of RAM, video card NVIDIA GeForce GTS 450 c 4 GB of memory and 100 MB of free hard disk space .
+	The work was implemented by a software module that calculates three-dimensional coordinates by triangulation aquarium fish in their two-dimensional coordinates on the frame with the camera. This software module enables the system to automate EthoStudio ethological studies with laboratory fish.
+In the future we plan tested and fine-tune algorithms to implement a system to LIN SO RAN. Also, it is planned to implement the separation of animals when they cross the frame of video cameras.
